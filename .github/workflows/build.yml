@@ -1,0 +1,17 @@
+name: Build Swift App
+on: [push]
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Resolve Swift Dependencies
+        run: xcodebuild -resolvePackageDependencies
+      - name: Build Package
+        # We build the 'AppModule' scheme exposed natively by the Swift Package for iOS Simulator
+        run: xcodebuild -scheme AppModule -destination 'platform=iOS Simulator,name=iPad Pro (11-inch) (4th generation)' build
+      - name: Trigger Pushcut (Placeholder)
+        if: success()
+        run: |
+          echo "Placeholder: Here we will ping Pushcut once you set it up!"
+          # curl -X POST https://api.pushcut.io/secret/notifications/BuildSuccess
