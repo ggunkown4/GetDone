@@ -18,7 +18,7 @@ let package = Package(
             targets: ["AppModule"],
             displayVersion: "1.0",
             bundleVersion: "1",
-            appIcon: .placeholder(icon: .earth),
+            appIcon: .placeholder(icon: .calendar),
             accentColor: .presetColor(.blue),
             supportedDeviceFamilies: [
                 .pad,
@@ -40,6 +40,11 @@ let package = Package(
         .executableTarget(
             name: "AppModule",
             path: ".",
+            exclude: [
+                "AGENTS.md",
+                "build.log",
+                ".github"
+            ],
             swiftSettings: [
                 .enableUpcomingFeature("BareSlashRegexLiterals")
             ]
