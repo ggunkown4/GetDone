@@ -1,0 +1,45 @@
+{
+  "variable_names": {
+    "geselecteerdeDatum": "selectedDate",
+    "geselecteerdeWeergave": "selectedView",
+    "geselecteerdFilter": "selectedFilter",
+    "geselecteerdeOptie": "selectedOption",
+    "bronnenVolgorde": "resourcesOrder",
+    "bronnenVolgordeRaw": "resourcesOrderRaw",
+    "gebruiker": "user",
+    "planningen": "plans",
+    "magisterPlanningen": "magisterPlans",
+    "toonNieuwPlanSheet": "showNewPlanSheet",
+    "laadMeer": "loadMore",
+    "laadHuiswerkEnRooster": "loadHomeworkAndSchedule",
+    "isLadenMeerBestanden": "isLoadingMoreFiles",
+    "titel": "title",
+    "huidige": "current",
+    "nieuwe": "new",
+    "oude": "old"
+  },
+  "struct_names": {
+    "BronnenView": "ResourcesView",
+    "ProfielView": "ProfileView",
+    "DetailScherm": "DetailScreen",
+    "MagisterSectie": "MagisterSection",
+    "BronIcoonWeergave": "ResourceIconView",
+    "AankondigingBalkWeergave": "AnnouncementBarView",
+    "ClassroomItemKaartWeergave": "ClassroomItemCardView",
+    "VoegPlanToeSheet": "AddPlanSheet",
+    "AgendaInstellingenView": "AgendaSettingsView",
+    "ChatInstellingenView": "ChatSettingsView",
+    "BronnenInstellingenView": "ResourcesSettingsView"
+  },
+  "ui_strings": {
+    "Geen": "None",
+    "Bronnen": "Resources",
+    "Je hebt nog geen bronnen.": "You don't have any resources yet."
+  },
+  "file_renames": {
+    "BronnenView.swift": "ResourcesView.swift",
+    "ProfielView.swift": "ProfileView.swift",
+    "DetailScherm.swift": "DetailScreen.swift",
+    "MagisterSectie.swift": "MagisterSection.swift"
+  }
+}
