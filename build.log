@@ -2,11 +2,11 @@ Command line invocation:
     /Applications/Xcode_26.6.app/Contents/Developer/usr/bin/xcodebuild -scheme AppModule -destination "platform=iOS Simulator,name=iPad Pro (11-inch) (4th generation)" build
 
 Resolve Package Graph
-2026-09-30 13:08:02.603 xcodebuild[2104:10163] [MT] IDERunDestination: Supported platforms for the buildables in the current scheme is empty.
+2026-09-30 13:13:12.027 xcodebuild[1442:7814] [MT] IDERunDestination: Supported platforms for the buildables in the current scheme is empty.
 
 
 Resolved source packages:
   GetDone: /Users/runner/work/GetDone/GetDone
 
-2026-09-30 13:08:02.633 xcodebuild[2104:10163] Writing error result bundle to /var/folders/36/tjdph2t965j8snz9_vkdnw0r0000gn/T/ResultBundle_2026-30-09_13-08-0002.xcresult
+2026-09-30 13:13:12.075 xcodebuild[1442:7814] Writing error result bundle to /var/folders/36/tjdph2t965j8snz9_vkdnw0r0000gn/T/ResultBundle_2026-30-09_13-13-0012.xcresult
 xcodebuild: error: The workspace named "GetDone" does not contain a scheme named "AppModule". The "-list" option can be used to find the names of the schemes in the workspace.
