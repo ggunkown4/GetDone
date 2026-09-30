@@ -118,16 +118,16 @@ struct MagisterSectie: View {
             self.isLoggedIn = false
         }
     }
-
+    
     private func leesGeheim(key: String) -> String? {
         if let value = MagisterKeychainHelper.read(key: key) {
             return value
         }
-
+        
         guard let legacyValue = MagisterAppStorageHelper.read(key: key), !legacyValue.isEmpty else {
             return nil
         }
-
+        
         MagisterKeychainHelper.save(legacyValue, key: key)
         MagisterAppStorageHelper.delete(key: key)
         return legacyValue
@@ -622,7 +622,7 @@ struct MagisterWKWebView: UIViewRepresentable {
     class Coordinator: NSObject, WKNavigationDelegate, WKScriptMessageHandler {
         var parent: MagisterWKWebView
         private var loginCompletionHandled = false
-
+        
         init(_ parent: MagisterWKWebView) { self.parent = parent }
         
         func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
@@ -665,7 +665,7 @@ struct MagisterWKWebView: UIViewRepresentable {
         private func verwerkURL(_ url: URL) {
             let parameters = callbackParameters(from: url)
             var extractedToken: String? = nil
-
+            
             if let token = parameters["access_token"], !token.isEmpty {
                 extractedToken = token
                 DispatchQueue.main.async {
@@ -674,7 +674,7 @@ struct MagisterWKWebView: UIViewRepresentable {
                     MagisterAppStorageHelper.saveDate(Date(), key: "magister_last_login_date")
                 }
             }
-
+            
             if let idToken = parameters["id_token"],
                let payload = parseJWTPayload(idToken) {
                 DispatchQueue.main.async {
@@ -696,11 +696,11 @@ struct MagisterWKWebView: UIViewRepresentable {
                     }
                 }
             }
-
+            
             guard let validToken = extractedToken,
                   !validToken.isEmpty,
                   !loginCompletionHandled else { return }
-
+            
             loginCompletionHandled = true
             DispatchQueue.main.async {
                 self.parent.accessToken = validToken
@@ -716,14 +716,14 @@ struct MagisterWKWebView: UIViewRepresentable {
                 self.parent.onLoginSuccess()
             }
         }
-
+        
         private func callbackParameters(from url: URL) -> [String: String] {
             let queryParameters: [(String, String)] = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.compactMap { item in
                 guard let value = item.value else { return nil }
                 return (item.name, value)
             } ?? []
             var parameters: [String: String] = Dictionary(uniqueKeysWithValues: queryParameters)
-
+            
             if let fragment = url.fragment,
                let fragmentComponents = URLComponents(string: "https://callback.invalid/?\(fragment)") {
                 for item in fragmentComponents.queryItems ?? [] {
@@ -734,13 +734,13 @@ struct MagisterWKWebView: UIViewRepresentable {
             }
             return parameters
         }
-
+        
         private func veiligeURLBeschrijving(_ url: URL) -> String {
             let host = url.host ?? "onbekende host"
             let path = url.path.isEmpty ? "/" : url.path
             return "https://\(host)\(path)"
         }
-
+        
         private func javaScriptString(_ value: String) -> String {
             guard let data = try? JSONSerialization.data(withJSONObject: value, options: [.fragmentsAllowed]),
                   let encodedValue = String(data: data, encoding: .utf8) else {
