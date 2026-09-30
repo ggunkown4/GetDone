@@ -1,17 +1,32 @@
 name: Build Swift App
 on: [push]
+
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Resolve Swift Dependencies
         run: xcodebuild -resolvePackageDependencies
       - name: Build Package
-        # We build the 'AppModule' scheme exposed natively by the Swift Package for iOS Simulator
-        run: xcodebuild -scheme AppModule -destination 'platform=iOS Simulator,name=iPad Pro (11-inch) (4th generation)' build
+        # Run xcodebuild. If it fails, capture the log, commit it, and push it to main.
+        run: |
+          if ! xcodebuild -scheme AppModule -destination 'platform=iOS Simulator,name=iPad Pro (11-inch) (4th generation)' build > build.log 2>&1; then
+            cat build.log
+            git config user.name "github-actions"
+            git config user.email "github-actions@github.com"
+            git add build.log
+            git commit -m "Upload xcodebuild error log"
+            git push
+            exit 1
+          fi
       - name: Trigger Pushcut
         if: always()
         run: |
-          echo "Triggering Pushcut webhook on iPad..."
+          echo "Triggering iPad..."
           curl -X POST https://api.pushcut.io/js5k0Bts71CE5r5HB6-PL/notifications/GetDoneUpdate
