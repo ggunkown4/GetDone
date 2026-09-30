@@ -399,13 +399,13 @@ struct ChatInstellingenView: View {
                     Text("Relaxed").tag("Relaxed")
                 }
             }
-
+            
             Section(header: Text("Lokale AI-server").foregroundColor(.orange)) {
                 TextField("https://jouw-server.nl", text: $aiServerURL)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
                     .keyboardType(.URL)
-
+                
                 SecureField("API-token", text: $aiServerToken)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
