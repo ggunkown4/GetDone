@@ -43,7 +43,11 @@ let package = Package(
             exclude: [
                 "AGENTS.md",
                 "build.log",
-                ".github"
+                ".github",
+                "ContentView_old.swift",
+                "ContentView.swift.backup",
+                "check_build.sh",
+                "README.md"
             ],
             swiftSettings: [
                 .enableUpcomingFeature("BareSlashRegexLiterals")
