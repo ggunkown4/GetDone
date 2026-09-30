@@ -12,11 +12,11 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Resolve Swift Dependencies
-        run: xcodebuild -resolvePackageDependencies
+        run: swift package resolve
       - name: Build Package
-        # Run xcodebuild. If it fails, capture the log, commit it, and push it to main.
+        # Run swift build. If it fails, capture the log, commit it, and push it to main.
         run: |
-          if ! xcodebuild -scheme AppModule -destination 'platform=iOS Simulator,name=iPad Pro (11-inch) (4th generation)' build > build.log 2>&1; then
+          if ! swift build > build.log 2>&1; then
             cat build.log
             git config user.name "github-actions"
             git config user.email "github-actions@github.com"
