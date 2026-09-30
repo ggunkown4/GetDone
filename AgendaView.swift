@@ -151,7 +151,7 @@ struct WeekSelectorPopover: View {
             Button {
                 dismiss()
             } label: {
-                Text("Klaar")
+                Text("Ready")
                     .font(.subheadline.bold())
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
@@ -240,7 +240,7 @@ struct AgendaView: View {
                 )
                 .padding(.top, 10)
             } else if selectedView == 1 {
-                AgendaDagView(
+                AgendaDayView(
                     selectedDate: selectedDate,
                     plans: allePlanningen
                 )
@@ -390,8 +390,8 @@ struct AgendaLijstView: View {
     }
 }
 
-// MARK: - 2. Dagrooster Weergave
-struct AgendaDagView: View {
+// MARK: - 2. Dayrooster Weergave
+struct AgendaDayView: View {
     var selectedDate: Date
     var plans: [PlanningItem]
     
@@ -482,7 +482,7 @@ struct AgendaWeekView: View {
     var selectedDate: Date
     var plans: [PlanningItem]
     
-    private var weekDagen: [Date] {
+    private var weekDayen: [Date] {
         var calendar = Calendar.current
         calendar.firstWeekday = 2
         guard let weekInterval = calendar.dateInterval(of: .weekOfYear, for: selectedDate) else { return [] }
@@ -492,7 +492,7 @@ struct AgendaWeekView: View {
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(alignment: .top, spacing: 15) {
-                ForEach(weekDagen, id: \.self) { dagDatum in
+                ForEach(weekDayen, id: \.self) { dagDatum in
                     let dagPlanningen = plans
                         .filter { Calendar.current.isDate($0.datum, inSameDayAs: dagDatum) }
                         .sorted(by: { $0.beginTijd < $1.beginTijd })

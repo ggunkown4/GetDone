@@ -38,9 +38,9 @@ struct ClassroomCourse: Codable, Identifiable {
 }
 
 enum ClassroomItemType: String { 
-    case opdracht = "Opdracht"
-    case aankondiging = "Aankondiging"
-    case materiaal = "Materiaal" 
+    case opdracht = "Assignment"
+    case aankondiging = "Announcement"
+    case materiaal = "Material" 
 }
 
 struct ClassroomItem: Identifiable {
@@ -171,7 +171,7 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
             guard let callbackURL = callbackURL,
                   let queryItems = URLComponents(string: callbackURL.absoluteString)?.queryItems,
                   let code = queryItems.first(where: { $0.name == "code" })?.value else {
-                DispatchQueue.main.async { self.errorMessage = "None geldige respons ontvangen." }
+                DispatchQueue.main.async { self.errorMessage = "No valid response received." }
                 return
             }
             
@@ -405,7 +405,7 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
             let courseName = course.name
             let courseColor = self.kleurVoorVak(id: courseId)
             
-            // 1. Opdrachten
+            // 1. Assignmenten
             let cwToken = courseWorkTokens[courseId]
             if !loadMore || cwToken != nil {
                 dispatchGroup.enter()
@@ -475,7 +475,7 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
                 }
             }
             
-            // 3. Aankondigingen
+            // 3. Announcementen
             let annToken = announcementsTokens[courseId]
             if !loadMore || annToken != nil {
                 dispatchGroup.enter()
@@ -497,7 +497,7 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
                                    let url = ann["alternateLink"] as? String {
                                     let timeStr = ann["creationTime"] as? String
                                     let item = ClassroomItem(
-                                        id: id, titel: "Aankondiging", vakNaam: courseName,
+                                        id: id, titel: "Announcement", vakNaam: courseName,
                                         type: .aankondiging, url: url, datum: self.parseISO8601Date(timeStr),
                                         kleur: courseColor, tekst: text
                                     )

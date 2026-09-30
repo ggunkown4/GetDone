@@ -61,7 +61,7 @@ struct MagisterSection: View {
     @AppStorage("isMagisterLoggedIn") private var isLoggedIn: Bool = false
     
     @State private var showLoginPopup: Bool = false
-    @State private var logText: String = "Logboek gestart...\n"
+    @State private var logText: String = "Log started...\n"
     @State private var user = MagisterGebruikerModel()
     
     @State private var accessToken: String = ""
@@ -191,7 +191,7 @@ struct MagisterSection: View {
             
             Button(action: {
                 if !MagisterNetworkMonitor.shared.isConnected {
-                    startLoginError = "None wifi of internetverbinding beschikbaar."
+                    startLoginError = "No wifi or internet connection available."
                     return
                 }
                 if user.geformatteerdDomein.isEmpty {
@@ -215,7 +215,7 @@ struct MagisterSection: View {
                 
                 URLCache.shared.removeAllCachedResponses()
                 startLoginError = nil
-                logText = "Logboek gestart...\nDoel URL: https://\(user.geformatteerdDomein)/\n"
+                logText = "Log started...\nDoel URL: https://\(user.geformatteerdDomein)/\n"
                 
                 WKWebsiteDataStore.default().removeData(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(), modifiedSince: Date(timeIntervalSince1970: 0)) {
                     DispatchQueue.main.async { showLoginPopup = true }
@@ -325,7 +325,7 @@ struct MagisterSection: View {
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
                             Image(systemName: "exclamationmark.triangle.fill").foregroundColor(.red)
-                            Text("Foutmelding / Status").font(.caption.bold()).foregroundColor(.red)
+                            Text("Errormelding / Status").font(.caption.bold()).foregroundColor(.red)
                             Spacer()
                         }
                         ScrollView {
@@ -410,11 +410,11 @@ struct MagisterSection: View {
     
     func laadLiveRooster() {
         if !MagisterNetworkMonitor.shared.isConnected {
-            scheduleError = "None internetverbinding."
+            scheduleError = "No internet connection."
             isLoadingSchedule = false; return
         }
         guard !accessToken.isEmpty else {
-            scheduleError = "Access Token ontbreekt."
+            scheduleError = "Access Token missing."
             showLoginPopup = true; return
         }
         let domein = user.geformatteerdDomein
@@ -432,7 +432,7 @@ struct MagisterSection: View {
                 return
             }
             guard let data = data, let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-                DispatchQueue.main.async { self.scheduleError = "Fout bij ophalen account data."; self.isLoadingSchedule = false }
+                DispatchQueue.main.async { self.scheduleError = "Error fetching account data."; self.isLoadingSchedule = false }
                 return
             }
             
@@ -453,7 +453,7 @@ struct MagisterSection: View {
                 DispatchQueue.main.async { self.user.personId = personId }
                 self.haalAfsprakenOp(personId: personId, domein: domein)
             } else {
-                DispatchQueue.main.async { self.scheduleError = "Persoon ID niet gevonden."; self.isLoadingSchedule = false }
+                DispatchQueue.main.async { self.scheduleError = "Person ID not found."; self.isLoadingSchedule = false }
             }
         }.resume()
     }
@@ -471,7 +471,7 @@ struct MagisterSection: View {
         URLSession.shared.dataTask(with: request) { data, response, error in
             DispatchQueue.main.async { self.isLoadingSchedule = false }
             guard let data = data, let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any], let items = json["Items"] as? [[String: Any]] else {
-                DispatchQueue.main.async { self.scheduleError = "None afspraken ontvangen." }
+                DispatchQueue.main.async { self.scheduleError = "No appointments received." }
                 return
             }
             
@@ -491,7 +491,7 @@ struct MagisterSection: View {
             
             DispatchQueue.main.async {
                 self.mySchedule = nieuweLessen
-                self.laatstVerverstTekst = "Laatst vernieuwd om \(timeFormatter.string(from: Date()))"
+                self.laatstVerverstTekst = "Last updated on \(timeFormatter.string(from: Date()))"
             }
         }.resume()
     }
@@ -536,7 +536,7 @@ struct MagisterLoginPopupView: View {
                         
                         Button(action: {
                             UIPasteboard.general.string = logText
-                            kopieerMelding = "Gekopieerd!"
+                            kopieerMelding = "Copied!"
                             Task {
                                 try? await Task.sleep(nanoseconds: 2_000_000_000)
                                 kopieerMelding = ""
@@ -848,7 +848,7 @@ struct MagisterWKWebView: UIViewRepresentable {
         }
         
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-            DispatchQueue.main.async { self.parent.logText += "\n❌ Fout: \(error.localizedDescription)" }
+            DispatchQueue.main.async { self.parent.logText += "\n❌ Error: \(error.localizedDescription)" }
         }
     }
 }

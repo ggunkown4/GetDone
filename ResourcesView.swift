@@ -477,7 +477,7 @@ struct AnnouncementBarView: View {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
                     Text(item.vakNaam).font(.caption.bold()).foregroundColor(.white).padding(.horizontal, 10).padding(.vertical, 4).background(item.kleur).clipShape(Capsule())
-                    Text("Aankondiging").font(.caption2.bold()).foregroundColor(item.kleur)
+                    Text("Announcement").font(.caption2.bold()).foregroundColor(item.kleur)
                     Spacer()
                     Text(item.datumFormatted).font(.caption2).foregroundColor(.gray)
                 }

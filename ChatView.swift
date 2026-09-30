@@ -44,7 +44,7 @@ final class AIManager: ObservableObject {
     @AppStorage("aiServerToken") private var serverToken: String = ""
     
     @Published private(set) var isLoading = false
-    @Published private(set) var statusText = "Klaar"
+    @Published private(set) var statusText = "Ready"
     @Published private(set) var approachSummary = ""
     @Published var errorMessage: String?
     @Published private(set) var debugLog: [String] = []
@@ -65,7 +65,7 @@ final class AIManager: ObservableObject {
         activeTask?.cancel()
         activeTask = nil
         isLoading = false
-        statusText = "Gestopt door user"
+        statusText = "Stopped by user"
         addLog("[\(tijd())] Aanvraag gestopt door user")
     }
     
@@ -95,7 +95,7 @@ final class AIManager: ObservableObject {
             return
         }
         
-        statusText = "Verbinden met de AI..."
+        statusText = "Connecting to AI..."
         approachSummary = "Ik maak verbinding met de lokale GetDone-AI."
         isLoading = true
         addLog("[\(tijd())] Streaming gestart naar \(baseURL)/chat/stream")
@@ -141,8 +141,8 @@ final class AIManager: ObservableObject {
                 
                 await MainActor.run {
                     self.isLoading = false
-                    self.statusText = "Klaar"
-                    self.approachSummary = "Antwoord ontvangen."
+                    self.statusText = "Ready"
+                    self.approachSummary = "Answer received."
                     self.activeTask = nil
                     self.addLog("[\(self.tijd())] Streaming voltooid")
                     completion(.success(()))
@@ -150,15 +150,15 @@ final class AIManager: ObservableObject {
             } catch is CancellationError {
                 await MainActor.run {
                     self.isLoading = false
-                    self.statusText = "Gestopt door user"
-                    self.approachSummary = "De aanvraag is gestopt."
+                    self.statusText = "Stopped by user"
+                    self.approachSummary = "The request was stopped."
                     self.activeTask = nil
                 }
             } catch {
                 await MainActor.run {
                     self.isLoading = false
-                    self.statusText = "Fout"
-                    self.approachSummary = "Er ging iets mis tijdens het ophalen van het antwoord."
+                    self.statusText = "Error"
+                    self.approachSummary = "Something went wrong while fetching the answer."
                     self.activeTask = nil
                     self.addLog("[\(self.tijd())] STREAM-FOUT: \(error.localizedDescription)")
                     completion(.failure(error))
@@ -287,8 +287,8 @@ struct ChatView: View {
     
     @AppStorage("ai_provider") private var aiProvider: String = "auto"
     @AppStorage("google_user_name") private var googleUserName: String = ""
-    @AppStorage("magister_voornaam") private var magisterVoornaam: String = ""
-    @AppStorage("magister_achternaam") private var magisterAchternaam: String = ""
+    @AppStorage("magister_voornaam") private var magisterFirstName: String = ""
+    @AppStorage("magister_achternaam") private var magisterLastName: String = ""
     
     @StateObject private var aiManager = AIManager()
     @State private var toonLogboek = false
@@ -316,7 +316,7 @@ struct ChatView: View {
     ]
     
     private var displayUserName: String {
-        let magisterName = "\(magisterVoornaam) \(magisterAchternaam)".trimmingCharacters(in: .whitespaces)
+        let magisterName = "\(magisterFirstName) \(magisterLastName)".trimmingCharacters(in: .whitespaces)
         if !magisterName.isEmpty { return magisterName }
         if !googleUserName.isEmpty { return googleUserName }
         return "Gebruiker"
@@ -939,7 +939,7 @@ struct AILogboekView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Klaar") { dismiss() }
+                    Button("Ready") { dismiss() }
                 }
             }
         }
@@ -1017,7 +1017,7 @@ struct ArchivedResponsesView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Klaar") { dismiss() }
+                    Button("Ready") { dismiss() }
                 }
             }
         }
@@ -1083,7 +1083,7 @@ struct WebResultsSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Klaar") { dismiss() }
+                    Button("Ready") { dismiss() }
                 }
             }
         }

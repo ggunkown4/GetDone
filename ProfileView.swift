@@ -52,15 +52,15 @@ struct ProfileView: View {
     @State private var toonUitlogBevestiging: Bool = false
     
     // MARK: - Persistent Settings (Are automatically saved)
-    @AppStorage("aiToon") private var aiToon: String = "Motiverend"
-    @AppStorage("productiviteitsType") private var productiviteitsType: String = "Ochtendmens"
+    @AppStorage("aiShow") private var aiShow: String = "Motiverend"
+    @AppStorage("productivityType") private var productivityType: String = "MorningMotivation"
     @AppStorage("bufferTijdMinuten") private var bufferTijdMinuten: Int = 15
     @AppStorage("isMagisterLoggedIn") private var isMagisterLoggedIn: Bool = false
-    @AppStorage("magister_voornaam") private var magisterVoornaam: String = ""
-    @AppStorage("magister_achternaam") private var magisterAchternaam: String = ""
+    @AppStorage("magister_voornaam") private var magisterFirstName: String = ""
+    @AppStorage("magister_achternaam") private var magisterLastName: String = ""
     
     private var magisterVolledigeNaam: String {
-        let naam = "\(magisterVoornaam) \(magisterAchternaam)".trimmingCharacters(in: .whitespaces)
+        let naam = "\(magisterFirstName) \(magisterLastName)".trimmingCharacters(in: .whitespaces)
         return naam.isEmpty ? "Magister Gebruiker" : naam
     }
     
@@ -91,7 +91,7 @@ struct ProfileView: View {
                                     icoon: "calendar.badge.clock",
                                     kleur: .blue,
                                     titel: "Agenda",
-                                    subtekst: "\(bufferTijdMinuten) min buffer • \(productiviteitsType)"
+                                    subtekst: "\(bufferTijdMinuten) min buffer • \(productivityType)"
                                 )
                             }
                             
@@ -102,7 +102,7 @@ struct ProfileView: View {
                                     icoon: "bubble.left.and.bubble.right.fill",
                                     kleur: .purple,
                                     titel: "Chat",
-                                    subtekst: "AI Toon: \(aiToon)"
+                                    subtekst: "AI Toon: \(aiShow)"
                                 )
                             }
                             
@@ -346,7 +346,7 @@ struct ProfileView: View {
 // MARK: - SUBMENU'S PER TABBLAD
 
 struct AgendaSettingsView: View {
-    @AppStorage("productiviteitsType") private var productiviteitsType: String = "Ochtendmens"
+    @AppStorage("productivityType") private var productivityType: String = "MorningMotivation"
     @AppStorage("dynamischHerplannen") private var dynamischHerplannen: Bool = true
     @AppStorage("maxStudieUur") private var maxStudieUur: Double = 4.0
     @AppStorage("bufferTijdMinuten") private var bufferTijdMinuten: Int = 15
@@ -355,8 +355,8 @@ struct AgendaSettingsView: View {
     var body: some View {
         Form {
             Section(header: Text("Slim Inplannen").foregroundColor(.orange)) {
-                Picker("Productiviteitsritme", selection: $productiviteitsType) {
-                    Text("Ochtendmens").tag("Ochtendmens")
+                Picker("Productiviteitsritme", selection: $productivityType) {
+                    Text("MorningMotivation").tag("MorningMotivation")
                     Text("Middagmens").tag("Middagmens")
                     Text("Avondmens").tag("Avondmens")
                 }
@@ -384,7 +384,7 @@ struct AgendaSettingsView: View {
 }
 
 struct ChatSettingsView: View {
-    @AppStorage("aiToon") private var aiToon: String = "Motiverend"
+    @AppStorage("aiShow") private var aiShow: String = "Motiverend"
     @AppStorage("ochtendBriefing") private var ochtendBriefing: Bool = true
     @AppStorage("avondEvaluatie") private var avondEvaluatie: Bool = true
     @AppStorage("aiServerURL") private var aiServerURL: String = ""
@@ -393,7 +393,7 @@ struct ChatSettingsView: View {
     var body: some View {
         Form {
             Section(header: Text("AI Persona").foregroundColor(.orange)) {
-                Picker("AI Toon & Stijl", selection: $aiToon) {
+                Picker("AI Toon & Stijl", selection: $aiShow) {
                     Text("Motiverend").tag("Motiverend")
                     Text("Direct & Zakelijk").tag("Direct & Zakelijk")
                     Text("Relaxed").tag("Relaxed")

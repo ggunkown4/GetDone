@@ -10,7 +10,7 @@ struct DetailScreen: View {
     @State private var selectedDate: Date = Date()
     @State private var toonDatePicker: Bool = false
     @State private var toonWeekPicker: Bool = false
-    @State private var selectedView: Int = 0 // 0 = Lijst, 1 = Dag, 2 = Week
+    @State private var selectedView: Int = 0 // 0 = Lijst, 1 = Day, 2 = Week
     
     // Status voor bronnenfilter
     @State private var bronFilter: BronFilter = .alles
@@ -28,7 +28,7 @@ struct DetailScreen: View {
     private var weergaveTitel: String {
         switch selectedView {
         case 0: return "Lijst"
-        case 1: return "Dag"
+        case 1: return "Day"
         case 2: return "Week"
         default: return "Weergave"
         }
@@ -262,7 +262,7 @@ struct DetailScreen: View {
                         Menu {
                             Picker("Weergave", selection: $selectedView) {
                                 Label("Lijst", systemImage: "list.bullet").tag(0)
-                                Label("Dag", systemImage: "calendar.day.timeline.left").tag(1)
+                                Label("Day", systemImage: "calendar.day.timeline.left").tag(1)
                                 Label("Week", systemImage: "calendar").tag(2)
                             }
                         } label: {
