@@ -1,7 +1,7 @@
 import SwiftUI
 
 // MARK: - Main Content View
-struct ContentView: View {
+struct ContentView_old: View {
     @StateObject private var auth = WebGoogleAuthManager()
     
     @Environment(\.horizontalSizeClass) var sizeClass
