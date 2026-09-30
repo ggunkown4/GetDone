@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - Main Content View
+// MARK: Main Content View
 struct ContentView_old: View {
     @StateObject private var auth = WebGoogleAuthManager()
     
