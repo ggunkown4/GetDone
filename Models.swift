@@ -4,7 +4,7 @@ import Security
 // MARK: - Beveiligde Magister Opslag
 struct MagisterKeychainHelper {
     private static let service = "GetDone.Magister"
-
+    
     static func read(key: String) -> String? {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
@@ -13,14 +13,14 @@ struct MagisterKeychainHelper {
             kSecReturnData as String: true,
             kSecMatchLimit as String: kSecMatchLimitOne
         ]
-
+        
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
         guard status == errSecSuccess,
               let data = result as? Data else { return nil }
         return String(data: data, encoding: .utf8)
     }
-
+    
     @discardableResult
     static func save(_ value: String, key: String) -> Bool {
         let data = Data(value.utf8)
@@ -30,15 +30,15 @@ struct MagisterKeychainHelper {
             kSecAttrAccount as String: key
         ]
         let attributes: [String: Any] = [kSecValueData as String: data]
-
+        
         let updateStatus = SecItemUpdate(query as CFDictionary, attributes as CFDictionary)
         if updateStatus == errSecSuccess { return true }
-
+        
         var item = query
         item[kSecValueData as String] = data
         return SecItemAdd(item as CFDictionary, nil) == errSecSuccess
     }
-
+    
     static func delete(key: String) {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
@@ -54,23 +54,23 @@ struct MagisterAppStorageHelper {
     static func read(key: String) -> String? {
         return UserDefaults.standard.string(forKey: key)
     }
-
+    
     static func save(_ string: String, key: String) {
         UserDefaults.standard.set(string, forKey: key)
     }
-
+    
     static func write(key: String, value: String) {
         UserDefaults.standard.set(value, forKey: key)
     }
-
+    
     static func delete(key: String) {
         UserDefaults.standard.removeObject(forKey: key)
     }
-
+    
     static func saveDate(_ date: Date, key: String) {
         UserDefaults.standard.set(date, forKey: key)
     }
-
+    
     static func readDate(key: String) -> Date? {
         return UserDefaults.standard.object(forKey: key) as? Date
     }
