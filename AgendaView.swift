@@ -1,10 +1,10 @@
 import SwiftUI
 
 // MARK: - Modal Sheet voor Plan Aanmaken
-struct VoegPlanToeSheet: View {
+struct AddPlanSheet: View {
     @Environment(\.dismiss) var dismiss
-    @Binding var planningen: [PlanningItem]
-    var geselecteerdeDatum: Date
+    @Binding var plans: [PlanningItem]
+    var selectedDate: Date
     
     @State private var titel: String = ""
     @State private var datum: Date = Date()
@@ -58,7 +58,7 @@ struct VoegPlanToeSheet: View {
                             kleur: gekozenKleur,
                             isMagister: false
                         )
-                        planningen.append(nieuwPlan)
+                        plans.append(nieuwPlan)
                         dismiss()
                     }
                     .bold()
@@ -66,7 +66,7 @@ struct VoegPlanToeSheet: View {
             }
         }
         .onAppear {
-            datum = geselecteerdeDatum
+            datum = selectedDate
         }
         .preferredColorScheme(.dark)
     }
@@ -74,7 +74,7 @@ struct VoegPlanToeSheet: View {
 
 // MARK: - Week Selector Popover
 struct WeekSelectorPopover: View {
-    @Binding var geselecteerdeDatum: Date
+    @Binding var selectedDate: Date
     @Environment(\.dismiss) var dismiss
     
     @State private var gekozenWeek: Int = 1
@@ -166,7 +166,7 @@ struct WeekSelectorPopover: View {
         .onAppear {
             var cal = Calendar.current
             cal.firstWeekday = 2
-            let week = cal.component(.weekOfYear, from: geselecteerdeDatum)
+            let week = cal.component(.weekOfYear, from: selectedDate)
             gekozenWeek = week
             typInvoer = "\(week)"
         }
@@ -185,31 +185,31 @@ struct WeekSelectorPopover: View {
     private func veranderNaarWeek(_ week: Int) {
         var calendar = Calendar.current
         calendar.firstWeekday = 2
-        let jaar = calendar.component(.yearForWeekOfYear, from: geselecteerdeDatum)
+        let jaar = calendar.component(.yearForWeekOfYear, from: selectedDate)
         
         var components = DateComponents()
         components.yearForWeekOfYear = jaar
         components.weekOfYear = week
-        components.weekday = calendar.component(.weekday, from: geselecteerdeDatum)
+        components.weekday = calendar.component(.weekday, from: selectedDate)
         
         if let nieuweDatum = calendar.date(from: components) {
-            geselecteerdeDatum = nieuweDatum
+            selectedDate = nieuweDatum
         }
     }
 }
 
 // MARK: - Agenda Weergave Router
 struct AgendaView: View {
-    @Binding var geselecteerdeDatum: Date
-    @Binding var geselecteerdeWeergave: Int
-    @Binding var planningen: [PlanningItem]
-    var magisterPlanningen: [PlanningItem]
-    @Binding var toonNieuwPlanSheet: Bool
+    @Binding var selectedDate: Date
+    @Binding var selectedView: Int
+    @Binding var plans: [PlanningItem]
+    var magisterPlans: [PlanningItem]
+    @Binding var showNewPlanSheet: Bool
     
     @ObservedObject private var magisterManager = MagisterManager.shared
     
     var allePlanningen: [PlanningItem] {
-        let gecombineerd = planningen + magisterManager.magisterPlanningen + magisterPlanningen
+        let gecombineerd = plans + magisterManager.magisterPlans + magisterPlans
         return ontdekEnOntdubbel(gecombineerd)
     }
     
@@ -232,23 +232,23 @@ struct AgendaView: View {
                     .padding(.vertical, 4)
             }
             
-            if geselecteerdeWeergave == 0 {
+            if selectedView == 0 {
                 AgendaLijstView(
-                    planningen: $planningen,
-                    magisterPlanningen: magisterManager.magisterPlanningen.isEmpty ? magisterPlanningen : magisterManager.magisterPlanningen,
-                    toonNieuwPlanSheet: $toonNieuwPlanSheet
+                    plans: $plans,
+                    magisterPlans: magisterManager.magisterPlans.isEmpty ? magisterPlans : magisterManager.magisterPlans,
+                    showNewPlanSheet: $showNewPlanSheet
                 )
                 .padding(.top, 10)
-            } else if geselecteerdeWeergave == 1 {
+            } else if selectedView == 1 {
                 AgendaDagView(
-                    geselecteerdeDatum: geselecteerdeDatum,
-                    planningen: allePlanningen
+                    selectedDate: selectedDate,
+                    plans: allePlanningen
                 )
                 .padding(.top, 10)
             } else {
                 AgendaWeekView(
-                    geselecteerdeDatum: geselecteerdeDatum,
-                    planningen: allePlanningen
+                    selectedDate: selectedDate,
+                    plans: allePlanningen
                 )
                 .padding(.top, 10)
             }
@@ -256,10 +256,10 @@ struct AgendaView: View {
             Spacer()
         }
         .onAppear {
-            magisterManager.laadHuiswerkEnRooster(voor: geselecteerdeDatum)
+            magisterManager.loadHomeworkAndSchedule(voor: selectedDate)
         }
-        .onChange(of: geselecteerdeDatum) { _, nieuweDatum in
-            magisterManager.laadHuiswerkEnRooster(voor: nieuweDatum)
+        .onChange(of: selectedDate) { _, nieuweDatum in
+            magisterManager.loadHomeworkAndSchedule(voor: nieuweDatum)
         }
     }
     
@@ -288,12 +288,12 @@ struct AgendaView: View {
 
 // MARK: - 1. Lijst Weergave
 struct AgendaLijstView: View {
-    @Binding var planningen: [PlanningItem]
-    var magisterPlanningen: [PlanningItem]
-    @Binding var toonNieuwPlanSheet: Bool
+    @Binding var plans: [PlanningItem]
+    var magisterPlans: [PlanningItem]
+    @Binding var showNewPlanSheet: Bool
     
     var alleGesorteerdePlanningen: [PlanningItem] {
-        let gecombineerd = planningen + magisterPlanningen
+        let gecombineerd = plans + magisterPlans
         var uniekeItems: [PlanningItem] = []
         var gezieneMagisterIDs = Set<Int>()
         
@@ -325,7 +325,7 @@ struct AgendaLijstView: View {
                     .foregroundColor(.gray.opacity(0.8))
                 
                 Button {
-                    toonNieuwPlanSheet = true
+                    showNewPlanSheet = true
                 } label: {
                     Text("Plan toevoegen")
                         .font(.subheadline.bold())
@@ -370,8 +370,8 @@ struct AgendaLijstView: View {
                             
                             if !isMagisterItem {
                                 Button {
-                                    if let index = planningen.firstIndex(where: { $0.id == item.id }) {
-                                        planningen.remove(at: index)
+                                    if let index = plans.firstIndex(where: { $0.id == item.id }) {
+                                        plans.remove(at: index)
                                     }
                                 } label: {
                                     Image(systemName: "trash")
@@ -392,15 +392,15 @@ struct AgendaLijstView: View {
 
 // MARK: - 2. Dagrooster Weergave
 struct AgendaDagView: View {
-    var geselecteerdeDatum: Date
-    var planningen: [PlanningItem]
+    var selectedDate: Date
+    var plans: [PlanningItem]
     
     let uurHoogte: CGFloat = 60
     let startUur = 0
     let eindUur = 23
     
     private var dagPlanningen: [PlanningItem] {
-        planningen.filter { Calendar.current.isDate($0.datum, inSameDayAs: geselecteerdeDatum) }
+        plans.filter { Calendar.current.isDate($0.datum, inSameDayAs: selectedDate) }
     }
     
     private var totaleHoogte: CGFloat {
@@ -479,13 +479,13 @@ struct AgendaDagView: View {
 
 // MARK: - 3. Weekrooster Weergave
 struct AgendaWeekView: View {
-    var geselecteerdeDatum: Date
-    var planningen: [PlanningItem]
+    var selectedDate: Date
+    var plans: [PlanningItem]
     
     private var weekDagen: [Date] {
         var calendar = Calendar.current
         calendar.firstWeekday = 2
-        guard let weekInterval = calendar.dateInterval(of: .weekOfYear, for: geselecteerdeDatum) else { return [] }
+        guard let weekInterval = calendar.dateInterval(of: .weekOfYear, for: selectedDate) else { return [] }
         return (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: weekInterval.start) }
     }
     
@@ -493,7 +493,7 @@ struct AgendaWeekView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(alignment: .top, spacing: 15) {
                 ForEach(weekDagen, id: \.self) { dagDatum in
-                    let dagPlanningen = planningen
+                    let dagPlanningen = plans
                         .filter { Calendar.current.isDate($0.datum, inSameDayAs: dagDatum) }
                         .sorted(by: { $0.beginTijd < $1.beginTijd })
                     
@@ -509,7 +509,7 @@ struct AgendaWeekView: View {
                         .padding(.bottom, 10)
                         
                         if dagPlanningen.isEmpty {
-                            Text("Geen plannen")
+                            Text("None plannen")
                                 .font(.caption)
                                 .foregroundColor(.gray.opacity(0.6))
                                 .frame(height: 100)
@@ -546,9 +546,9 @@ struct AgendaWeekView: View {
 // MARK: - Swift Playgrounds Canvas Preview Provider
 #Preview {
     AgendaView(
-        geselecteerdeDatum: .constant(Date()),
-        geselecteerdeWeergave: .constant(0),
-        planningen: .constant([
+        selectedDate: .constant(Date()),
+        selectedView: .constant(0),
+        plans: .constant([
             PlanningItem(
                 titel: "Wiskunde Huiswerk",
                 datum: Date(),
@@ -557,7 +557,7 @@ struct AgendaWeekView: View {
                 kleur: .blue
             )
         ]),
-        magisterPlanningen: [],
-        toonNieuwPlanSheet: .constant(false)
+        magisterPlans: [],
+        showNewPlanSheet: .constant(false)
     )
 }

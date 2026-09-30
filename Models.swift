@@ -76,7 +76,7 @@ struct MagisterAppStorageHelper {
     }
 }
 
-// MARK: - Bronnen & Filter Enums
+// MARK: - Resources & Filter Enums
 enum BronFilter: String, CaseIterable {
     case alles = "Alles"
     case drive = "Google Drive"
@@ -205,7 +205,7 @@ struct MagisterGebruiker {
     var voornaam: String = ""
     var achternaam: String = ""
     var email: String = ""
-    var gebruikersnaam: String = ""
+    var usersnaam: String = ""
     var wachtwoord: String = ""
     var personId: Int? = nil
     var schoolDomein: String = ""

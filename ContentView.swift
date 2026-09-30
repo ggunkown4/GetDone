@@ -6,7 +6,7 @@ struct ContentView: View {
     
     @Environment(\.horizontalSizeClass) var sizeClass
     
-    @State private var geselecteerdeOptie: String? = "Agenda"
+    @State private var selectedOption: String? = "Agenda"
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
     
     @State private var isChatOpen: Bool = false
@@ -14,10 +14,10 @@ struct ContentView: View {
     
     var body: some View {
         let veiligeSelectie = Binding<String?>(
-            get: { geselecteerdeOptie },
+            get: { selectedOption },
             set: { newValue in
                 if let geldigeWaarde = newValue {
-                    geselecteerdeOptie = geldigeWaarde
+                    selectedOption = geldigeWaarde
                 }
             }
         )
@@ -25,20 +25,20 @@ struct ContentView: View {
         Group {
             if sizeClass == .compact {
                 // iPhone layout
-                TabView(selection: $geselecteerdeOptie) {
-                    NavigationStack { DetailScherm(titel: "Agenda", auth: auth) }
+                TabView(selection: $selectedOption) {
+                    NavigationStack { DetailScreen(titel: "Agenda", auth: auth) }
                         .tabItem { Label("Agenda", systemImage: "calendar") }
                         .tag("Agenda" as String?)
                     
-                    NavigationStack { DetailScherm(titel: "Chat", auth: auth) }
+                    NavigationStack { DetailScreen(titel: "Chat", auth: auth) }
                         .tabItem { Label("Chat", systemImage: "message.fill") }
                         .tag("Chat" as String?)
                     
-                    NavigationStack { DetailScherm(titel: "Bronnen", auth: auth) }
-                        .tabItem { Label("Bronnen", systemImage: "books.vertical.fill") }
-                        .tag("Bronnen" as String?)
+                    NavigationStack { DetailScreen(titel: "Resources", auth: auth) }
+                        .tabItem { Label("Resources", systemImage: "books.vertical.fill") }
+                        .tag("Resources" as String?)
                     
-                    NavigationStack { DetailScherm(titel: "Profiel", auth: auth) }
+                    NavigationStack { DetailScreen(titel: "Profiel", auth: auth) }
                         .tabItem { Label("Profiel", systemImage: "person.crop.circle.fill") }
                         .tag("Profiel" as String?)
                 }
@@ -62,10 +62,10 @@ struct ContentView: View {
                                 }
                                 
                                 DisclosureGroup(isExpanded: $isBestandenOpen) {
-                                    NavigationLink(value: "Bronnen - Documenten") { Label("Documenten", systemImage: "doc") }
-                                    NavigationLink(value: "Bronnen - Afbeeldingen") { Label("Afbeeldingen", systemImage: "photo") }
+                                    NavigationLink(value: "Resources - Documenten") { Label("Documenten", systemImage: "doc") }
+                                    NavigationLink(value: "Resources - Afbeeldingen") { Label("Afbeeldingen", systemImage: "photo") }
                                 } label: {
-                                    NavigationLink(value: "Bronnen") { Label("Bronnen", systemImage: "books.vertical.fill") }
+                                    NavigationLink(value: "Resources") { Label("Resources", systemImage: "books.vertical.fill") }
                                 }
                             }
                         }
@@ -94,7 +94,7 @@ struct ContentView: View {
                             
                             // Dynamic Profielknop
                             Button {
-                                withAnimation(.easeInOut(duration: 0.2)) { geselecteerdeOptie = "Profiel" }
+                                withAnimation(.easeInOut(duration: 0.2)) { selectedOption = "Profiel" }
                             } label: {
                                 HStack(spacing: 15) {
                                     if auth.isLoggedIn, let photoUrl = URL(string: auth.userPicture), !auth.userPicture.isEmpty {
@@ -128,7 +128,7 @@ struct ContentView: View {
                                 .padding(.vertical, 15)
                                 .padding(.horizontal, 14)
                                 .background {
-                                    let isProfielActief = (geselecteerdeOptie == "Profiel")
+                                    let isProfielActief = (selectedOption == "Profiel")
                                     RoundedRectangle(cornerRadius: 22, style: .continuous)
                                         .fill(isProfielActief ? AnyShapeStyle(.regularMaterial) : AnyShapeStyle(Color.black))
                                         .environment(\.colorScheme, .dark)
@@ -158,8 +158,8 @@ struct ContentView: View {
                 } detail: {
                     NavigationStack {
                         Group {
-                            if let selectie = geselecteerdeOptie {
-                                DetailScherm(titel: selectie, auth: auth)
+                            if let selectie = selectedOption {
+                                DetailScreen(titel: selectie, auth: auth)
                                     .id(selectie)
                                     .transition(.opacity)
                             } else {

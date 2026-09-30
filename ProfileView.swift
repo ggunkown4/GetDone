@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - Slimme Popover Modifier (Dynamische Positie Logica)
+// MARK: - Smart Popover Modifier (Dynamic Position Logic)
 struct AdaptivePopoverModifier<PopoverContent: View>: ViewModifier {
     @Binding var isPresented: Bool
     @ViewBuilder let popoverContent: () -> PopoverContent
@@ -43,15 +43,15 @@ extension View {
     }
 }
 
-// MARK: - PROFIELLOGICA & HOOFDSCHERM
+// MARK: - PROFILE LOGIC & MAIN SCREEN
 
-struct ProfielView: View {
+struct ProfileView: View {
     @ObservedObject var auth: WebGoogleAuthManager
     
     // MARK: - State voor Bevestigingspopup
     @State private var toonUitlogBevestiging: Bool = false
     
-    // MARK: - Persistent Instellingen (Worden automatisch opgeslagen)
+    // MARK: - Persistent Settings (Are automatically saved)
     @AppStorage("aiToon") private var aiToon: String = "Motiverend"
     @AppStorage("productiviteitsType") private var productiviteitsType: String = "Ochtendmens"
     @AppStorage("bufferTijdMinuten") private var bufferTijdMinuten: Int = 15
@@ -79,14 +79,14 @@ struct ProfielView: View {
             ScrollView {
                 VStack(spacing: 24) {
                     
-                    // MARK: - Header (Profielfoto & Gebruikersinfo / Inloggen)
+                    // MARK: - Header (Profile Photo & User Info / Login)
                     profielHeader
                     
-                    // MARK: - Sectie 1: Instellingen & Voorkeuren per Tabblad
+                    // MARK: - Section 1: Settings & Preferences per Tab
                     InstellingenKaart(titel: "INSTELLINGEN & VOORKEUREN") {
                         VStack(spacing: 0) {
                             
-                            NavigationLink(destination: AgendaInstellingenView()) {
+                            NavigationLink(destination: AgendaSettingsView()) {
                                 MenuRijView(
                                     icoon: "calendar.badge.clock",
                                     kleur: .blue,
@@ -97,7 +97,7 @@ struct ProfielView: View {
                             
                             Divider().background(Color.white.opacity(0.1)).padding(.vertical, 8)
                             
-                            NavigationLink(destination: ChatInstellingenView()) {
+                            NavigationLink(destination: ChatSettingsView()) {
                                 MenuRijView(
                                     icoon: "bubble.left.and.bubble.right.fill",
                                     kleur: .purple,
@@ -108,11 +108,11 @@ struct ProfielView: View {
                             
                             Divider().background(Color.white.opacity(0.1)).padding(.vertical, 8)
                             
-                            NavigationLink(destination: BronnenInstellingenView()) {
+                            NavigationLink(destination: ResourcesSettingsView()) {
                                 MenuRijView(
                                     icoon: "folder.fill",
                                     kleur: .orange,
-                                    titel: "Bronnen",
+                                    titel: "Resources",
                                     subtekst: "Drive & Magister sync"
                                 )
                             }
@@ -345,7 +345,7 @@ struct ProfielView: View {
 
 // MARK: - SUBMENU'S PER TABBLAD
 
-struct AgendaInstellingenView: View {
+struct AgendaSettingsView: View {
     @AppStorage("productiviteitsType") private var productiviteitsType: String = "Ochtendmens"
     @AppStorage("dynamischHerplannen") private var dynamischHerplannen: Bool = true
     @AppStorage("maxStudieUur") private var maxStudieUur: Double = 4.0
@@ -383,7 +383,7 @@ struct AgendaInstellingenView: View {
     }
 }
 
-struct ChatInstellingenView: View {
+struct ChatSettingsView: View {
     @AppStorage("aiToon") private var aiToon: String = "Motiverend"
     @AppStorage("ochtendBriefing") private var ochtendBriefing: Bool = true
     @AppStorage("avondEvaluatie") private var avondEvaluatie: Bool = true
@@ -425,18 +425,18 @@ struct ChatInstellingenView: View {
     }
 }
 
-struct BronnenInstellingenView: View {
+struct ResourcesSettingsView: View {
     @AppStorage("syncDrive") private var syncDrive: Bool = true
     @AppStorage("syncClassroom") private var syncClassroom: Bool = true
     @AppStorage("compacteBronweergave") private var compacteBronweergave: Bool = false
-    @AppStorage("bronnenVolgorde") private var bronnenVolgordeRaw: String = "drive,classroom"
+    @AppStorage("resourcesOrder") private var resourcesOrderRaw: String = "drive,classroom"
     
-    @State private var bronnenVolgorde: [String] = ["drive", "classroom"]
+    @State private var resourcesOrder: [String] = ["drive", "classroom"]
     
     var body: some View {
         Form {
             Section(header: Text("Volgorde op Hoofdscherm").foregroundColor(.orange)) {
-                ForEach(Array(bronnenVolgorde.enumerated()), id: \.element) { index, bronKey in
+                ForEach(Array(resourcesOrder.enumerated()), id: \.element) { index, bronKey in
                     HStack(spacing: 12) {
                         Image(systemName: bronKey == "drive" ? "folder.fill" : "graduationcap.fill")
                             .foregroundColor(bronKey == "drive" ? .blue : .orange)
@@ -456,10 +456,10 @@ struct BronnenInstellingenView: View {
                         // Pijltje Omlaag
                         Button(action: { verplaatsOmlaag(index: index) }) {
                             Image(systemName: "arrow.down")
-                                .foregroundColor(index == bronnenVolgorde.count - 1 ? .gray.opacity(0.3) : .orange)
+                                .foregroundColor(index == resourcesOrder.count - 1 ? .gray.opacity(0.3) : .orange)
                         }
                         .buttonStyle(.borderless)
-                        .disabled(index == bronnenVolgorde.count - 1)
+                        .disabled(index == resourcesOrder.count - 1)
                     }
                 }
                 .onMove(perform: verplaatsMetDrag)
@@ -470,17 +470,17 @@ struct BronnenInstellingenView: View {
             }
             
             Section(header: Text("Automatische Synchronisatie").foregroundColor(.orange)) {
-                Toggle("Google Drive Mappen Sync", isOn: $syncDrive)
-                Toggle("Google Classroom Opdrachten Sync", isOn: $syncClassroom)
+                Toggle("Google Drive Folders Sync", isOn: $syncDrive)
+                Toggle("Google Classroom Assignments Sync", isOn: $syncClassroom)
             }
             
             Section(header: Text("Onderhoud").foregroundColor(.orange)) {
-                Button("Ververs Alle Bronnen Cache", role: .destructive) {
+                Button("Ververs Alle Resources Cache", role: .destructive) {
                     // Cache opschonen logica
                 }
             }
         }
-        .navigationTitle("Bronnen Instellingen")
+        .navigationTitle("Resources Instellingen")
         .toolbar {
             EditButton()
         }
@@ -490,36 +490,36 @@ struct BronnenInstellingenView: View {
     }
     
     private func laadVolgorde() {
-        let geladen = bronnenVolgordeRaw.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+        let geladen = resourcesOrderRaw.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
         if !geladen.isEmpty && geladen.contains("drive") && geladen.contains("classroom") {
-            bronnenVolgorde = geladen
+            resourcesOrder = geladen
         } else {
-            bronnenVolgorde = ["drive", "classroom"]
+            resourcesOrder = ["drive", "classroom"]
         }
     }
     
     private func opslaan() {
-        bronnenVolgordeRaw = bronnenVolgorde.joined(separator: ",")
+        resourcesOrderRaw = resourcesOrder.joined(separator: ",")
     }
     
     private func verplaatsOmhoog(index: Int) {
         guard index > 0 else { return }
         withAnimation {
-            bronnenVolgorde.swapAt(index, index - 1)
+            resourcesOrder.swapAt(index, index - 1)
             opslaan()
         }
     }
     
     private func verplaatsOmlaag(index: Int) {
-        guard index < bronnenVolgorde.count - 1 else { return }
+        guard index < resourcesOrder.count - 1 else { return }
         withAnimation {
-            bronnenVolgorde.swapAt(index, index + 1)
+            resourcesOrder.swapAt(index, index + 1)
             opslaan()
         }
     }
     
     private func verplaatsMetDrag(from source: IndexSet, to destination: Int) {
-        bronnenVolgorde.move(fromOffsets: source, toOffset: destination)
+        resourcesOrder.move(fromOffsets: source, toOffset: destination)
         opslaan()
     }
 }
@@ -653,7 +653,7 @@ struct MagisterDetailView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                MagisterSectie()
+                MagisterSection()
             }
             .padding()
         }
@@ -679,7 +679,7 @@ struct DiagnostiekStatusView: View {
                 }
             }
             
-            Section(header: Text("Systeem Status").foregroundColor(.orange)) {
+            Section(header: Text("System Status").foregroundColor(.orange)) {
                 HStack {
                     Text("App Versie")
                     Spacer()
@@ -719,7 +719,7 @@ struct LogGebeurtenis: Identifiable {
 
 struct DiagnostiekLogboekView: View {
     @State private var consoleLogs: [String] = [
-        "[SYSTEM] App gestart v1.0.0",
+        "[SYSTEM] App started v1.0.0",
         "[AUTH] WebGoogleAuthManager geïnitialiseerd",
         "[NETWORK] Verbinding gecontroleerd -> OK",
         "[AI Engine] Assistent status: Actief",
@@ -727,13 +727,13 @@ struct DiagnostiekLogboekView: View {
     ]
     
     @State private var recenteGebeurtenissen: [LogGebeurtenis] = [
-        LogGebeurtenis(titel: "App gestart", beschrijving: "Systeem succesvol geïnitialiseerd."),
-        LogGebeurtenis(titel: "Google Auth Check", beschrijving: "Sessie gecontroleerd.")
+        LogGebeurtenis(titel: "App started", beschrijving: "System successfully initialized."),
+        LogGebeurtenis(titel: "Google Auth Check", beschrijving: "Session checked.")
     ]
     
     private var logboekExporteerTekst: String {
-        let logs = consoleLogs.isEmpty ? "Geen console logs." : consoleLogs.joined(separator: "\n")
-        let gebeurtenissen = recenteGebeurtenissen.isEmpty ? "Geen recente gebeurtenissen." : recenteGebeurtenissen.map { "\($0.titel): \($0.beschrijving)" }.joined(separator: "\n")
+        let logs = consoleLogs.isEmpty ? "None console logs." : consoleLogs.joined(separator: "\n")
+        let gebeurtenissen = recenteGebeurtenissen.isEmpty ? "No recent events." : recenteGebeurtenissen.map { "\($0.titel): \($0.beschrijving)" }.joined(separator: "\n")
         return "=== CONSOLE LOGS ===\n\(logs)\n\n=== RECENTE GEBEURTENISSEN ===\n\(gebeurtenissen)"
     }
     
@@ -768,7 +768,7 @@ struct DiagnostiekLogboekView: View {
                             .foregroundColor(.orange)
                     }
                 } else {
-                    Text("Geen logboek beschikbaar om te exporteren")
+                    Text("None logboek beschikbaar om te exporteren")
                         .font(.subheadline)
                         .foregroundColor(.gray)
                 }
@@ -780,9 +780,9 @@ struct DiagnostiekLogboekView: View {
                 .disabled(consoleLogs.isEmpty && recenteGebeurtenissen.isEmpty)
             }
             
-            Section(header: Text("Recente Gebeurtenissen").foregroundColor(.orange)) {
+            Section(header: Text("Recent Events").foregroundColor(.orange)) {
                 if recenteGebeurtenissen.isEmpty {
-                    Text("Geen recente gebeurtenissen.")
+                    Text("No recent events.")
                         .font(.caption)
                         .foregroundColor(.gray)
                 } else {
@@ -883,5 +883,5 @@ extension MenuRijView where TrailingContent == Text {
 
 #Preview {
     let mockGoogleAuth = WebGoogleAuthManager()
-    return ProfielView(auth: mockGoogleAuth)
+    return ProfileView(auth: mockGoogleAuth)
 }

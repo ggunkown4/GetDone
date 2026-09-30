@@ -5,7 +5,7 @@ class MagisterManager: ObservableObject {
     static let shared = MagisterManager()
     
     @Published var magisterItems: [MagisterItem] = []
-    @Published var magisterPlanningen: [PlanningItem] = []
+    @Published var magisterPlans: [PlanningItem] = []
     @Published var isLoading: Bool = false
     @Published var foutmelding: String? = nil
     
@@ -14,7 +14,7 @@ class MagisterManager: ObservableObject {
         return ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
     }
     
-    func laadHuiswerkEnRooster(voor referentieDatum: Date = Date()) {
+    func loadHomeworkAndSchedule(voor referentieDatum: Date = Date()) {
         if isCanvasPreview {
             return
         }
@@ -58,7 +58,7 @@ class MagisterManager: ObservableObject {
             guard let data = data, let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
                 DispatchQueue.main.async {
                     self.isLoading = false
-                    self.foutmelding = "Kon account niet valideren."
+                    self.foutmelding = "Could not validate account."
                 }
                 return
             }
@@ -120,7 +120,7 @@ class MagisterManager: ObservableObject {
                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                   let items = json["Items"] as? [[String: Any]] else {
                 DispatchQueue.main.async {
-                    self.foutmelding = error != nil ? "Fout bij ophalen rooster" : "Geen roosterdata ontvangen."
+                    self.foutmelding = error != nil ? "Fout bij ophalen rooster" : "None roosterdata ontvangen."
                 }
                 return
             }
@@ -226,7 +226,7 @@ class MagisterManager: ObservableObject {
             DispatchQueue.main.async {
                 let nieuweMagisterIDs = Set(geladenPlanningen.compactMap { $0.magisterID })
                 
-                self.magisterPlanningen.removeAll { existing in
+                self.magisterPlans.removeAll { existing in
                     if let id = existing.magisterID, nieuweMagisterIDs.contains(id) {
                         return true
                     }
@@ -240,10 +240,10 @@ class MagisterManager: ObservableObject {
                     return existing.datum >= startOfWeek && existing.datum < endOfWeek
                 }
                 
-                self.magisterPlanningen.append(contentsOf: geladenPlanningen)
+                self.magisterPlans.append(contentsOf: geladenPlanningen)
                 self.magisterItems.append(contentsOf: geladenMagisterItems)
                 
-                self.magisterPlanningen.sort(by: { $0.beginTijd < $1.beginTijd })
+                self.magisterPlans.sort(by: { $0.beginTijd < $1.beginTijd })
                 self.magisterItems.sort(by: { $0.datum < $1.datum })
                 self.foutmelding = nil
             }

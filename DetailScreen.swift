@@ -1,32 +1,32 @@
 import SwiftUI
 
-// MARK: - DetailScherm met Floating '+' Knop Rechts Onderin
-struct DetailScherm: View {
+// MARK: - DetailScreen met Floating '+' Knop Rechts Onderin
+struct DetailScreen: View {
     @Environment(\.horizontalSizeClass) var sizeClass
     var titel: String
     @ObservedObject var auth: WebGoogleAuthManager
     @ObservedObject var magisterManager = MagisterManager.shared
     
-    @State private var geselecteerdeDatum: Date = Date()
+    @State private var selectedDate: Date = Date()
     @State private var toonDatePicker: Bool = false
     @State private var toonWeekPicker: Bool = false
-    @State private var geselecteerdeWeergave: Int = 0 // 0 = Lijst, 1 = Dag, 2 = Week
+    @State private var selectedView: Int = 0 // 0 = Lijst, 1 = Dag, 2 = Week
     
     // Status voor bronnenfilter
     @State private var bronFilter: BronFilter = .alles
     
     // Eigen plannen opslaan
-    @State private var planningen: [PlanningItem] = []
-    @State private var toonNieuwPlanSheet: Bool = false
+    @State private var plans: [PlanningItem] = []
+    @State private var showNewPlanSheet: Bool = false
     
     private var huidigWeekNummer: Int {
         var calendar = Calendar.current
         calendar.firstWeekday = 2
-        return calendar.component(.weekOfYear, from: geselecteerdeDatum)
+        return calendar.component(.weekOfYear, from: selectedDate)
     }
     
     private var weergaveTitel: String {
-        switch geselecteerdeWeergave {
+        switch selectedView {
         case 0: return "Lijst"
         case 1: return "Dag"
         case 2: return "Week"
@@ -37,9 +37,9 @@ struct DetailScherm: View {
     private func pasWeekAan(met offset: Int) {
         var calendar = Calendar.current
         calendar.firstWeekday = 2
-        if let nieuweDatum = calendar.date(byAdding: .weekOfYear, value: offset, to: geselecteerdeDatum) {
+        if let nieuweDatum = calendar.date(byAdding: .weekOfYear, value: offset, to: selectedDate) {
             withAnimation {
-                geselecteerdeDatum = nieuweDatum
+                selectedDate = nieuweDatum
             }
         }
     }
@@ -51,18 +51,18 @@ struct DetailScherm: View {
             // ROUTING OP BASIS VAN TITEL
             if titel == "Agenda" {
                 AgendaView(
-                    geselecteerdeDatum: $geselecteerdeDatum,
-                    geselecteerdeWeergave: $geselecteerdeWeergave,
-                    planningen: $planningen,
-                    magisterPlanningen: magisterManager.magisterPlanningen,
-                    toonNieuwPlanSheet: $toonNieuwPlanSheet
+                    selectedDate: $selectedDate,
+                    selectedView: $selectedView,
+                    plans: $plans,
+                    magisterPlans: magisterManager.magisterPlans,
+                    showNewPlanSheet: $showNewPlanSheet
                 )
             } else if titel.hasPrefix("Chat") { 
                 ChatView(titel: titel)
-            } else if titel == "Bronnen" || titel.hasPrefix("Bron") {
-                BronnenView(auth: auth, geselecteerdFilter: $bronFilter)
+            } else if titel == "Resources" || titel.hasPrefix("Bron") {
+                ResourcesView(auth: auth, selectedFilter: $bronFilter)
             } else if titel == "Profiel" {
-                ProfielView(auth: auth)
+                ProfileView(auth: auth)
             } else {
                 Text("Je kijkt nu naar: \(titel)")
                     .font(.largeTitle)
@@ -73,7 +73,7 @@ struct DetailScherm: View {
             // zwevende '+' knop RECHTS ONDERAAN (Alleen in Agenda)
             if titel == "Agenda" {
                 Button {
-                    toonNieuwPlanSheet = true
+                    showNewPlanSheet = true
                 } label: {
                     Image(systemName: "plus")
                         .font(.title2.bold())
@@ -88,17 +88,17 @@ struct DetailScherm: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
-        .sheet(isPresented: $toonNieuwPlanSheet) {
-            VoegPlanToeSheet(planningen: $planningen, geselecteerdeDatum: geselecteerdeDatum)
+        .sheet(isPresented: $showNewPlanSheet) {
+            AddPlanSheet(plans: $plans, selectedDate: selectedDate)
         }
         .onAppear {
             if titel == "Agenda" {
-                magisterManager.laadHuiswerkEnRooster(voor: geselecteerdeDatum)
+                magisterManager.loadHomeworkAndSchedule(voor: selectedDate)
             }
         }
-        .onChange(of: geselecteerdeDatum) { _, nieuweDatum in
+        .onChange(of: selectedDate) { _, nieuweDatum in
             if titel == "Agenda" {
-                magisterManager.laadHuiswerkEnRooster(voor: nieuweDatum)
+                magisterManager.loadHomeworkAndSchedule(voor: nieuweDatum)
             }
         }
         .toolbar {
@@ -118,21 +118,21 @@ struct DetailScherm: View {
                             
                             VStack(alignment: .leading, spacing: 0) {
                                 if sizeClass == .regular {
-                                    Text(geselecteerdeDatum.formatted(.dateTime.weekday(.wide)))
+                                    Text(selectedDate.formatted(.dateTime.weekday(.wide)))
                                         .font(.caption2.weight(.semibold))
                                         .foregroundColor(.white)
                                         .fixedSize()
                                         .layoutPriority(1)
-                                    Text(geselecteerdeDatum.formatted(.dateTime.day().month(.wide)))
+                                    Text(selectedDate.formatted(.dateTime.day().month(.wide)))
                                         .font(.caption2.weight(.semibold))
                                         .foregroundColor(.white)
                                         .fixedSize()
                                         .layoutPriority(1)
                                 } else {
-                                    Text(geselecteerdeDatum.formatted(.dateTime.weekday()))
+                                    Text(selectedDate.formatted(.dateTime.weekday()))
                                         .font(.caption2.weight(.semibold))
                                         .foregroundColor(.white)
-                                    Text(geselecteerdeDatum.formatted(.dateTime.day().month(.abbreviated)))
+                                    Text(selectedDate.formatted(.dateTime.day().month(.abbreviated)))
                                         .font(.caption2.weight(.semibold))
                                         .foregroundColor(.white)
                                         .fixedSize()
@@ -154,7 +154,7 @@ struct DetailScherm: View {
                     }
                     .buttonStyle(.plain)
                     .popover(isPresented: $toonDatePicker) {
-                        DatePicker("", selection: $geselecteerdeDatum, displayedComponents: .date)
+                        DatePicker("", selection: $selectedDate, displayedComponents: .date)
                             .datePickerStyle(.graphical)
                             .labelsHidden()
                             .padding()
@@ -168,7 +168,7 @@ struct DetailScherm: View {
                         .fixedSize()
                         .layoutPriority(1)
                         .padding(.leading, 10)
-                        .padding(.trailing, (titel == "Bronnen" && bronFilter != .alles) ? 0 : 12)
+                        .padding(.trailing, (titel == "Resources" && bronFilter != .alles) ? 0 : 12)
                 }
             }
             
@@ -216,7 +216,7 @@ struct DetailScherm: View {
                         }
                         .buttonStyle(.plain)
                         .popover(isPresented: $toonWeekPicker) {
-                            WeekSelectorPopover(geselecteerdeDatum: $geselecteerdeDatum)
+                            WeekSelectorPopover(selectedDate: $selectedDate)
                                 .presentationCompactAdaptation(.popover)
                         }
                     }
@@ -232,7 +232,7 @@ struct DetailScherm: View {
                                 .progressViewStyle(CircularProgressViewStyle(tint: .orange))
                         } else {
                             Button {
-                                magisterManager.laadHuiswerkEnRooster(voor: geselecteerdeDatum)
+                                magisterManager.loadHomeworkAndSchedule(voor: selectedDate)
                             } label: {
                                 Image(systemName: "arrow.clockwise")
                                     .font(.subheadline.bold())
@@ -243,7 +243,7 @@ struct DetailScherm: View {
                         // Vandaag knop
                         Button {
                             withAnimation {
-                                geselecteerdeDatum = Date()
+                                selectedDate = Date()
                             }
                         } label: {
                             HStack(spacing: 6) {
@@ -260,14 +260,14 @@ struct DetailScherm: View {
                         
                         // Weergave menu knop
                         Menu {
-                            Picker("Weergave", selection: $geselecteerdeWeergave) {
+                            Picker("Weergave", selection: $selectedView) {
                                 Label("Lijst", systemImage: "list.bullet").tag(0)
                                 Label("Dag", systemImage: "calendar.day.timeline.left").tag(1)
                                 Label("Week", systemImage: "calendar").tag(2)
                             }
                         } label: {
                             HStack(spacing: 6) {
-                                Image(systemName: geselecteerdeWeergave == 0 ? "list.bullet" : (geselecteerdeWeergave == 1 ? "calendar.day.timeline.left" : "calendar"))
+                                Image(systemName: selectedView == 0 ? "list.bullet" : (selectedView == 1 ? "calendar.day.timeline.left" : "calendar"))
                                     .font(.subheadline)
                                 
                                 if sizeClass == .regular {

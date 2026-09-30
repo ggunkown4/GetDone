@@ -26,7 +26,7 @@ struct MagisterGebruikerModel {
     var voornaam: String = ""
     var achternaam: String = ""
     var email: String = ""
-    var gebruikersnaam: String = ""
+    var usersnaam: String = ""
     var wachtwoord: String = ""
     var personId: Int? = nil
     var schoolDomein: String = "roercollege"
@@ -56,24 +56,24 @@ struct MagisterLes: Identifiable {
     let tijd: String
 }
 
-// MARK: - Hoofdscherm (MagisterSectie)
-struct MagisterSectie: View {
+// MARK: - Hoofdscherm (MagisterSection)
+struct MagisterSection: View {
     @AppStorage("isMagisterLoggedIn") private var isLoggedIn: Bool = false
     
     @State private var showLoginPopup: Bool = false
     @State private var logText: String = "Logboek gestart...\n"
-    @State private var gebruiker = MagisterGebruikerModel()
+    @State private var user = MagisterGebruikerModel()
     
     @State private var accessToken: String = ""
-    @State private var mijnRooster: [MagisterLes] = []
-    @State private var isLoadingRooster: Bool = false
-    @State private var roosterFoutmelding: String? = nil
-    @State private var startInlogFoutmelding: String? = nil
-    @State private var cookieStatusMeldingText: String = ""
+    @State private var mySchedule: [MagisterLes] = []
+    @State private var isLoadingSchedule: Bool = false
+    @State private var scheduleError: String? = nil
+    @State private var startLoginError: String? = nil
+    @State private var cookieStatusMessageText: String = ""
     @State private var laatstVerverstTekst: String = ""
     
     var magisterStartURL: URL {
-        let domein = gebruiker.geformatteerdDomein.isEmpty ? "roercollege.magister.net" : gebruiker.geformatteerdDomein
+        let domein = user.geformatteerdDomein.isEmpty ? "roercollege.magister.net" : user.geformatteerdDomein
         return URL(string: "https://\(domein)/") ?? URL(string: "https://roercollege.magister.net/")!
     }
     
@@ -85,35 +85,35 @@ struct MagisterSectie: View {
                 startView
             }
         }
-        .onAppear { herstelSessie() }
+        .onAppear { restoreSession() }
         .sheet(isPresented: $showLoginPopup) {
             MagisterLoginPopupView(
                 isLoggedIn: $isLoggedIn,
                 showLoginPopup: $showLoginPopup,
                 logText: $logText,
-                gebruiker: $gebruiker,
+                user: $user,
                 accessToken: $accessToken,
                 magisterURL: magisterStartURL,
                 onLoginSuccess: { 
                     laadLiveRooster()
-                    MagisterManager.shared.laadHuiswerkEnRooster()
+                    MagisterManager.shared.loadHomeworkAndSchedule()
                 }
             )
         }
     }
     
-    private func herstelSessie() {
-        if let savedDomein = MagisterAppStorageHelper.read(key: "magister_domein"), !savedDomein.isEmpty { gebruiker.schoolDomein = savedDomein }
-        if let savedUsername = leesGeheim(key: "magister_username") { gebruiker.gebruikersnaam = savedUsername }
-        if let savedPassword = leesGeheim(key: "magister_password") { gebruiker.wachtwoord = savedPassword }
-        if let savedVoornaam = MagisterAppStorageHelper.read(key: "magister_voornaam") { gebruiker.voornaam = savedVoornaam }
-        if let savedAchternaam = MagisterAppStorageHelper.read(key: "magister_achternaam") { gebruiker.achternaam = savedAchternaam }
+    private func restoreSession() {
+        if let savedDomein = MagisterAppStorageHelper.read(key: "magister_domein"), !savedDomein.isEmpty { user.schoolDomein = savedDomein }
+        if let savedUsername = leesGeheim(key: "magister_username") { user.usersnaam = savedUsername }
+        if let savedPassword = leesGeheim(key: "magister_password") { user.wachtwoord = savedPassword }
+        if let savedVoornaam = MagisterAppStorageHelper.read(key: "magister_voornaam") { user.voornaam = savedVoornaam }
+        if let savedAchternaam = MagisterAppStorageHelper.read(key: "magister_achternaam") { user.achternaam = savedAchternaam }
         
         if let savedToken = leesGeheim(key: "magister_access_token"), !savedToken.isEmpty {
             self.accessToken = savedToken
             self.isLoggedIn = true
             self.laadLiveRooster()
-            MagisterManager.shared.laadHuiswerkEnRooster()
+            MagisterManager.shared.loadHomeworkAndSchedule()
         } else {
             self.isLoggedIn = false
         }
@@ -151,7 +151,7 @@ struct MagisterSectie: View {
                     Text("Schooldomein:")
                         .font(.caption)
                         .foregroundColor(.gray)
-                    TextField("bijv. roercollege", text: $gebruiker.schoolDomein)
+                    TextField("bijv. roercollege", text: $user.schoolDomein)
                         .padding(12)
                         .background(Color.white.opacity(0.12))
                         .cornerRadius(8)
@@ -164,7 +164,7 @@ struct MagisterSectie: View {
                     Text("Gebruikersnaam / Leerlingnummer:")
                         .font(.caption)
                         .foregroundColor(.gray)
-                    TextField("bijv. 123456", text: $gebruiker.gebruikersnaam)
+                    TextField("bijv. 123456", text: $user.usersnaam)
                         .padding(12)
                         .background(Color.white.opacity(0.12))
                         .cornerRadius(8)
@@ -177,45 +177,45 @@ struct MagisterSectie: View {
                     Text("Wachtwoord:")
                         .font(.caption)
                         .foregroundColor(.gray)
-                    SecureField("Wachtwoord", text: $gebruiker.wachtwoord)
+                    SecureField("Wachtwoord", text: $user.wachtwoord)
                         .padding(12)
                         .background(Color.white.opacity(0.12))
                         .cornerRadius(8)
                         .foregroundColor(.white)
                 }
                 
-                if let fout = startInlogFoutmelding {
+                if let fout = startLoginError {
                     Text(fout).font(.caption).foregroundColor(.red)
                 }
             }
             
             Button(action: {
                 if !MagisterNetworkMonitor.shared.isConnected {
-                    startInlogFoutmelding = "Geen wifi of internetverbinding beschikbaar."
+                    startLoginError = "None wifi of internetverbinding beschikbaar."
                     return
                 }
-                if gebruiker.geformatteerdDomein.isEmpty {
-                    startInlogFoutmelding = "Vul a.u.b. een schoolnaam in."
+                if user.geformatteerdDomein.isEmpty {
+                    startLoginError = "Please enter a school name."
                     return
                 }
                 
-                gebruiker.personId = nil
-                gebruiker.voornaam = ""
-                gebruiker.achternaam = ""
-                gebruiker.email = ""
+                user.personId = nil
+                user.voornaam = ""
+                user.achternaam = ""
+                user.email = ""
                 accessToken = ""
                 laatstVerverstTekst = ""
                 
                 MagisterKeychainHelper.delete(key: "magister_access_token")
-                MagisterAppStorageHelper.save(gebruiker.schoolDomein, key: "magister_domein")
-                MagisterKeychainHelper.save(gebruiker.gebruikersnaam, key: "magister_username")
-                MagisterKeychainHelper.save(gebruiker.wachtwoord, key: "magister_password")
+                MagisterAppStorageHelper.save(user.schoolDomein, key: "magister_domein")
+                MagisterKeychainHelper.save(user.usersnaam, key: "magister_username")
+                MagisterKeychainHelper.save(user.wachtwoord, key: "magister_password")
                 MagisterAppStorageHelper.delete(key: "magister_username")
                 MagisterAppStorageHelper.delete(key: "magister_password")
                 
                 URLCache.shared.removeAllCachedResponses()
-                startInlogFoutmelding = nil
-                logText = "Logboek gestart...\nDoel URL: https://\(gebruiker.geformatteerdDomein)/\n"
+                startLoginError = nil
+                logText = "Logboek gestart...\nDoel URL: https://\(user.geformatteerdDomein)/\n"
                 
                 WKWebsiteDataStore.default().removeData(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(), modifiedSince: Date(timeIntervalSince1970: 0)) {
                     DispatchQueue.main.async { showLoginPopup = true }
@@ -243,19 +243,19 @@ struct MagisterSectie: View {
             HStack(spacing: 15) {
                 ZStack {
                     Circle().fill(Color.orange).frame(width: 70, height: 70)
-                    Text(gebruikerInitialen).font(.title.bold()).foregroundColor(.white)
+                    Text(userInitialen).font(.title.bold()).foregroundColor(.white)
                 }
                 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(gebruiker.volledigeNaam).font(.title2).bold().foregroundColor(.white)
+                    Text(user.volledigeNaam).font(.title2).bold().foregroundColor(.white)
                     
-                    if !gebruiker.email.isEmpty {
-                        Text(gebruiker.email).font(.subheadline).foregroundColor(.gray)
+                    if !user.email.isEmpty {
+                        Text(user.email).font(.subheadline).foregroundColor(.gray)
                     }
                     
                     HStack(spacing: 4) {
                         Image(systemName: accessToken.isEmpty ? "xmark.circle.fill" : "checkmark.circle.fill").font(.caption2)
-                        Text(accessToken.isEmpty ? "Sessie status: Inactief" : "Sessie status: Actief").font(.caption2)
+                        Text(accessToken.isEmpty ? "Session status: Inactive" : "Session status: Active").font(.caption2)
                     }
                     .foregroundColor(accessToken.isEmpty ? Color.red : Color.green)
                 }
@@ -268,13 +268,13 @@ struct MagisterSectie: View {
             VStack(spacing: 6) {
                 Button(action: {
                     self.accessToken = ""
-                    self.gebruiker.personId = nil
+                    self.user.personId = nil
                     MagisterKeychainHelper.delete(key: "magister_access_token")
                     URLCache.shared.removeAllCachedResponses()
                     WKWebsiteDataStore.default().removeData(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(), modifiedSince: Date(timeIntervalSince1970: 0)) {
                         DispatchQueue.main.async {
-                            self.cookieStatusMeldingText = "Sessie & cookies gewist! Rooster blijft zichtbaar."
-                            Task { try? await Task.sleep(nanoseconds: 3_000_000_000); self.cookieStatusMeldingText = "" }
+                            self.cookieStatusMessageText = "Session & cookies cleared! Schedule remains visible."
+                            Task { try? await Task.sleep(nanoseconds: 3_000_000_000); self.cookieStatusMessageText = "" }
                         }
                     }
                 }) {
@@ -290,8 +290,8 @@ struct MagisterSectie: View {
                     .cornerRadius(10)
                 }
                 
-                if !cookieStatusMeldingText.isEmpty {
-                    Text(cookieStatusMeldingText).font(.caption.bold()).foregroundColor(.orange)
+                if !cookieStatusMessageText.isEmpty {
+                    Text(cookieStatusMessageText).font(.caption.bold()).foregroundColor(.orange)
                 }
             }
             
@@ -306,14 +306,14 @@ struct MagisterSectie: View {
                     Spacer()
                     Button(action: { 
                         laadLiveRooster()
-                        MagisterManager.shared.laadHuiswerkEnRooster()
+                        MagisterManager.shared.loadHomeworkAndSchedule()
                     }) {
                         Image(systemName: "arrow.clockwise").font(.subheadline).foregroundColor(.orange)
                     }
                 }
                 .padding(.bottom, 5)
                 
-                if isLoadingRooster {
+                if isLoadingSchedule {
                     HStack {
                         Spacer()
                         ProgressView().progressViewStyle(CircularProgressViewStyle(tint: .orange)).padding()
@@ -321,7 +321,7 @@ struct MagisterSectie: View {
                     }
                 }
                 
-                if let error = roosterFoutmelding {
+                if let error = scheduleError {
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
                             Image(systemName: "exclamationmark.triangle.fill").foregroundColor(.red)
@@ -331,7 +331,7 @@ struct MagisterSectie: View {
                         ScrollView {
                             Text(error).font(.footnote).foregroundColor(.red).frame(maxWidth: .infinity, alignment: .leading)
                         }.frame(maxHeight: 80)
-                        Button("Sessie Vernieuwen via Cookie") {
+                        Button("Refresh Session via Cookie") {
                             showLoginPopup = true
                         }
                         .font(.caption.bold())
@@ -343,8 +343,8 @@ struct MagisterSectie: View {
                     .padding(.bottom, 8)
                 }
                 
-                if mijnRooster.isEmpty && !isLoadingRooster {
-                    Text("Geen lessen meer ingepland voor vandaag!")
+                if mySchedule.isEmpty && !isLoadingSchedule {
+                    Text("None lessen meer ingepland voor vandaag!")
                         .font(.subheadline)
                         .foregroundColor(.gray)
                         .padding()
@@ -352,7 +352,7 @@ struct MagisterSectie: View {
                         .background(Color.white.opacity(0.08))
                         .cornerRadius(8)
                 } else {
-                    ForEach(mijnRooster) { les in
+                    ForEach(mySchedule) { les in
                         HStack {
                             VStack(alignment: .leading) {
                                 Text(les.uur).bold().foregroundColor(.white)
@@ -384,8 +384,8 @@ struct MagisterSectie: View {
                 Button("Volledig Uitloggen & Alles Wissen") {
                     isLoggedIn = false
                     accessToken = ""
-                    gebruiker = MagisterGebruikerModel()
-                    mijnRooster = []
+                    user = MagisterGebruikerModel()
+                    mySchedule = []
                     MagisterKeychainHelper.delete(key: "magister_access_token")
                     MagisterKeychainHelper.delete(key: "magister_username")
                     MagisterKeychainHelper.delete(key: "magister_password")
@@ -402,24 +402,24 @@ struct MagisterSectie: View {
         .cornerRadius(16)
     }
     
-    var gebruikerInitialen: String {
-        let v = gebruiker.voornaam.prefix(1)
-        let a = gebruiker.achternaam.prefix(1)
+    var userInitialen: String {
+        let v = user.voornaam.prefix(1)
+        let a = user.achternaam.prefix(1)
         return "\(v)\(a)".uppercased()
     }
     
     func laadLiveRooster() {
         if !MagisterNetworkMonitor.shared.isConnected {
-            roosterFoutmelding = "Geen internetverbinding."
-            isLoadingRooster = false; return
+            scheduleError = "None internetverbinding."
+            isLoadingSchedule = false; return
         }
         guard !accessToken.isEmpty else {
-            roosterFoutmelding = "Access Token ontbreekt."
+            scheduleError = "Access Token ontbreekt."
             showLoginPopup = true; return
         }
-        let domein = gebruiker.geformatteerdDomein
-        isLoadingRooster = true
-        roosterFoutmelding = nil
+        let domein = user.geformatteerdDomein
+        isLoadingSchedule = true
+        scheduleError = nil
         
         guard let accountURL = URL(string: "https://\(domein)/api/account") else { return }
         var request = URLRequest(url: accountURL)
@@ -428,11 +428,11 @@ struct MagisterSectie: View {
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 401 {
-                DispatchQueue.main.async { self.isLoadingRooster = false; self.roosterFoutmelding = "Sessie-token verlopen (401)."; self.showLoginPopup = true }
+                DispatchQueue.main.async { self.isLoadingSchedule = false; self.scheduleError = "Sessie-token verlopen (401)."; self.showLoginPopup = true }
                 return
             }
             guard let data = data, let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-                DispatchQueue.main.async { self.roosterFoutmelding = "Fout bij ophalen account data."; self.isLoadingRooster = false }
+                DispatchQueue.main.async { self.scheduleError = "Fout bij ophalen account data."; self.isLoadingSchedule = false }
                 return
             }
             
@@ -442,18 +442,18 @@ struct MagisterSectie: View {
                 if let subDict = json[subKey] as? [String: Any], let foundId = subDict["Id"] as? Int ?? subDict["id"] as? Int {
                     pId = foundId
                     DispatchQueue.main.async {
-                        self.gebruiker.voornaam = subDict["Roepnaam"] as? String ?? ""
-                        self.gebruiker.achternaam = subDict["Achternaam"] as? String ?? ""
+                        self.user.voornaam = subDict["Roepnaam"] as? String ?? ""
+                        self.user.achternaam = subDict["Achternaam"] as? String ?? ""
                     }
                     break
                 }
             }
             
             if let personId = pId ?? json["Id"] as? Int ?? json["id"] as? Int {
-                DispatchQueue.main.async { self.gebruiker.personId = personId }
+                DispatchQueue.main.async { self.user.personId = personId }
                 self.haalAfsprakenOp(personId: personId, domein: domein)
             } else {
-                DispatchQueue.main.async { self.roosterFoutmelding = "Persoon ID niet gevonden."; self.isLoadingRooster = false }
+                DispatchQueue.main.async { self.scheduleError = "Persoon ID niet gevonden."; self.isLoadingSchedule = false }
             }
         }.resume()
     }
@@ -469,9 +469,9 @@ struct MagisterSectie: View {
         request.addValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         
         URLSession.shared.dataTask(with: request) { data, response, error in
-            DispatchQueue.main.async { self.isLoadingRooster = false }
+            DispatchQueue.main.async { self.isLoadingSchedule = false }
             guard let data = data, let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any], let items = json["Items"] as? [[String: Any]] else {
-                DispatchQueue.main.async { self.roosterFoutmelding = "Geen afspraken ontvangen." }
+                DispatchQueue.main.async { self.scheduleError = "None afspraken ontvangen." }
                 return
             }
             
@@ -490,7 +490,7 @@ struct MagisterSectie: View {
             timeFormatter.dateFormat = "HH:mm"
             
             DispatchQueue.main.async {
-                self.mijnRooster = nieuweLessen
+                self.mySchedule = nieuweLessen
                 self.laatstVerverstTekst = "Laatst vernieuwd om \(timeFormatter.string(from: Date()))"
             }
         }.resume()
@@ -502,7 +502,7 @@ struct MagisterLoginPopupView: View {
     @Binding var isLoggedIn: Bool
     @Binding var showLoginPopup: Bool
     @Binding var logText: String
-    @Binding var gebruiker: MagisterGebruikerModel
+    @Binding var user: MagisterGebruikerModel
     @Binding var accessToken: String
     let magisterURL: URL
     var onLoginSuccess: () -> Void
@@ -517,7 +517,7 @@ struct MagisterLoginPopupView: View {
                     logText: $logText,
                     isLoggedIn: $isLoggedIn,
                     showLoginPopup: $showLoginPopup,
-                    gebruiker: $gebruiker,
+                    user: $user,
                     accessToken: $accessToken,
                     onLoginSuccess: onLoginSuccess
                 )
@@ -584,7 +584,7 @@ struct MagisterWKWebView: UIViewRepresentable {
     @Binding var logText: String
     @Binding var isLoggedIn: Bool
     @Binding var showLoginPopup: Bool
-    @Binding var gebruiker: MagisterGebruikerModel
+    @Binding var user: MagisterGebruikerModel
     @Binding var accessToken: String
     var onLoginSuccess: () -> Void
     
@@ -656,7 +656,7 @@ struct MagisterWKWebView: UIViewRepresentable {
             if let host = url.host, host.hasSuffix(".magister.net"), host != "accounts.magister.net" {
                 DispatchQueue.main.async {
                     let schoolNaam = host.replacingOccurrences(of: ".magister.net", with: "")
-                    self.parent.gebruiker.schoolDomein = schoolNaam
+                    self.parent.user.schoolDomein = schoolNaam
                     MagisterAppStorageHelper.save(schoolNaam, key: "magister_domein")
                 }
             }
@@ -679,18 +679,18 @@ struct MagisterWKWebView: UIViewRepresentable {
                let payload = parseJWTPayload(idToken) {
                 DispatchQueue.main.async {
                     if let voornaam = payload["given_name"] as? String {
-                        self.parent.gebruiker.voornaam = voornaam
+                        self.parent.user.voornaam = voornaam
                         MagisterAppStorageHelper.save(voornaam, key: "magister_voornaam")
                     }
                     if let achternaam = payload["family_name"] as? String {
-                        self.parent.gebruiker.achternaam = achternaam
+                        self.parent.user.achternaam = achternaam
                         MagisterAppStorageHelper.save(achternaam, key: "magister_achternaam")
                     }
                     if let email = payload["email"] as? String {
-                        self.parent.gebruiker.email = email
+                        self.parent.user.email = email
                     }
                     if let username = payload["preferred_username"] as? String {
-                        self.parent.gebruiker.gebruikersnaam = username
+                        self.parent.user.usersnaam = username
                         MagisterKeychainHelper.save(username, key: "magister_username")
                         MagisterAppStorageHelper.delete(key: "magister_username")
                     }
@@ -705,9 +705,9 @@ struct MagisterWKWebView: UIViewRepresentable {
             DispatchQueue.main.async {
                 self.parent.accessToken = validToken
                 MagisterKeychainHelper.save(validToken, key: "magister_access_token")
-                MagisterAppStorageHelper.save(self.parent.gebruiker.schoolDomein, key: "magister_domein")
-                MagisterKeychainHelper.save(self.parent.gebruiker.gebruikersnaam, key: "magister_username")
-                MagisterKeychainHelper.save(self.parent.gebruiker.wachtwoord, key: "magister_password")
+                MagisterAppStorageHelper.save(self.parent.user.schoolDomein, key: "magister_domein")
+                MagisterKeychainHelper.save(self.parent.user.usersnaam, key: "magister_username")
+                MagisterKeychainHelper.save(self.parent.user.wachtwoord, key: "magister_password")
                 MagisterAppStorageHelper.delete(key: "magister_username")
                 MagisterAppStorageHelper.delete(key: "magister_password")
                 
@@ -773,8 +773,8 @@ struct MagisterWKWebView: UIViewRepresentable {
             if let url = webView.url {
                 DispatchQueue.main.async { self.parent.logText += "\n✅ Pagina Geladen: \(self.veiligeURLBeschrijving(url))" }
                 
-                let savedUsername = MagisterKeychainHelper.read(key: "magister_username") ?? self.parent.gebruiker.gebruikersnaam
-                let savedPassword = MagisterKeychainHelper.read(key: "magister_password") ?? self.parent.gebruiker.wachtwoord
+                let savedUsername = MagisterKeychainHelper.read(key: "magister_username") ?? self.parent.user.usersnaam
+                let savedPassword = MagisterKeychainHelper.read(key: "magister_password") ?? self.parent.user.wachtwoord
                 
                 if url.host == "accounts.magister.net" {
                     let usernameJSON = javaScriptString(savedUsername)

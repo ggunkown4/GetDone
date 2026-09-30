@@ -65,8 +65,8 @@ final class AIManager: ObservableObject {
         activeTask?.cancel()
         activeTask = nil
         isLoading = false
-        statusText = "Gestopt door gebruiker"
-        addLog("[\(tijd())] Aanvraag gestopt door gebruiker")
+        statusText = "Gestopt door user"
+        addLog("[\(tijd())] Aanvraag gestopt door user")
     }
     
     private var activeTask: Task<Void, Never>?
@@ -150,7 +150,7 @@ final class AIManager: ObservableObject {
             } catch is CancellationError {
                 await MainActor.run {
                     self.isLoading = false
-                    self.statusText = "Gestopt door gebruiker"
+                    self.statusText = "Gestopt door user"
                     self.approachSummary = "De aanvraag is gestopt."
                     self.activeTask = nil
                 }
@@ -1034,7 +1034,7 @@ struct WebResultsSheet: View {
         NavigationStack {
             List {
                 if results.isEmpty {
-                    Text("Geen online resultaten beschikbaar.")
+                    Text("None online resultaten beschikbaar.")
                         .foregroundColor(.gray)
                         .padding(.vertical, 12)
                 } else {

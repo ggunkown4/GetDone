@@ -1,13 +1,13 @@
 import SwiftUI
 
-// MARK: - Bronnen Weergave
-struct BronnenView: View {
+// MARK: - Resources Weergave
+struct ResourcesView: View {
     @ObservedObject var auth: WebGoogleAuthManager
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    @Binding var geselecteerdFilter: BronFilter
+    @Binding var selectedFilter: BronFilter
     
     // Volgorde opgeslagen via AppStorage
-    @AppStorage("bronnenVolgorde") private var bronnenVolgordeRaw: String = "drive,classroom"
+    @AppStorage("resourcesOrder") private var resourcesOrderRaw: String = "drive,classroom"
     
     // Weergave Opties
     @State private var sorteerOptie: SorteerOptie = .datum
@@ -29,15 +29,15 @@ struct BronnenView: View {
         huidigeMap?.id ?? "root"
     }
     
-    private var actueleBestanden: [DriveFile] {
+    private var currentFiles: [DriveFile] {
         if let cached = mappenCache[huidigeMapKey], !cached.isEmpty {
             return cached
         }
         return auth.driveFiles
     }
     
-    private var bronnenVolgorde: [String] {
-        let items = bronnenVolgordeRaw.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+    private var resourcesOrder: [String] {
+        let items = resourcesOrderRaw.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
         let geldigeItems = items.filter { $0 == "drive" || $0 == "classroom" }
         return geldigeItems.isEmpty ? ["drive", "classroom"] : geldigeItems
     }
@@ -59,22 +59,22 @@ struct BronnenView: View {
             VStack(spacing: 0) {
                 ScrollView {
                     VStack(spacing: 30) {
-                        ForEach(bronnenVolgorde, id: \.self) { bronKey in
-                            if bronKey == "drive" && (geselecteerdFilter == .alles || geselecteerdFilter == .drive) {
-                                weergaveBestandenSectie
+                        ForEach(resourcesOrder, id: \.self) { bronKey in
+                            if bronKey == "drive" && (selectedFilter == .alles || selectedFilter == .drive) {
+                                displayFilesSection
                             }
                             
-                            if bronKey == "classroom" && (geselecteerdFilter == .alles || geselecteerdFilter == .classroom) {
+                            if bronKey == "classroom" && (selectedFilter == .alles || selectedFilter == .classroom) {
                                 weergaveClassroomSectie
                             }
                         }
                         
-                        if geselecteerdFilter == .alles && actueleBestanden.isEmpty && auth.classroomItems.isEmpty {
+                        if selectedFilter == .alles && currentFiles.isEmpty && auth.classroomItems.isEmpty {
                             VStack(spacing: 16) {
                                 Image(systemName: "tray")
                                     .font(.system(size: 50))
                                     .foregroundColor(.gray)
-                                Text("Je hebt nog geen bronnen.")
+                                Text("You don't have any resources yet.")
                                     .foregroundColor(.gray)
                             }
                             .padding(.top, 40)
@@ -89,17 +89,17 @@ struct BronnenView: View {
                 mappenCache[huidigeMapKey] = auth.driveFiles
             }
         }
-        .onChange(of: geselecteerdFilter) { newValue in
+        .onChange(of: selectedFilter) { newValue in
             if newValue == .alles {
                 resetMapNavigatie()
             }
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                if geselecteerdFilter != .alles {
+                if selectedFilter != .alles {
                     Button {
                         withAnimation {
-                            geselecteerdFilter = .alles
+                            selectedFilter = .alles
                             resetMapNavigatie()
                         }
                     } label: {
@@ -146,7 +146,7 @@ struct BronnenView: View {
                 }
                 
                 Menu {
-                    Picker("Bron", selection: $geselecteerdFilter) {
+                    Picker("Bron", selection: $selectedFilter) {
                         ForEach(BronFilter.allCases, id: \.self) { filter in
                             Text(filter.rawValue).tag(filter)
                         }
@@ -169,7 +169,7 @@ struct BronnenView: View {
     // MARK: - Map Navigatie Functies
     private func navigeerNaarMap(_ map: DriveFile) {
         withAnimation(.easeInOut(duration: 0.2)) {
-            geselecteerdFilter = .drive 
+            selectedFilter = .drive 
             if let huidige = huidigeMap {
                 mapGeschiedenis.append(huidige)
             }
@@ -177,11 +177,11 @@ struct BronnenView: View {
         }
         
         if mappenCache[map.id] == nil {
-            auth.laadBestandenVoorMap(mapId: map.id)
+            auth.loadFilesForFolder(mapId: map.id)
         }
     }
     
-    private func gaTerugInMappen() {
+    private func goBackInFolders() {
         withAnimation(.easeInOut(duration: 0.2)) {
             if !mapGeschiedenis.isEmpty {
                 huidigeMap = mapGeschiedenis.removeLast()
@@ -191,7 +191,7 @@ struct BronnenView: View {
         }
         
         if mappenCache[huidigeMapKey] == nil {
-            auth.laadBestandenVoorMap(mapId: huidigeMap?.id)
+            auth.loadFilesForFolder(mapId: huidigeMap?.id)
         }
     }
     
@@ -201,17 +201,17 @@ struct BronnenView: View {
             mapGeschiedenis.removeAll()
         }
         if mappenCache["root"] == nil {
-            auth.laadBestandenVoorMap(mapId: nil)
+            auth.loadFilesForFolder(mapId: nil)
         }
     }
     
-    // MARK: - Subweergave: Drive Bestanden
+    // MARK: - Subview: Drive Files
     @ViewBuilder
-    private var weergaveBestandenSectie: some View {
+    private var displayFilesSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 if let map = huidigeMap {
-                    Button(action: gaTerugInMappen) {
+                    Button(action: goBackInFolders) {
                         HStack(spacing: 6) {
                             Image(systemName: "chevron.left")
                                 .font(.title3.bold())
@@ -225,9 +225,9 @@ struct BronnenView: View {
                     Text(map.name).font(.title3.bold()).foregroundColor(.white).lineLimit(1)
                     Spacer()
                 } else {
-                    if geselecteerdFilter == .alles {
+                    if selectedFilter == .alles {
                         Button {
-                            withAnimation { geselecteerdFilter = .drive }
+                            withAnimation { selectedFilter = .drive }
                         } label: {
                             HStack(spacing: 8) {
                                 Text("Google Drive").font(.title2.bold()).foregroundColor(.white)
@@ -244,9 +244,9 @@ struct BronnenView: View {
             }
             .padding(.horizontal, 20)
             
-            let bestandenTerTonen = actueleBestanden
+            let filesToShow = currentFiles
             
-            if bestandenTerTonen.isEmpty && !auth.isLoadingData {
+            if filesToShow.isEmpty && !auth.isLoadingData {
                 VStack(spacing: 16) {
                     Image(systemName: "folder").font(.system(size: 50)).foregroundColor(.gray)
                     Text(huidigeMap != nil ? "Deze map is leeg" : "Je Drive is leeg").foregroundColor(.gray)
@@ -254,12 +254,12 @@ struct BronnenView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.top, 40)
             } else {
-                let basisBestanden = bestandenTerTonen.filter { file in
+                let baseFiles = filesToShow.filter { file in
                     guard let grens = filterDatumGrens else { return true }
                     return file.datum >= grens 
                 }
                 
-                let gesorteerdeBestanden = basisBestanden.sorted { (file1, file2) -> Bool in
+                let sortedFiles = baseFiles.sorted { (file1, file2) -> Bool in
                     let isFolder1 = file1.mimeType == "application/vnd.google-apps.folder"
                     let isFolder2 = file2.mimeType == "application/vnd.google-apps.folder"
                     
@@ -272,30 +272,30 @@ struct BronnenView: View {
                     }
                 }
                 
-                let tonenBestanden = (geselecteerdFilter == .alles && huidigeMap == nil)
-                ? Array(gesorteerdeBestanden.prefix(6))
-                : gesorteerdeBestanden
+                let showFiles = (selectedFilter == .alles && huidigeMap == nil)
+                ? Array(sortedFiles.prefix(6))
+                : sortedFiles
                 
-                if tonenBestanden.isEmpty {
-                    Text("Geen bestanden gevonden met deze filters.")
+                if showFiles.isEmpty {
+                    Text("None bestanden gevonden met deze filters.")
                         .foregroundColor(.gray)
                         .padding(.horizontal, 20)
                 } else {
                     LazyVGrid(columns: columns, spacing: 30) {
-                        ForEach(tonenBestanden) { file in
-                            BronIcoonWeergave(file: file) { geselecteerdeMap in
+                        ForEach(showFiles) { file in
+                            ResourceIconView(file: file) { geselecteerdeMap in
                                 navigeerNaarMap(geselecteerdeMap)
                             }
                             .onAppear {
-                                if geselecteerdFilter == .drive, file.id == tonenBestanden.last?.id {
-                                    auth.laadMeerBestandenVoorMap(mapId: huidigeMap?.id)
+                                if selectedFilter == .drive, file.id == showFiles.last?.id {
+                                    auth.loadMoreBestandenVoorMap(mapId: huidigeMap?.id)
                                 }
                             }
                         }
                     }
                     .padding(.horizontal, 20)
                     
-                    if auth.isLadenMeerBestanden {
+                    if auth.isLoadingMoreFiles {
                         ProgressView("Meer laden...")
                             .tint(.white)
                             .foregroundColor(.gray)
@@ -307,22 +307,22 @@ struct BronnenView: View {
         }
     }
     
-    // MARK: - Subweergave: Classroom Items
+    // MARK: - Subview: Classroom Items
     @ViewBuilder
     private var weergaveClassroomSectie: some View {
         if auth.classroomItems.isEmpty {
-            if geselecteerdFilter == .classroom {
+            if selectedFilter == .classroom {
                 VStack(spacing: 16) {
                     Image(systemName: "graduationcap").font(.system(size: 50)).foregroundColor(.gray)
-                    Text("Geen materiaal of opdrachten gevonden").foregroundColor(.gray)
+                    Text("None materiaal of opdrachten gevonden").foregroundColor(.gray)
                 }
                 .padding(.top, 40)
             }
         } else {
             VStack(alignment: .leading, spacing: 16) {
-                if geselecteerdFilter == .alles {
+                if selectedFilter == .alles {
                     Button {
-                        withAnimation { geselecteerdFilter = .classroom }
+                        withAnimation { selectedFilter = .classroom }
                     } label: {
                         HStack(spacing: 8) {
                             Text("Google Classroom").font(.title2.bold()).foregroundColor(.white)
@@ -349,27 +349,27 @@ struct BronnenView: View {
                     }
                 }
                 
-                let tonenItems = geselecteerdFilter == .alles 
+                let tonenItems = selectedFilter == .alles 
                 ? Array(gesorteerdeItems.prefix(4)) 
                 : gesorteerdeItems
                 
                 if tonenItems.isEmpty {
-                    Text("Geen items gevonden met deze filters.").foregroundColor(.gray).padding(.horizontal, 20)
+                    Text("None items gevonden met deze filters.").foregroundColor(.gray).padding(.horizontal, 20)
                 } else {
                     LazyVStack(spacing: 14) {
                         ForEach(tonenItems) { item in
                             if item.type == .aankondiging {
-                                AankondigingBalkWeergave(item: item)
+                                AnnouncementBarView(item: item)
                                     .onAppear {
-                                        if geselecteerdFilter == .classroom, item.id == tonenItems.last?.id {
-                                            auth.laadMeerClassroomItems()
+                                        if selectedFilter == .classroom, item.id == tonenItems.last?.id {
+                                            auth.loadMoreClassroomItems()
                                         }
                                     }
                             } else {
-                                ClassroomItemKaartWeergave(item: item)
+                                ClassroomItemCardView(item: item)
                                     .onAppear {
-                                        if geselecteerdFilter == .classroom, item.id == tonenItems.last?.id {
-                                            auth.laadMeerClassroomItems()
+                                        if selectedFilter == .classroom, item.id == tonenItems.last?.id {
+                                            auth.loadMoreClassroomItems()
                                         }
                                     }
                             }
@@ -377,7 +377,7 @@ struct BronnenView: View {
                     }
                     .padding(.horizontal, 20)
                     
-                    if auth.isLadenMeerClassroomItems {
+                    if auth.isLoadingMoreClassroomItems {
                         ProgressView("Meer Classroom items laden...")
                             .tint(.white)
                             .foregroundColor(.gray)
@@ -390,8 +390,8 @@ struct BronnenView: View {
     }
 }
 
-// MARK: - Drive & Classroom Hulpweergaven
-struct BronIcoonWeergave: View {
+// MARK: - Drive & Classroom Helper Views
+struct ResourceIconView: View {
     let file: DriveFile
     var actieBijMap: ((DriveFile) -> Void)? = nil
     @Environment(\.openURL) var openURL
@@ -469,7 +469,7 @@ struct BronIcoonWeergave: View {
     }
 }
 
-struct AankondigingBalkWeergave: View {
+struct AnnouncementBarView: View {
     let item: ClassroomItem
     @Environment(\.openURL) var openURL
     var body: some View {
@@ -490,7 +490,7 @@ struct AankondigingBalkWeergave: View {
     }
 }
 
-struct ClassroomItemKaartWeergave: View {
+struct ClassroomItemCardView: View {
     let item: ClassroomItem
     @Environment(\.openURL) var openURL
     var body: some View {

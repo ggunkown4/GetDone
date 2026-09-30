@@ -96,13 +96,13 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
     // Drive variabelen
     @Published var driveFiles: [DriveFile] = []
     @Published var driveNextPageToken: String? = nil
-    @Published var isLadenMeerBestanden: Bool = false
+    @Published var isLoadingMoreFiles: Bool = false
     
     // Classroom variabelen
     @Published var classroomCourses: [ClassroomCourse] = []
     @Published var classroomItems: [ClassroomItem] = []
     @Published var isLoadingData: Bool = false
-    @Published var isLadenMeerClassroomItems: Bool = false
+    @Published var isLoadingMoreClassroomItems: Bool = false
     @Published var classroomHasMoreItems: Bool = false
     
     // Classroom paginatie tokens per vak
@@ -165,13 +165,13 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
         
         let session = ASWebAuthenticationSession(url: authURL, callbackURLScheme: redirectScheme) { callbackURL, error in
             if error != nil {
-                DispatchQueue.main.async { self.errorMessage = "Inloggen geannuleerd of mislukt." }
+                DispatchQueue.main.async { self.errorMessage = "Login cancelled or failed." }
                 return
             }
             guard let callbackURL = callbackURL,
                   let queryItems = URLComponents(string: callbackURL.absoluteString)?.queryItems,
                   let code = queryItems.first(where: { $0.name == "code" })?.value else {
-                DispatchQueue.main.async { self.errorMessage = "Geen geldige respons ontvangen." }
+                DispatchQueue.main.async { self.errorMessage = "None geldige respons ontvangen." }
                 return
             }
             
@@ -211,7 +211,7 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
                     self.laadGoogleData()
                 }
             } else {
-                DispatchQueue.main.async { self.errorMessage = "Fout bij ophalen van tokens." }
+                DispatchQueue.main.async { self.errorMessage = "Error fetching tokens." }
             }
         }.resume()
     }
@@ -292,30 +292,30 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
             self.classroomItems.removeAll()
             self.driveFiles.removeAll()
             self.driveNextPageToken = nil
-            self.isLadenMeerBestanden = false
+            self.isLoadingMoreFiles = false
             self.courseWorkTokens.removeAll()
             self.materialsTokens.removeAll()
             self.announcementsTokens.removeAll()
         }
         
-        fetchDriveFiles(mapId: nil, laadMeer: false)
+        fetchDriveFiles(mapId: nil, loadMore: false)
         fetchClassroomCourses()
     }
     
     // MARK: - Drive Ophalen
-    func laadBestandenVoorMap(mapId: String?) {
+    func loadFilesForFolder(mapId: String?) {
         driveNextPageToken = nil
-        isLadenMeerBestanden = false
-        fetchDriveFiles(mapId: mapId, laadMeer: false)
+        isLoadingMoreFiles = false
+        fetchDriveFiles(mapId: mapId, loadMore: false)
     }
     
-    func laadMeerBestandenVoorMap(mapId: String?) {
-        guard driveNextPageToken != nil, !isLadenMeerBestanden else { return }
-        isLadenMeerBestanden = true
-        fetchDriveFiles(mapId: mapId, laadMeer: true)
+    func loadMoreBestandenVoorMap(mapId: String?) {
+        guard driveNextPageToken != nil, !isLoadingMoreFiles else { return }
+        isLoadingMoreFiles = true
+        fetchDriveFiles(mapId: mapId, loadMore: true)
     }
     
-    private func fetchDriveFiles(mapId: String? = nil, laadMeer: Bool = false) {
+    private func fetchDriveFiles(mapId: String? = nil, loadMore: Bool = false) {
         let query: String
         if let parentId = mapId {
             query = "'\(parentId)' in parents and trashed = false"
@@ -326,12 +326,12 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
         let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         var urlString = "https://www.googleapis.com/drive/v3/files?q=\(encodedQuery)&pageSize=40&fields=nextPageToken,files(id,name,mimeType,webViewLink,modifiedTime)&orderBy=folder,name"
         
-        if laadMeer, let token = driveNextPageToken {
+        if loadMore, let token = driveNextPageToken {
             urlString += "&pageToken=\(token)"
         }
         
         guard let url = URL(string: urlString) else {
-            DispatchQueue.main.async { self.isLadenMeerBestanden = false }
+            DispatchQueue.main.async { self.isLoadingMoreFiles = false }
             return
         }
         
@@ -339,25 +339,25 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
             if let data = data,
                let response = try? JSONDecoder().decode(DriveListResponse.self, from: data) {
                 DispatchQueue.main.async {
-                    let nieuweBestanden = response.files ?? []
+                    let newFiles = response.files ?? []
                     
-                    if laadMeer {
+                    if loadMore {
                         var bestaande = self.driveFiles
-                        for file in nieuweBestanden {
+                        for file in newFiles {
                             if !bestaande.contains(where: { $0.id == file.id }) {
                                 bestaande.append(file)
                             }
                         }
                         self.driveFiles = bestaande
                     } else {
-                        self.driveFiles = nieuweBestanden
+                        self.driveFiles = newFiles
                     }
                     
                     self.driveNextPageToken = response.nextPageToken
-                    self.isLadenMeerBestanden = false
+                    self.isLoadingMoreFiles = false
                 }
             } else {
-                DispatchQueue.main.async { self.isLadenMeerBestanden = false }
+                DispatchQueue.main.async { self.isLoadingMoreFiles = false }
             }
         }
     }
@@ -372,7 +372,7 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
                let courses = response["courses"] {
                 DispatchQueue.main.async {
                     self.classroomCourses = courses
-                    self.fetchClassroomItems(for: courses, laadMeer: false)
+                    self.fetchClassroomItems(for: courses, loadMore: false)
                 }
             } else {
                 DispatchQueue.main.async { self.isLoadingData = false }
@@ -380,14 +380,14 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
         }
     }
     
-    func laadMeerClassroomItems() {
-        guard classroomHasMoreItems, !isLadenMeerClassroomItems else { return }
-        isLadenMeerClassroomItems = true
-        fetchClassroomItems(for: classroomCourses, laadMeer: true)
+    func loadMoreClassroomItems() {
+        guard classroomHasMoreItems, !isLoadingMoreClassroomItems else { return }
+        isLoadingMoreClassroomItems = true
+        fetchClassroomItems(for: classroomCourses, loadMore: true)
     }
     
-    private func fetchClassroomItems(for courses: [ClassroomCourse], laadMeer: Bool = false) {
-        if !laadMeer {
+    private func fetchClassroomItems(for courses: [ClassroomCourse], loadMore: Bool = false) {
+        if !loadMore {
             courseWorkTokens.removeAll()
             materialsTokens.removeAll()
             announcementsTokens.removeAll()
@@ -407,10 +407,10 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
             
             // 1. Opdrachten
             let cwToken = courseWorkTokens[courseId]
-            if !laadMeer || cwToken != nil {
+            if !loadMore || cwToken != nil {
                 dispatchGroup.enter()
                 var cwUrlString = "https://classroom.googleapis.com/v1/courses/\(courseId)/courseWork?pageSize=\(pageSize)"
-                if laadMeer, let token = cwToken { cwUrlString += "&pageToken=\(token)" }
+                if loadMore, let token = cwToken { cwUrlString += "&pageToken=\(token)" }
                 
                 fetchEndpoint(cwUrlString) { json in
                     if let json = json {
@@ -442,10 +442,10 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
             
             // 2. Materialen
             let matToken = materialsTokens[courseId]
-            if !laadMeer || matToken != nil {
+            if !loadMore || matToken != nil {
                 dispatchGroup.enter()
                 var matUrlString = "https://classroom.googleapis.com/v1/courses/\(courseId)/courseWorkMaterials?pageSize=\(pageSize)"
-                if laadMeer, let token = matToken { matUrlString += "&pageToken=\(token)" }
+                if loadMore, let token = matToken { matUrlString += "&pageToken=\(token)" }
                 
                 fetchEndpoint(matUrlString) { json in
                     if let json = json {
@@ -477,10 +477,10 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
             
             // 3. Aankondigingen
             let annToken = announcementsTokens[courseId]
-            if !laadMeer || annToken != nil {
+            if !loadMore || annToken != nil {
                 dispatchGroup.enter()
                 var annUrlString = "https://classroom.googleapis.com/v1/courses/\(courseId)/announcements?pageSize=\(pageSize)"
-                if laadMeer, let token = annToken { annUrlString += "&pageToken=\(token)" }
+                if loadMore, let token = annToken { annUrlString += "&pageToken=\(token)" }
                 
                 fetchEndpoint(annUrlString) { json in
                     if let json = json {
@@ -512,7 +512,7 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
         }
         
         dispatchGroup.notify(queue: .main) {
-            if laadMeer {
+            if loadMore {
                 var bestaande = self.classroomItems
                 for item in opgehaaldeItems {
                     if !bestaande.contains(where: { $0.id == item.id }) {
@@ -520,7 +520,7 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
                     }
                 }
                 self.classroomItems = bestaande
-                self.isLadenMeerClassroomItems = false
+                self.isLoadingMoreClassroomItems = false
             } else {
                 self.classroomItems = opgehaaldeItems
                 self.isLoadingData = false
