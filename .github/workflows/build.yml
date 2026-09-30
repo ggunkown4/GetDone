@@ -11,7 +11,7 @@ jobs:
         # We build the 'AppModule' scheme exposed natively by the Swift Package for iOS Simulator
         run: xcodebuild -scheme AppModule -destination 'platform=iOS Simulator,name=iPad Pro (11-inch) (4th generation)' build
       - name: Trigger Pushcut
-        if: success()
+        if: always()
         run: |
           echo "Triggering Pushcut webhook on iPad..."
           curl -X POST https://api.pushcut.io/js5k0Bts71CE5r5HB6-PL/notifications/GetDoneUpdate
