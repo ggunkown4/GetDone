@@ -187,7 +187,7 @@ struct ProfielView: View {
                     // MARK: - Sectie 3: Bronnen
                     InstellingenKaart(titel: "BRONNEN") {
                         VStack(spacing: 0) {
-                            NavigationLink(destination: BronnenView(auth: auth, geselecteerdFilter: .constant(.alles))) {
+                            NavigationLink(destination: BronnenView(auth: auth, geselecteerdFilter: .constant(.drive))) {
                                 MenuRijView(
                                     icoon: "folder.fill",
                                     kleur: .blue,
