@@ -183,7 +183,33 @@ struct ProfielView: View {
                         }
                     }
                     
-                    // MARK: - Sectie 3: Diagnostiek
+                    
+                    // MARK: - Sectie 3: Bronnen
+                    InstellingenKaart(titel: "BRONNEN") {
+                        VStack(spacing: 0) {
+                            NavigationLink(destination: BronnenView(auth: auth, geselecteerdFilter: .constant(.alles))) {
+                                MenuRijView(
+                                    icoon: "folder.fill",
+                                    kleur: .blue,
+                                    titel: "Google Drive",
+                                    subtekst: "Bestanden & Mappen"
+                                )
+                            }
+                            
+                            Divider().background(Color.white.opacity(0.1)).padding(.vertical, 8)
+                            
+                            NavigationLink(destination: BronnenView(auth: auth, geselecteerdFilter: .constant(.classroom))) {
+                                MenuRijView(
+                                    icoon: "book.fill",
+                                    kleur: .green,
+                                    titel: "Google Classroom",
+                                    subtekst: "Opdrachten & Cursussen"
+                                )
+                            }
+                        }
+                    }
+
+                    // MARK: - Sectie 4: Diagnostiek
                     InstellingenKaart(titel: "DIAGNOSTIEK") {
                         VStack(spacing: 0) {
                             NavigationLink(destination: DiagnostiekStatusView(auth: auth)) {
@@ -208,7 +234,7 @@ struct ProfielView: View {
                         }
                     }
                     
-                    // MARK: - Sectie 4: Uitloggen Knop met Slimme Popover
+                    // MARK: - Sectie 5: Uitloggen Knop met Slimme Popover
                     if auth.isLoggedIn {
                         Button(role: .destructive, action: {
                             toonUitlogBevestiging = true

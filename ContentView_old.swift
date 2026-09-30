@@ -6,8 +6,11 @@ struct ContentView: View {
     
     @Environment(\.horizontalSizeClass) var sizeClass
     
-    @State private var geselecteerdeOptie: String? = "Chat"
+    @State private var geselecteerdeOptie: String? = "Agenda"
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
+    
+    @State private var isChatOpen: Bool = false
+    @State private var isBestandenOpen: Bool = false
     
     var body: some View {
         let veiligeSelectie = Binding<String?>(
@@ -21,18 +24,22 @@ struct ContentView: View {
         
         Group {
             if sizeClass == .compact {
-                // iPhone layout - 3 tabs
+                // iPhone layout
                 TabView(selection: $geselecteerdeOptie) {
-                    NavigationStack { DetailScherm(titel: "Chat", auth: auth) }
-                        .tabItem { Label("Chat", systemImage: "message.fill") }
-                        .tag("Chat" as String?)
-                    
                     NavigationStack { DetailScherm(titel: "Agenda", auth: auth) }
                         .tabItem { Label("Agenda", systemImage: "calendar") }
                         .tag("Agenda" as String?)
                     
+                    NavigationStack { DetailScherm(titel: "Chat", auth: auth) }
+                        .tabItem { Label("Chat", systemImage: "message.fill") }
+                        .tag("Chat" as String?)
+                    
+                    NavigationStack { DetailScherm(titel: "Bronnen", auth: auth) }
+                        .tabItem { Label("Bronnen", systemImage: "books.vertical.fill") }
+                        .tag("Bronnen" as String?)
+                    
                     NavigationStack { DetailScherm(titel: "Profiel", auth: auth) }
-                        .tabItem { Label("Meer", systemImage: "ellipsis.circle.fill") }
+                        .tabItem { Label("Profiel", systemImage: "person.crop.circle.fill") }
                         .tag("Profiel" as String?)
                 }
             } else {
@@ -43,12 +50,22 @@ struct ContentView: View {
                         // 1. SCROLLBARE LIJST
                         List(selection: veiligeSelectie.animation(.easeInOut(duration: 0.3))) {
                             Section {
-                                NavigationLink(value: "Chat") {
-                                    Label("Chat", systemImage: "message.fill")
-                                }
-                                
                                 NavigationLink(value: "Agenda") {
                                     Label("Agenda", systemImage: "calendar")
+                                }
+                                
+                                DisclosureGroup(isExpanded: $isChatOpen) {
+                                    NavigationLink(value: "Chat - Project A") { Label("Project A", systemImage: "message") }
+                                    NavigationLink(value: "Chat - Team") { Label("Team", systemImage: "message") }
+                                } label: {
+                                    NavigationLink(value: "Chat") { Label("Chat", systemImage: "message.fill") }
+                                }
+                                
+                                DisclosureGroup(isExpanded: $isBestandenOpen) {
+                                    NavigationLink(value: "Bronnen - Documenten") { Label("Documenten", systemImage: "doc") }
+                                    NavigationLink(value: "Bronnen - Afbeeldingen") { Label("Afbeeldingen", systemImage: "photo") }
+                                } label: {
+                                    NavigationLink(value: "Bronnen") { Label("Bronnen", systemImage: "books.vertical.fill") }
                                 }
                             }
                         }
