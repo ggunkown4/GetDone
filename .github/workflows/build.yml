@@ -14,29 +14,32 @@ jobs:
       
       - name: Build Swift Playgrounds Package
         run: |
-          # Swift Playgrounds apps need to be built differently
-          # They can't use standard swift build, so we just validate syntax
           echo "Validating Swift syntax..."
           
-          # Check for basic syntax errors in Swift files
           ERROR_COUNT=0
+          ERROR_OUTPUT=""
           for file in *.swift; do
             if [ -f "$file" ]; then
               echo "Checking $file..."
-              if ! xcrun swift-frontend -typecheck "$file" 2>/dev/null; then
+              if ! OUTPUT=$(xcrun swift-frontend -typecheck "$file" 2>&1); then
                 echo "❌ Syntax error in $file"
+                ERROR_OUTPUT="$ERROR_OUTPUT\n--- $file ---\n$OUTPUT\n"
                 ERROR_COUNT=$((ERROR_COUNT + 1))
               fi
             fi
           done
           
           if [ $ERROR_COUNT -gt 0 ]; then
-            echo "Build failed with $ERROR_COUNT error(s)" > build.log
+            echo -e "Build failed with $ERROR_COUNT error(s)\n$ERROR_OUTPUT" > build.log
             git config user.name "github-actions"
             git config user.email "github-actions@github.com"
+            git config pull.rebase true
+            git stash || true
+            git pull || true
+            git stash pop || true
             git add build.log
-            git commit -m "Upload build error log"
-            git push
+            git commit -m "Upload build error log" || true
+            git push || true
             exit 1
           fi
           
