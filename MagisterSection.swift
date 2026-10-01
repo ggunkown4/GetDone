@@ -109,7 +109,7 @@ struct MagisterSection: View {
         if let savedFirstName = MagisterAppStorageHelper.read(key: "magister_voornaam") { user.firstName = savedFirstName }
         if let savedLastName = MagisterAppStorageHelper.read(key: "magister_achternaam") { user.lastName = savedLastName }
         
-        if let savedToken = leesGeheim(key: "magister_access_token"), !savedToken.isEmpty {
+        if let savedToken = readSecret(key: "magister_access_token"), !savedToken.isEmpty {
             self.accessToken = savedToken
             self.isLoggedIn = true
             self.loadLiveSchedule()
@@ -204,7 +204,7 @@ struct MagisterSection: View {
                 user.lastName = ""
                 user.email = ""
                 accessToken = ""
-                laatstVerverstTekst = ""
+                lastRefreshedText = ""
                 
                 MagisterKeychainHelper.delete(key: "magister_access_token")
                 MagisterAppStorageHelper.save(user.schoolDomain, key: "magister_domein")

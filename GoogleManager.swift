@@ -53,7 +53,7 @@ struct ClassroomItem: Identifiable {
     let color: Color
     let text: String?
     
-    var datumFormatted: String {
+    var dateFormatted: String {
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .short
         return formatter.localizedString(for: date, relativeTo: Date())

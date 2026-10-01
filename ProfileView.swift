@@ -832,13 +832,13 @@ struct SettingsCard<Content: View>: View {
 
 // Generic MenuRowView with support for custom trailing content
 struct MenuRowView<TrailingContent: View>: View {
-    let icoon: String
+    let icon: String
     let color: Color
     let title: String
     let trailingContent: TrailingContent
     
     init(icon: String, color: Color, title: String, @ViewBuilder trailingContent: () -> TrailingContent) {
-        self.icoon = icoon
+        self.icon = icon
         self.color = color
         self.title = title
         self.trailingContent = trailingContent()
@@ -875,7 +875,7 @@ extension MenuRowView where TrailingContent == Text {
         self.icon = icon
         self.color = color
         self.title = title
-        self.trailingContent = Text(subtitle)
+        self.trailingContent = Text(subtext)
             .font(.caption)
             .foregroundColor(.gray)
     }
