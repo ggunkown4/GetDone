@@ -27,7 +27,7 @@ struct AdaptivePopoverModifier<PopoverContent: View>: ViewModifier {
     
     private func updatePosition(proxy: GeometryProxy) {
         let frame = proxy.frame(in: .global)
-        let screenHeight = UIScreen.main.bounds.height
+        let screenHeight = UIScreen.screens.first?.bounds.height ?? 800
         
         if frame.midY > (screenHeight * 0.55) {
             arrowEdge = .bottom

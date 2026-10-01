@@ -130,7 +130,7 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
             }
             return UIWindow(windowScene: windowScene)
         }
-        return UIWindow(frame: UIScreen.main.bounds)
+        return UIWindow()
     }
     
     func startGoogleLogin() {
