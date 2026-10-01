@@ -1,1 +1,38 @@
 Build failed with 12 error(s)
+
+--- AgendaView.swift ---
+<unknown>:0: error: unable to load standard library for target 'arm64-apple-macosx26.0'
+
+--- ChatView.swift ---
+<unknown>:0: error: unable to load standard library for target 'arm64-apple-macosx26.0'
+
+--- ContentView.swift ---
+<unknown>:0: error: unable to load standard library for target 'arm64-apple-macosx26.0'
+
+--- DetailScreen.swift ---
+<unknown>:0: error: unable to load standard library for target 'arm64-apple-macosx26.0'
+
+--- GoogleManager.swift ---
+<unknown>:0: error: unable to load standard library for target 'arm64-apple-macosx26.0'
+
+--- MagisterManager.swift ---
+<unknown>:0: error: unable to load standard library for target 'arm64-apple-macosx26.0'
+
+--- MagisterSection.swift ---
+<unknown>:0: error: unable to load standard library for target 'arm64-apple-macosx26.0'
+
+--- Models.swift ---
+<unknown>:0: error: unable to load standard library for target 'arm64-apple-macosx26.0'
+
+--- MyApp.swift ---
+<unknown>:0: error: unable to load standard library for target 'arm64-apple-macosx26.0'
+
+--- Package.swift ---
+<unknown>:0: error: unable to load standard library for target 'arm64-apple-macosx26.0'
+
+--- ProfileView.swift ---
+<unknown>:0: error: unable to load standard library for target 'arm64-apple-macosx26.0'
+
+--- ResourcesView.swift ---
+<unknown>:0: error: unable to load standard library for target 'arm64-apple-macosx26.0'
+
