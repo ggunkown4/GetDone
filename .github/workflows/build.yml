@@ -26,21 +26,10 @@ jobs:
           SDK=$(xcrun --sdk iphoneos --show-sdk-path)
           ARCH="arm64"
           
-          ERROR_COUNT=0
-          ERROR_OUTPUT=""
-          for file in *.swift; do
-            if [ -f "$file" ]; then
-              echo "Checking $file..."
-              if ! OUTPUT=$(xcrun swift-frontend -typecheck -sdk "$SDK" -target "${ARCH}-apple-ios26.0" -parse-as-library "$file" 2>&1); then
-                echo "❌ Syntax error in $file"
-                ERROR_OUTPUT="$ERROR_OUTPUT\n--- $file ---\n$OUTPUT\n"
-                ERROR_COUNT=$((ERROR_COUNT + 1))
-              fi
-            fi
-          done
-          
-          if [ $ERROR_COUNT -gt 0 ]; then
-            echo -e "Build failed with $ERROR_COUNT error(s)\n$ERROR_OUTPUT" > build.log
+          echo "Checking files as a single module..."
+          if ! OUTPUT=$(xcrun swift-frontend -typecheck -sdk "$SDK" -target "${ARCH}-apple-ios26.0" -parse-as-library *.swift 2>&1); then
+            echo "❌ Syntax error"
+            echo -e "Build failed\n\n$OUTPUT" > build.log
             git config user.name "github-actions"
             git config user.email "github-actions@github.com"
             git config pull.rebase true

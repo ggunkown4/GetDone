@@ -480,10 +480,10 @@ struct MagisterSection: View {
                 let lessonDesc = item["Omschrijving"] as? String ?? item["Inhoud"] as? String ?? "Lesson"
                 let room = item["Lokatie"] as? String ?? "Unknown"
                 let lessonHour = item["LesuurVan"] as? Int
-                let hourStr = lesuur != nil ? "\(lesuur!)e" : "-"
-                var tijdStr = ""
-                if let begin = item["Begin"] as? String { tijdStr = String(begin.prefix(16).suffix(5)) }
-                newLessons.append(MagisterLesson(period: uurStr, subject: lessonDesc, room: room, timeStr: tijdStr))
+                let hourStr = lessonHour != nil ? "\(lessonHour!)e" : "-"
+                var timeStr = ""
+                if let begin = item["Begin"] as? String { timeStr = String(begin.prefix(16).suffix(5)) }
+                newLessons.append(MagisterLesson(period: hourStr, subject: lessonDesc, room: room, timeStr: timeStr))
             }
             
             let timeFormatter = DateFormatter()

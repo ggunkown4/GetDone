@@ -482,7 +482,7 @@ struct AgendaWeekView: View {
     var selectedDate: Date
     var plans: [PlanningItem]
     
-    private var weekDayen: [Date] {
+    private var weekDays: [Date] {
         var calendar = Calendar.current
         calendar.firstWeekday = 2
         guard let weekInterval = calendar.dateInterval(of: .weekOfYear, for: selectedDate) else { return [] }
@@ -492,7 +492,7 @@ struct AgendaWeekView: View {
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(alignment: .top, spacing: 15) {
-                ForEach(weekDayen, id: \.self) { dayDate in
+                ForEach(weekDays, id: \.self) { dayDate in
                     let dayPlans = plans
                         .filter { Calendar.current.isDate($0.date, inSameDayAs: dayDate) }
                         .sorted(by: { $0.startTime < $1.startTime })
