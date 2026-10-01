@@ -118,7 +118,7 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
         if !accessToken.isEmpty {
             self.isLoggedIn = true
             DispatchQueue.main.async {
-                self.laadGoogleData()
+                self.loadGoogleData()
             }
         }
     }
@@ -208,7 +208,7 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
                     }
                     self.isLoggedIn = true
                     self.fetchUserProfile(token: token)
-                    self.laadGoogleData()
+                    self.loadGoogleData()
                 }
             } else {
                 DispatchQueue.main.async { self.errorMessage = "Error fetching tokens." }
@@ -248,7 +248,7 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
         }.resume()
     }
     
-    // Generieke netwerkfunctie met automatische token refresh
+    // Generic network function with automatic token refresh
     private func fetchAuthenticatedData(url: URL, isRetry: Bool = false, completion: @escaping (Data?, Error?) -> Void) {
         var request = URLRequest(url: url)
         request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")

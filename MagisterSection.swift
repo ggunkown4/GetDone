@@ -417,11 +417,11 @@ struct MagisterSection: View {
             scheduleError = "Access Token missing."
             showLoginPopup = true; return
         }
-        let domein = user.formattedDomain
+        let domain = user.formattedDomain
         isLoadingSchedule = true
         scheduleError = nil
         
-        guard let accountURL = URL(string: "https://\(domein)/api/account") else { return }
+        guard let accountURL = URL(string: "https://\(domain)/api/account") else { return }
         var request = URLRequest(url: accountURL)
         request.httpMethod = "GET"
         request.addValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
@@ -451,19 +451,19 @@ struct MagisterSection: View {
             
             if let personId = pId ?? json["Id"] as? Int ?? json["id"] as? Int {
                 DispatchQueue.main.async { self.user.personId = personId }
-                self.fetchAppointments(personId: personId, domein: domein)
+                self.fetchAppointments(personId: personId, domain: domain)
             } else {
                 DispatchQueue.main.async { self.scheduleError = "Person ID not found."; self.isLoadingSchedule = false }
             }
         }.resume()
     }
     
-    private func fetchAppointments(personId: Int, domein: String) {
+    private func fetchAppointments(personId: Int, domain: String) {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         let todayStr = formatter.string(from: Date())
         
-        guard let appointmentsURL = URL(string: "https://\(domein)/api/personen/\(personId)/afspraken?van=\(todayStr)&tot=\(todayStr)") else { return }
+        guard let appointmentsURL = URL(string: "https://\(domain)/api/personen/\(personId)/afspraken?van=\(todayStr)&tot=\(todayStr)") else { return }
         var request = URLRequest(url: appointmentsURL)
         request.httpMethod = "GET"
         request.addValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")

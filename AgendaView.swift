@@ -127,9 +127,9 @@ struct WeekSelectorPopover: View {
                     .foregroundColor(.white)
                     .frame(width: 70)
                     .onSubmit {
-                        if let getal = Int(typInvoer), (1...53).contains(getal) {
-                            gekozenWeek = getal
-                            veranderNaarWeek(getal)
+                        if let number = Int(typInvoer), (1...53).contains(number) {
+                            gekozenWeek = number
+                            changeToWeek(number)
                         }
                     }
             }
@@ -145,7 +145,7 @@ struct WeekSelectorPopover: View {
             .frame(height: 120)
             .onChange(of: gekozenWeek) { _, newValue in
                 typInvoer = "\(newValue)"
-                veranderNaarWeek(newValue)
+                changeToWeek(newValue)
             }
             
             Button {
@@ -173,16 +173,16 @@ struct WeekSelectorPopover: View {
     }
     
     private func adjustWeek(by offset: Int) {
-        var nieuweWeek = gekozenWeek + offset
-        if nieuweWeek < 1 { nieuweWeek = 53 }
-        else if nieuweWeek > 53 { nieuweWeek = 1 }
+        var newWeek = gekozenWeek + offset
+        if newWeek < 1 { newWeek = 53 }
+        else if newWeek > 53 { newWeek = 1 }
         
-        gekozenWeek = nieuweWeek
-        typInvoer = "\(nieuweWeek)"
-        veranderNaarWeek(nieuweWeek)
+        gekozenWeek = newWeek
+        typInvoer = "\(newWeek)"
+        changeToWeek(newWeek)
     }
     
-    private func veranderNaarWeek(_ week: Int) {
+    private func changeToWeek(_ week: Int) {
         var calendar = Calendar.current
         calendar.firstWeekday = 2
         let jaar = calendar.component(.yearForWeekOfYear, from: selectedDate)
@@ -209,13 +209,13 @@ struct AgendaView: View {
     @ObservedObject private var magisterManager = MagisterManager.shared
     
     var allePlanningen: [PlanningItem] {
-        let gecombineerd = plans + magisterManager.magisterPlans + magisterPlans
-        return ontdekEnOntdubbel(gecombineerd)
+        let combined = plans + magisterManager.magisterPlans + magisterPlans
+        return discoverAndDeduplicate(combined)
     }
     
     var body: some View {
         VStack(spacing: 0) {
-            // Status- & Laadbalk
+            // Status & Loading Bar
             if magisterManager.isLoading {
                 HStack(spacing: 8) {
                     ProgressView()
@@ -233,7 +233,7 @@ struct AgendaView: View {
             }
             
             if selectedView == 0 {
-                AgendaLijstView(
+                AgendaListView(
                     plans: $plans,
                     magisterPlans: magisterManager.magisterPlans.isEmpty ? magisterPlans : magisterManager.magisterPlans,
                     showNewPlanSheet: $showNewPlanSheet
@@ -263,51 +263,51 @@ struct AgendaView: View {
         }
     }
     
-    private func ontdekEnOntdubbel(_ items: [PlanningItem]) -> [PlanningItem] {
-        var uniekeItems: [PlanningItem] = []
-        var gezieneMagisterIDs = Set<Int>()
-        var gezieneUniekeKeys = Set<String>()
+    private func discoverAndDeduplicate(_ items: [PlanningItem]) -> [PlanningItem] {
+        var uniqueItems: [PlanningItem] = []
+        var seenMagisterIDs = Set<Int>()
+        var seenUniqueKeys = Set<String>()
         
         for item in items {
             if let mId = item.magisterID {
-                if !gezieneMagisterIDs.contains(mId) {
-                    gezieneMagisterIDs.insert(mId)
-                    uniekeItems.append(item)
+                if !seenMagisterIDs.contains(mId) {
+                    seenMagisterIDs.insert(mId)
+                    uniqueItems.append(item)
                 }
             } else {
                 let key = "\(item.title)_\(item.startTime.timeIntervalSince1970)"
-                if !gezieneUniekeKeys.contains(key) {
-                    gezieneUniekeKeys.insert(key)
-                    uniekeItems.append(item)
+                if !seenUniqueKeys.contains(key) {
+                    seenUniqueKeys.insert(key)
+                    uniqueItems.append(item)
                 }
             }
         }
-        return uniekeItems
+        return uniqueItems
     }
 }
 
 // MARK: - 1. List View
-struct AgendaLijstView: View {
+struct AgendaListView: View {
     @Binding var plans: [PlanningItem]
     var magisterPlans: [PlanningItem]
     @Binding var showNewPlanSheet: Bool
     
     var allSortedPlans: [PlanningItem] {
-        let gecombineerd = plans + magisterPlans
-        var uniekeItems: [PlanningItem] = []
-        var gezieneMagisterIDs = Set<Int>()
+        let combined = plans + magisterPlans
+        var uniqueItems: [PlanningItem] = []
+        var seenMagisterIDs = Set<Int>()
         
-        for item in gecombineerd {
+        for item in combined {
             if let mId = item.magisterID {
-                if !gezieneMagisterIDs.contains(mId) {
-                    gezieneMagisterIDs.insert(mId)
-                    uniekeItems.append(item)
+                if !seenMagisterIDs.contains(mId) {
+                    seenMagisterIDs.insert(mId)
+                    uniqueItems.append(item)
                 }
             } else {
-                uniekeItems.append(item)
+                uniqueItems.append(item)
             }
         }
-        return uniekeItems.sorted { $0.startTime < $1.startTime }
+        return uniqueItems.sorted { $0.startTime < $1.startTime }
     }
     
     var body: some View {

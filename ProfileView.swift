@@ -52,7 +52,7 @@ struct ProfileView: View {
     @State private var showLogoutConfirmation: Bool = false
     
     // MARK: - Persistent Settings (Are automatically saved)
-    @AppStorage("aiShow") private var aiShow: String = "Motiverend"
+    @AppStorage("aiShow") private var aiShow: String = "Motivating"
     @AppStorage("productivityType") private var productivityType: String = "MorningMotivation"
     @AppStorage("bufferTijdMinuten") private var bufferMinutes: Int = 15
     @AppStorage("isMagisterLoggedIn") private var isMagisterLoggedIn: Bool = false
@@ -91,7 +91,7 @@ struct ProfileView: View {
                                     icon: "calendar.badge.clock",
                                     color: .blue,
                                     title: "Agenda",
-                                    subtekst: "\(bufferMinutes) min buffer • \(productivityType)"
+                                    subtext: "\(bufferMinutes) min buffer • \(productivityType)"
                                 )
                             }
                             
@@ -102,7 +102,7 @@ struct ProfileView: View {
                                     icon: "bubble.left.and.bubble.right.fill",
                                     color: .purple,
                                     title: "Chat",
-                                    subtekst: "AI Tone: \(aiShow)"
+                                    subtext: "AI Tone: \(aiShow)"
                                 )
                             }
                             
@@ -113,7 +113,7 @@ struct ProfileView: View {
                                     icon: "folder.fill",
                                     color: .orange,
                                     title: "Resources",
-                                    subtekst: "Drive & Magister sync"
+                                    subtext: "Drive & Magister sync"
                                 )
                             }
                         }
@@ -186,12 +186,12 @@ struct ProfileView: View {
                     // MARK: - Section 3: Diagnostics
                     SettingsCard(title: "DIAGNOSTICS") {
                         VStack(spacing: 0) {
-                            NavigationLink(destination: DiagnostiekStatusView(auth: auth)) {
+                            NavigationLink(destination: DiagnosticsStatusView(auth: auth)) {
                                 MenuRowView(
                                     icon: "waveform.path.ecg",
                                     color: .green,
                                     title: "Status",
-                                    subtekst: "System & Connections"
+                                    subtext: "System & Connections"
                                 )
                             }
                             
@@ -202,7 +202,7 @@ struct ProfileView: View {
                                     icon: "doc.text.fill",
                                     color: .gray,
                                     title: "Log",
-                                    subtekst: "Console & Events"
+                                    subtext: "Console & Events"
                                 )
                             }
                         }
@@ -357,8 +357,8 @@ struct AgendaSettingsView: View {
             Section(header: Text("Smart Planning").foregroundColor(.orange)) {
                 Picker("Productivity Rhythm", selection: $productivityType) {
                     Text("MorningMotivation").tag("MorningMotivation")
-                    Text("Afternoon Person").tag("Middagmens")
-                    Text("Evening Person").tag("Avondmens")
+                    Text("Afternoon Person").tag("AfternoonPerson")
+                    Text("Evening Person").tag("EveningPerson")
                 }
                 
                 Toggle("Dynamic Replanning", isOn: $dynamicReplanning)
@@ -384,7 +384,7 @@ struct AgendaSettingsView: View {
 }
 
 struct ChatSettingsView: View {
-    @AppStorage("aiShow") private var aiShow: String = "Motiverend"
+    @AppStorage("aiShow") private var aiShow: String = "Motivating"
     @AppStorage("ochtendBriefing") private var morningBriefing: Bool = true
     @AppStorage("avondEvaluatie") private var eveningEvaluation: Bool = true
     @AppStorage("aiServerURL") private var aiServerURL: String = ""
@@ -394,8 +394,8 @@ struct ChatSettingsView: View {
         Form {
             Section(header: Text("AI Persona").foregroundColor(.orange)) {
                 Picker("AI Tone & Style", selection: $aiShow) {
-                    Text("Motivating").tag("Motiverend")
-                    Text("Direct & Business").tag("Direct & Zakelijk")
+                    Text("Motivating").tag("Motivating")
+                    Text("Direct & Business").tag("Direct & Business")
                     Text("Relaxed").tag("Relaxed")
                 }
             }
@@ -664,13 +664,13 @@ struct MagisterDetailView: View {
 
 // MARK: - DIAGNOSTICS SUBMENU SCREENS
 
-struct DiagnostiekStatusView: View {
+struct DiagnosticsStatusView: View {
     @ObservedObject var auth: WebGoogleAuthManager
     @AppStorage("isMagisterLoggedIn") private var isMagisterLoggedIn: Bool = false
     
     var body: some View {
         Form {
-            Section(header: Text("AI Assistent").foregroundColor(.orange)) {
+            Section(header: Text("AI Assistant").foregroundColor(.orange)) {
                 HStack(spacing: 8) {
                     Circle().fill(Color.green).frame(width: 10, height: 10)
                     Text("AI Assistant Active")
@@ -681,7 +681,7 @@ struct DiagnostiekStatusView: View {
             
             Section(header: Text("System Status").foregroundColor(.orange)) {
                 HStack {
-                    Text("App Versie")
+                    Text("App Version")
                     Spacer()
                     Text("1.0.0").foregroundColor(.gray)
                 }
@@ -871,7 +871,7 @@ struct MenuRowView<TrailingContent: View>: View {
 
 // Extension for easy display with only a subtitle
 extension MenuRowView where TrailingContent == Text {
-    init(icon: String, color: Color, title: String, subtekst: String) {
+    init(icon: String, color: Color, title: String, subtext: String) {
         self.icon = icon
         self.color = color
         self.title = title

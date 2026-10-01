@@ -29,8 +29,8 @@ class MagisterManager: ObservableObject {
             return
         }
         
-        let domein = MagisterAppStorageHelper.read(key: "magister_domein") ?? "roercollege"
-        let formattedDomain = domein.contains(".magister.net") ? domein : "\(domein).magister.net"
+        let domain = MagisterAppStorageHelper.read(key: "magister_domein") ?? "roercollege"
+        let formattedDomain = domain.contains(".magister.net") ? domain : "\(domain).magister.net"
         
         DispatchQueue.main.async {
             self.isLoading = true
@@ -83,11 +83,11 @@ class MagisterManager: ObservableObject {
                 return
             }
             
-            self.fetchAppointmentsAndSchedule(personId: pId, domein: formattedDomain, token: token, referenceDate: referenceDate)
+            self.fetchAppointmentsAndSchedule(personId: pId, domain: formattedDomain, token: token, referenceDate: referenceDate)
         }.resume()
     }
     
-    private func fetchAppointmentsAndSchedule(personId: Int, domein: String, token: String, referenceDate: Date) {
+    private func fetchAppointmentsAndSchedule(personId: Int, domain: String, token: String, referenceDate: Date) {
         var calendar = Calendar.current
         calendar.firstWeekday = 2
         
@@ -104,7 +104,7 @@ class MagisterManager: ObservableObject {
         let fromStr = formatter.string(from: startOfWeek)
         let toStr = formatter.string(from: endOfWeek)
         
-        guard let url = URL(string: "https://\(domein)/api/personen/\(personId)/afspraken?van=\(fromStr)&tot=\(toStr)") else {
+        guard let url = URL(string: "https://\(domain)/api/personen/\(personId)/afspraken?van=\(fromStr)&tot=\(toStr)") else {
             DispatchQueue.main.async { self.isLoading = false }
             return
         }

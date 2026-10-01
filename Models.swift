@@ -201,7 +201,7 @@ struct PlanningItem: Identifiable, Equatable {
 }
 
 // MARK: - Magister User Model
-struct MagisterGebruiker {
+struct MagisterUser {
     var firstName: String = ""
     var lastName: String = ""
     var email: String = ""
