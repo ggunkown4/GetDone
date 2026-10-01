@@ -27,7 +27,7 @@ struct DetailScreen: View {
     
     private var weergaveTitel: String {
         switch selectedView {
-        case 0: return "Lijst"
+        case 0: return "List"
         case 1: return "Day"
         case 2: return "Week"
         default: return "Weergave"
@@ -251,7 +251,7 @@ struct DetailScreen: View {
                                     .font(.subheadline.bold())
                                 
                                 if sizeClass == .regular {
-                                    Text("Vandaag")
+                                    Text("Today")
                                         .font(.subheadline.bold())
                                 }
                             }
@@ -261,7 +261,7 @@ struct DetailScreen: View {
                         // Weergave menu knop
                         Menu {
                             Picker("Weergave", selection: $selectedView) {
-                                Label("Lijst", systemImage: "list.bullet").tag(0)
+                                Label("List", systemImage: "list.bullet").tag(0)
                                 Label("Day", systemImage: "calendar.day.timeline.left").tag(1)
                                 Label("Week", systemImage: "calendar").tag(2)
                             }
