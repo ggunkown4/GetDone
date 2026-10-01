@@ -38,7 +38,7 @@ struct AdaptivePopoverModifier<PopoverContent: View>: ViewModifier {
 }
 
 extension View {
-    func slimmePopover<Content: View>(isPresented: Binding<Bool>, @ViewBuilder content: @escaping () -> Content) -> some View {
+    func smartPopover<Content: View>(isPresented: Binding<Bool>, @ViewBuilder content: @escaping () -> Content) -> some View {
         self.modifier(AdaptivePopoverModifier(isPresented: isPresented, popoverContent: content))
     }
 }
@@ -48,23 +48,23 @@ extension View {
 struct ProfileView: View {
     @ObservedObject var auth: WebGoogleAuthManager
     
-    // MARK: - State voor Bevestigingspopup
-    @State private var toonUitlogBevestiging: Bool = false
+    // MARK: - State for Confirmation Popup
+    @State private var showLogoutConfirmation: Bool = false
     
     // MARK: - Persistent Settings (Are automatically saved)
     @AppStorage("aiShow") private var aiShow: String = "Motiverend"
     @AppStorage("productivityType") private var productivityType: String = "MorningMotivation"
-    @AppStorage("bufferTijdMinuten") private var bufferTijdMinuten: Int = 15
+    @AppStorage("bufferTijdMinuten") private var bufferMinutes: Int = 15
     @AppStorage("isMagisterLoggedIn") private var isMagisterLoggedIn: Bool = false
     @AppStorage("magister_voornaam") private var magisterFirstName: String = ""
     @AppStorage("magister_achternaam") private var magisterLastName: String = ""
     
-    private var magisterVolledigeNaam: String {
+    private var magisterFullName: String {
         let naam = "\(magisterFirstName) \(magisterLastName)".trimmingCharacters(in: .whitespaces)
-        return naam.isEmpty ? "Magister Gebruiker" : naam
+        return naam.isEmpty ? "Magister User" : naam
     }
     
-    // MARK: - Helper voor Schone & Veilige Foto URL
+    // MARK: - Helper for Clean & Safe Photo URL
     private var userPhotoURL: URL? {
         guard auth.isLoggedIn, !auth.userPicture.isEmpty else { return nil }
         var urlString = auth.userPicture.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -80,55 +80,55 @@ struct ProfileView: View {
                 VStack(spacing: 24) {
                     
                     // MARK: - Header (Profile Photo & User Info / Login)
-                    profielHeader
+                    profileHeader
                     
                     // MARK: - Section 1: Settings & Preferences per Tab
-                    InstellingenKaart(titel: "INSTELLINGEN & VOORKEUREN") {
+                    SettingsCard(title: "SETTINGS & PREFERENCES") {
                         VStack(spacing: 0) {
                             
                             NavigationLink(destination: AgendaSettingsView()) {
-                                MenuRijView(
-                                    icoon: "calendar.badge.clock",
-                                    kleur: .blue,
-                                    titel: "Agenda",
-                                    subtekst: "\(bufferTijdMinuten) min buffer • \(productivityType)"
+                                MenuRowView(
+                                    icon: "calendar.badge.clock",
+                                    color: .blue,
+                                    title: "Agenda",
+                                    subtekst: "\(bufferMinutes) min buffer • \(productivityType)"
                                 )
                             }
                             
                             Divider().background(Color.white.opacity(0.1)).padding(.vertical, 8)
                             
                             NavigationLink(destination: ChatSettingsView()) {
-                                MenuRijView(
-                                    icoon: "bubble.left.and.bubble.right.fill",
-                                    kleur: .purple,
-                                    titel: "Chat",
-                                    subtekst: "AI Toon: \(aiShow)"
+                                MenuRowView(
+                                    icon: "bubble.left.and.bubble.right.fill",
+                                    color: .purple,
+                                    title: "Chat",
+                                    subtekst: "AI Tone: \(aiShow)"
                                 )
                             }
                             
                             Divider().background(Color.white.opacity(0.1)).padding(.vertical, 8)
                             
                             NavigationLink(destination: ResourcesSettingsView()) {
-                                MenuRijView(
-                                    icoon: "folder.fill",
-                                    kleur: .orange,
-                                    titel: "Resources",
+                                MenuRowView(
+                                    icon: "folder.fill",
+                                    color: .orange,
+                                    title: "Resources",
                                     subtekst: "Drive & Magister sync"
                                 )
                             }
                         }
                     }
                     
-                    // MARK: - Sectie 2: Gekoppelde Accounts
-                    InstellingenKaart(titel: "GEKOPPELDE ACCOUNTS") {
+                    // MARK: - Section 2: Linked Accounts
+                    SettingsCard(title: "LINKED ACCOUNTS") {
                         VStack(spacing: 0) {
                             
                             // Google Submenu Knop
                             NavigationLink(destination: GoogleAccountDetailView(auth: auth)) {
-                                MenuRijView(
-                                    icoon: "g.circle.fill",
-                                    kleur: .red,
-                                    titel: "Google"
+                                MenuRowView(
+                                    icon: "g.circle.fill",
+                                    color: .red,
+                                    title: "Google"
                                 ) {
                                     if auth.isLoggedIn {
                                         HStack(spacing: 6) {
@@ -167,13 +167,13 @@ struct ProfileView: View {
                             
                             // Magister Submenu Knop
                             NavigationLink(destination: MagisterDetailView()) {
-                                MenuRijView(
-                                    icoon: "graduationcap.fill",
-                                    kleur: .orange,
-                                    titel: "Magister"
+                                MenuRowView(
+                                    icon: "graduationcap.fill",
+                                    color: .orange,
+                                    title: "Magister"
                                 ) {
                                     if isMagisterLoggedIn {
-                                        Text(magisterVolledigeNaam)
+                                        Text(magisterFullName)
                                             .font(.caption)
                                             .foregroundColor(.gray)
                                             .lineLimit(1)
@@ -183,39 +183,39 @@ struct ProfileView: View {
                         }
                     }
                     
-                    // MARK: - Sectie 3: Diagnostiek
-                    InstellingenKaart(titel: "DIAGNOSTIEK") {
+                    // MARK: - Section 3: Diagnostics
+                    SettingsCard(title: "DIAGNOSTICS") {
                         VStack(spacing: 0) {
                             NavigationLink(destination: DiagnostiekStatusView(auth: auth)) {
-                                MenuRijView(
-                                    icoon: "waveform.path.ecg",
-                                    kleur: .green,
-                                    titel: "Status",
-                                    subtekst: "Systeem & Verbindingen"
+                                MenuRowView(
+                                    icon: "waveform.path.ecg",
+                                    color: .green,
+                                    title: "Status",
+                                    subtekst: "System & Connections"
                                 )
                             }
                             
                             Divider().background(Color.white.opacity(0.1)).padding(.vertical, 8)
                             
-                            NavigationLink(destination: DiagnostiekLogboekView()) {
-                                MenuRijView(
-                                    icoon: "doc.text.fill",
-                                    kleur: .gray,
-                                    titel: "Logboek",
-                                    subtekst: "Console & Gebeurtenissen"
+                            NavigationLink(destination: DiagnosticsLogView()) {
+                                MenuRowView(
+                                    icon: "doc.text.fill",
+                                    color: .gray,
+                                    title: "Log",
+                                    subtekst: "Console & Events"
                                 )
                             }
                         }
                     }
                     
-                    // MARK: - Sectie 4: Uitloggen Knop met Slimme Popover
+                    // MARK: - Section 4: Logout Button with Smart Popover
                     if auth.isLoggedIn {
                         Button(role: .destructive, action: {
-                            toonUitlogBevestiging = true
+                            showLogoutConfirmation = true
                         }) {
                             HStack(spacing: 8) {
                                 Image(systemName: "rectangle.portrait.and.arrow.right")
-                                Text("Uitloggen")
+                                Text("Log Out")
                             }
                             .font(.headline)
                             .foregroundColor(.red)
@@ -225,14 +225,14 @@ struct ProfileView: View {
                             .cornerRadius(16)
                         }
                         .padding(.top, 8)
-                        .slimmePopover(isPresented: $toonUitlogBevestiging) {
+                        .smartPopover(isPresented: $showLogoutConfirmation) {
                             VStack(spacing: 16) {
                                 VStack(spacing: 6) {
-                                    Text("Weet je het zeker?")
+                                    Text("Are you sure?")
                                         .font(.headline)
                                         .multilineTextAlignment(.center)
                                     
-                                    Text("Je moet opnieuw inloggen om toegang te krijgen tot je accounts en gegevens.")
+                                    Text("You will need to log in again to access your accounts and data.")
                                         .font(.caption)
                                         .foregroundColor(.gray)
                                         .multilineTextAlignment(.center)
@@ -241,10 +241,10 @@ struct ProfileView: View {
                                 
                                 VStack(spacing: 8) {
                                     Button(role: .destructive) {
-                                        toonUitlogBevestiging = false
+                                        showLogoutConfirmation = false
                                         auth.logout()
                                     } label: {
-                                        Text("Uitloggen")
+                                        Text("Log Out")
                                             .font(.headline)
                                             .frame(maxWidth: .infinity)
                                             .padding(.vertical, 10)
@@ -254,9 +254,9 @@ struct ProfileView: View {
                                     }
                                     
                                     Button(role: .cancel) {
-                                        toonUitlogBevestiging = false
+                                        showLogoutConfirmation = false
                                     } label: {
-                                        Text("Annuleer")
+                                        Text("Cancel")
                                             .font(.subheadline)
                                             .foregroundColor(.gray)
                                     }
@@ -277,7 +277,7 @@ struct ProfileView: View {
     }
     
     // MARK: - Header Subview
-    private var profielHeader: some View {
+    private var profileHeader: some View {
         VStack(spacing: 12) {
             ZStack {
                 if let photoUrl = userPhotoURL {
@@ -319,14 +319,14 @@ struct ProfileView: View {
                         .foregroundColor(.gray)
                 } else {
                     VStack(spacing: 12) {
-                        Text("Koppel je accounts om aan de slag te gaan")
+                        Text("Link your accounts to get started")
                             .font(.caption)
                             .foregroundColor(.gray)
                         
                         Button(action: { auth.startGoogleLogin() }) {
                             HStack(spacing: 8) {
                                 Image(systemName: "g.circle.fill")
-                                Text("Inloggen met Google")
+                                Text("Log in with Google")
                             }
                             .font(.subheadline.bold())
                             .foregroundColor(.white)
@@ -343,99 +343,99 @@ struct ProfileView: View {
     }
 }
 
-// MARK: - SUBMENU'S PER TABBLAD
+// MARK: - SUBMENUS PER TAB
 
 struct AgendaSettingsView: View {
     @AppStorage("productivityType") private var productivityType: String = "MorningMotivation"
-    @AppStorage("dynamischHerplannen") private var dynamischHerplannen: Bool = true
-    @AppStorage("maxStudieUur") private var maxStudieUur: Double = 4.0
-    @AppStorage("bufferTijdMinuten") private var bufferTijdMinuten: Int = 15
-    @AppStorage("inclusiefWeekend") private var inclusiefWeekend: Bool = false
+    @AppStorage("dynamischHerplannen") private var dynamicReplanning: Bool = true
+    @AppStorage("maxStudieUur") private var maxStudyHours: Double = 4.0
+    @AppStorage("bufferTijdMinuten") private var bufferMinutes: Int = 15
+    @AppStorage("inclusiefWeekend") private var includeWeekend: Bool = false
     
     var body: some View {
         Form {
-            Section(header: Text("Slim Inplannen").foregroundColor(.orange)) {
-                Picker("Productiviteitsritme", selection: $productivityType) {
+            Section(header: Text("Smart Planning").foregroundColor(.orange)) {
+                Picker("Productivity Rhythm", selection: $productivityType) {
                     Text("MorningMotivation").tag("MorningMotivation")
-                    Text("Middagmens").tag("Middagmens")
-                    Text("Avondmens").tag("Avondmens")
+                    Text("Afternoon Person").tag("Middagmens")
+                    Text("Evening Person").tag("Avondmens")
                 }
                 
-                Toggle("Dynamisch Herplannen", isOn: $dynamischHerplannen)
-                Toggle("Weekend gebruiken voor studie", isOn: $inclusiefWeekend)
+                Toggle("Dynamic Replanning", isOn: $dynamicReplanning)
+                Toggle("Use weekend for study", isOn: $includeWeekend)
             }
             
-            Section(header: Text("Tijden & Limieten").foregroundColor(.orange)) {
-                Stepper("Buffer tussen afspraken: \(bufferTijdMinuten) min", value: $bufferTijdMinuten, in: 0...60, step: 5)
+            Section(header: Text("Times & Limits").foregroundColor(.orange)) {
+                Stepper("Buffer between appointments: \(bufferMinutes) min", value: $bufferMinutes, in: 0...60, step: 5)
                 
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
-                        Text("Max. studietijd per dag")
+                        Text("Max. study time per day")
                         Spacer()
-                        Text("\(Int(maxStudieUur)) uur").bold().foregroundColor(.orange)
+                        Text("\(Int(maxStudyHours)) hrs").bold().foregroundColor(.orange)
                     }
-                    Slider(value: $maxStudieUur, in: 1...8, step: 0.5)
+                    Slider(value: $maxStudyHours, in: 1...8, step: 0.5)
                 }
                 .padding(.vertical, 4)
             }
         }
-        .navigationTitle("Agenda Instellingen")
+        .navigationTitle("Agenda Settings")
     }
 }
 
 struct ChatSettingsView: View {
     @AppStorage("aiShow") private var aiShow: String = "Motiverend"
-    @AppStorage("ochtendBriefing") private var ochtendBriefing: Bool = true
-    @AppStorage("avondEvaluatie") private var avondEvaluatie: Bool = true
+    @AppStorage("ochtendBriefing") private var morningBriefing: Bool = true
+    @AppStorage("avondEvaluatie") private var eveningEvaluation: Bool = true
     @AppStorage("aiServerURL") private var aiServerURL: String = ""
     @AppStorage("aiServerToken") private var aiServerToken: String = ""
     
     var body: some View {
         Form {
             Section(header: Text("AI Persona").foregroundColor(.orange)) {
-                Picker("AI Toon & Stijl", selection: $aiShow) {
-                    Text("Motiverend").tag("Motiverend")
-                    Text("Direct & Zakelijk").tag("Direct & Zakelijk")
+                Picker("AI Tone & Style", selection: $aiShow) {
+                    Text("Motivating").tag("Motiverend")
+                    Text("Direct & Business").tag("Direct & Zakelijk")
                     Text("Relaxed").tag("Relaxed")
                 }
             }
             
-            Section(header: Text("Lokale AI-server").foregroundColor(.orange)) {
-                TextField("https://jouw-server.nl", text: $aiServerURL)
+            Section(header: Text("Local AI Server").foregroundColor(.orange)) {
+                TextField("https://your-server.com", text: $aiServerURL)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
                     .keyboardType(.URL)
                 
-                SecureField("API-token", text: $aiServerToken)
+                SecureField("API token", text: $aiServerToken)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
             }
             
-            Section(header: Text("Automatische Berichten").foregroundColor(.orange)) {
-                Toggle("Ochtend Briefing Ontvangen", isOn: $ochtendBriefing)
-                Toggle("Avond Evaluatie Ontvangen", isOn: $avondEvaluatie)
+            Section(header: Text("Automatic Messages").foregroundColor(.orange)) {
+                Toggle("Receive Morning Briefing", isOn: $morningBriefing)
+                Toggle("Receive Evening Evaluation", isOn: $eveningEvaluation)
             }
             
-            Section(header: Text("Geheugen").foregroundColor(.orange)) {
-                Button("Wis AI-Chatgeschiedenis", role: .destructive) {
+            Section(header: Text("Memory").foregroundColor(.orange)) {
+                Button("Clear AI Chat History", role: .destructive) {
                 }
             }
         }
-        .navigationTitle("Chat Instellingen")
+        .navigationTitle("Chat Settings")
     }
 }
 
 struct ResourcesSettingsView: View {
     @AppStorage("syncDrive") private var syncDrive: Bool = true
     @AppStorage("syncClassroom") private var syncClassroom: Bool = true
-    @AppStorage("compacteBronweergave") private var compacteBronweergave: Bool = false
+    @AppStorage("compacteBronweergave") private var compactSourceView: Bool = false
     @AppStorage("resourcesOrder") private var resourcesOrderRaw: String = "drive,classroom"
     
     @State private var resourcesOrder: [String] = ["drive", "classroom"]
     
     var body: some View {
         Form {
-            Section(header: Text("Volgorde op Hoofdscherm").foregroundColor(.orange)) {
+            Section(header: Text("Order on Main Screen").foregroundColor(.orange)) {
                 ForEach(Array(resourcesOrder.enumerated()), id: \.element) { index, bronKey in
                     HStack(spacing: 12) {
                         Image(systemName: bronKey == "drive" ? "folder.fill" : "graduationcap.fill")
@@ -445,16 +445,16 @@ struct ResourcesSettingsView: View {
                         
                         Spacer()
                         
-                        // Pijltje Omhoog
-                        Button(action: { verplaatsOmhoog(index: index) }) {
+                        // Arrow Up
+                        Button(action: { moveUp(index: index) }) {
                             Image(systemName: "arrow.up")
                                 .foregroundColor(index == 0 ? .gray.opacity(0.3) : .orange)
                         }
                         .buttonStyle(.borderless)
                         .disabled(index == 0)
                         
-                        // Pijltje Omlaag
-                        Button(action: { verplaatsOmlaag(index: index) }) {
+                        // Arrow Down
+                        Button(action: { moveDown(index: index) }) {
                             Image(systemName: "arrow.down")
                                 .foregroundColor(index == resourcesOrder.count - 1 ? .gray.opacity(0.3) : .orange)
                         }
@@ -462,75 +462,75 @@ struct ResourcesSettingsView: View {
                         .disabled(index == resourcesOrder.count - 1)
                     }
                 }
-                .onMove(perform: verplaatsMetDrag)
+                .onMove(perform: moveWithDrag)
             }
             
-            Section(header: Text("Weergave & Sortering").foregroundColor(.orange)) {
-                Toggle("Compacte weergave", isOn: $compacteBronweergave)
+            Section(header: Text("Display & Sorting").foregroundColor(.orange)) {
+                Toggle("Compact view", isOn: $compactSourceView)
             }
             
-            Section(header: Text("Automatische Synchronisatie").foregroundColor(.orange)) {
+            Section(header: Text("Automatic Sync").foregroundColor(.orange)) {
                 Toggle("Google Drive Folders Sync", isOn: $syncDrive)
                 Toggle("Google Classroom Assignments Sync", isOn: $syncClassroom)
             }
             
-            Section(header: Text("Onderhoud").foregroundColor(.orange)) {
-                Button("Ververs Alle Resources Cache", role: .destructive) {
-                    // Cache opschonen logica
+            Section(header: Text("Maintenance").foregroundColor(.orange)) {
+                Button("Refresh All Resources Cache", role: .destructive) {
+                    // Cache clearing logic
                 }
             }
         }
-        .navigationTitle("Resources Instellingen")
+        .navigationTitle("Resources Settings")
         .toolbar {
             EditButton()
         }
         .onAppear {
-            laadVolgorde()
+            loadOrder()
         }
     }
     
-    private func laadVolgorde() {
-        let geladen = resourcesOrderRaw.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
-        if !geladen.isEmpty && geladen.contains("drive") && geladen.contains("classroom") {
-            resourcesOrder = geladen
+    private func loadOrder() {
+        let loaded = resourcesOrderRaw.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+        if !loaded.isEmpty && loaded.contains("drive") && loaded.contains("classroom") {
+            resourcesOrder = loaded
         } else {
             resourcesOrder = ["drive", "classroom"]
         }
     }
     
-    private func opslaan() {
+    private func save() {
         resourcesOrderRaw = resourcesOrder.joined(separator: ",")
     }
     
-    private func verplaatsOmhoog(index: Int) {
+    private func moveUp(index: Int) {
         guard index > 0 else { return }
         withAnimation {
             resourcesOrder.swapAt(index, index - 1)
-            opslaan()
+            save()
         }
     }
     
-    private func verplaatsOmlaag(index: Int) {
+    private func moveDown(index: Int) {
         guard index < resourcesOrder.count - 1 else { return }
         withAnimation {
             resourcesOrder.swapAt(index, index + 1)
-            opslaan()
+            save()
         }
     }
     
-    private func verplaatsMetDrag(from source: IndexSet, to destination: Int) {
+    private func moveWithDrag(from source: IndexSet, to destination: Int) {
         resourcesOrder.move(fromOffsets: source, toOffset: destination)
-        opslaan()
+        save()
     }
 }
 
 
-// MARK: - ACCOUNTS SUBMENU SCHERMEN
+// MARK: - ACCOUNTS SUBMENU SCREENS
 
 struct GoogleAccountDetailView: View {
     @ObservedObject var auth: WebGoogleAuthManager
     
-    @State private var toonUitlogBevestiging: Bool = false
+    @State private var showLogoutConfirmation: Bool = false
     
     private var userPhotoURL: URL? {
         guard auth.isLoggedIn, !auth.userPicture.isEmpty else { return nil }
@@ -574,7 +574,7 @@ struct GoogleAccountDetailView: View {
                         }
                         
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(auth.userName.isEmpty ? "Google Gebruiker" : auth.userName)
+                            Text(auth.userName.isEmpty ? "Google User" : auth.userName)
                                 .font(.headline)
                             Text(auth.userEmail)
                                 .font(.caption)
@@ -583,18 +583,18 @@ struct GoogleAccountDetailView: View {
                     }
                     
                     Button(role: .destructive, action: {
-                        toonUitlogBevestiging = true
+                        showLogoutConfirmation = true
                     }) {
-                        Text("Uitloggen bij Google")
+                        Text("Log Out of Google")
                     }
-                    .slimmePopover(isPresented: $toonUitlogBevestiging) {
+                    .smartPopover(isPresented: $showLogoutConfirmation) {
                         VStack(spacing: 16) {
                             VStack(spacing: 6) {
-                                Text("Weet je het zeker?")
+                                Text("Are you sure?")
                                     .font(.headline)
                                     .multilineTextAlignment(.center)
                                 
-                                Text("Je moet opnieuw inloggen om toegang te krijgen tot je Google-bestanden en -gegevens.")
+                                Text("You will need to log in again to access your Google files and data.")
                                     .font(.caption)
                                     .foregroundColor(.gray)
                                     .multilineTextAlignment(.center)
@@ -603,10 +603,10 @@ struct GoogleAccountDetailView: View {
                             
                             VStack(spacing: 8) {
                                 Button(role: .destructive) {
-                                    toonUitlogBevestiging = false
+                                    showLogoutConfirmation = false
                                     auth.logout()
                                 } label: {
-                                    Text("Uitloggen bij Google")
+                                    Text("Log Out of Google")
                                         .font(.headline)
                                         .frame(maxWidth: .infinity)
                                         .padding(.vertical, 10)
@@ -616,9 +616,9 @@ struct GoogleAccountDetailView: View {
                                 }
                                 
                                 Button(role: .cancel) {
-                                    toonUitlogBevestiging = false
+                                    showLogoutConfirmation = false
                                 } label: {
-                                    Text("Annuleer")
+                                    Text("Cancel")
                                         .font(.subheadline)
                                         .foregroundColor(.gray)
                                 }
@@ -630,14 +630,14 @@ struct GoogleAccountDetailView: View {
                         .presentationCompactAdaptation(.popover)
                     }
                 } else {
-                    Text("Log in om Drive-bestanden en Classroom-opdrachten op te halen.")
+                    Text("Log in to access Drive files and Classroom assignments.")
                         .font(.subheadline)
                         .foregroundColor(.gray)
                     
                     Button(action: { auth.startGoogleLogin() }) {
                         HStack {
                             Image(systemName: "g.circle.fill")
-                            Text("Inloggen met Google")
+                            Text("Log in with Google")
                         }
                         .font(.headline)
                         .foregroundColor(.orange)
@@ -662,7 +662,7 @@ struct MagisterDetailView: View {
     }
 }
 
-// MARK: - DIAGNOSTIEK SUBMENU SCHERMEN
+// MARK: - DIAGNOSTICS SUBMENU SCREENS
 
 struct DiagnostiekStatusView: View {
     @ObservedObject var auth: WebGoogleAuthManager
@@ -673,7 +673,7 @@ struct DiagnostiekStatusView: View {
             Section(header: Text("AI Assistent").foregroundColor(.orange)) {
                 HStack(spacing: 8) {
                     Circle().fill(Color.green).frame(width: 10, height: 10)
-                    Text("AI Assistent Actief")
+                    Text("AI Assistant Active")
                         .font(.headline)
                         .foregroundColor(.green)
                 }
@@ -688,21 +688,21 @@ struct DiagnostiekStatusView: View {
                 HStack {
                     Text("AI Engine")
                     Spacer()
-                    Text("Actief").foregroundColor(.green).bold()
+                    Text("Active").foregroundColor(.green).bold()
                 }
             }
             
-            Section(header: Text("Koppelingen").foregroundColor(.orange)) {
+            Section(header: Text("Connections").foregroundColor(.orange)) {
                 HStack {
                     Text("Google API")
                     Spacer()
-                    Text(auth.isLoggedIn ? "Verbonden" : "Niet verbonden")
+                    Text(auth.isLoggedIn ? "Connected" : "Not connected")
                         .foregroundColor(auth.isLoggedIn ? .green : .red)
                 }
                 HStack {
                     Text("Magister API")
                     Spacer()
-                    Text(isMagisterLoggedIn ? "Verbonden" : "Niet verbonden")
+                    Text(isMagisterLoggedIn ? "Connected" : "Not connected")
                         .foregroundColor(isMagisterLoggedIn ? .green : .red)
                 }
             }
@@ -711,30 +711,30 @@ struct DiagnostiekStatusView: View {
     }
 }
 
-struct LogGebeurtenis: Identifiable {
+struct LogEvent: Identifiable {
     let id = UUID()
-    let titel: String
-    let beschrijving: String
+    let title: String
+    let description: String
 }
 
-struct DiagnostiekLogboekView: View {
+struct DiagnosticsLogView: View {
     @State private var consoleLogs: [String] = [
         "[SYSTEM] App started v1.0.0",
-        "[AUTH] WebGoogleAuthManager geïnitialiseerd",
-        "[NETWORK] Verbinding gecontroleerd -> OK",
+        "[AUTH] WebGoogleAuthManager initialized",
+        "[NETWORK] Connection verified -> OK",
         "[AI Engine] Assistent status: Actief",
-        "[CACHE] Gegevenscache geladen"
+        "[CACHE] Data cache loaded"
     ]
     
-    @State private var recenteGebeurtenissen: [LogGebeurtenis] = [
-        LogGebeurtenis(titel: "App started", beschrijving: "System successfully initialized."),
-        LogGebeurtenis(titel: "Google Auth Check", beschrijving: "Session checked.")
+    @State private var recentEvents: [LogEvent] = [
+        LogEvent(title: "App started", description: "System successfully initialized."),
+        LogEvent(title: "Google Auth Check", description: "Session checked.")
     ]
     
-    private var logboekExporteerTekst: String {
+    private var logExportText: String {
         let logs = consoleLogs.isEmpty ? "None console logs." : consoleLogs.joined(separator: "\n")
-        let gebeurtenissen = recenteGebeurtenissen.isEmpty ? "No recent events." : recenteGebeurtenissen.map { "\($0.titel): \($0.beschrijving)" }.joined(separator: "\n")
-        return "=== CONSOLE LOGS ===\n\(logs)\n\n=== RECENTE GEBEURTENISSEN ===\n\(gebeurtenissen)"
+        let events = recentEvents.isEmpty ? "No recent events." : recentEvents.map { "\($0.title): \($0.description)" }.joined(separator: "\n")
+        return "=== CONSOLE LOGS ===\n\(logs)\n\n=== RECENT EVENTS ===\n\(events)"
     }
     
     var body: some View {
@@ -743,7 +743,7 @@ struct DiagnostiekLogboekView: View {
                 ScrollView(.horizontal, showsIndicators: true) {
                     VStack(alignment: .leading, spacing: 4) {
                         if consoleLogs.isEmpty {
-                            Text("Console log is leeg.")
+                            Text("Console log is empty.")
                                 .font(.system(.caption, design: .monospaced))
                                 .foregroundColor(.gray)
                         } else {
@@ -762,35 +762,35 @@ struct DiagnostiekLogboekView: View {
             }
             
             Section(header: Text("Acties").foregroundColor(.orange)) {
-                if !consoleLogs.isEmpty || !recenteGebeurtenissen.isEmpty {
-                    ShareLink(item: logboekExporteerTekst) {
-                        Label("Exporteer Logboek", systemImage: "square.and.arrow.up")
+                if !consoleLogs.isEmpty || !recentEvents.isEmpty {
+                    ShareLink(item: logExportText) {
+                        Label("Export Log", systemImage: "square.and.arrow.up")
                             .foregroundColor(.orange)
                     }
                 } else {
-                    Text("None logboek beschikbaar om te exporteren")
+                    Text("No log available to export")
                         .font(.subheadline)
                         .foregroundColor(.gray)
                 }
                 
-                Button(role: .destructive, action: wisLogboek) {
-                    Label("Wis Logboek", systemImage: "trash")
+                Button(role: .destructive, action: clearLog) {
+                    Label("Clear Log", systemImage: "trash")
                         .foregroundColor(.red)
                 }
-                .disabled(consoleLogs.isEmpty && recenteGebeurtenissen.isEmpty)
+                .disabled(consoleLogs.isEmpty && recentEvents.isEmpty)
             }
             
             Section(header: Text("Recent Events").foregroundColor(.orange)) {
-                if recenteGebeurtenissen.isEmpty {
+                if recentEvents.isEmpty {
                     Text("No recent events.")
                         .font(.caption)
                         .foregroundColor(.gray)
                 } else {
-                    ForEach(recenteGebeurtenissen) { gebeurtenis in
+                    ForEach(recentEvents) { event in
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(gebeurtenis.titel)
+                            Text(event.title)
                                 .font(.subheadline.bold())
-                            Text(gebeurtenis.beschrijving)
+                            Text(event.description)
                                 .font(.caption)
                                 .foregroundColor(.gray)
                         }
@@ -798,23 +798,23 @@ struct DiagnostiekLogboekView: View {
                 }
             }
         }
-        .navigationTitle("Logboek")
+        .navigationTitle("Log")
     }
     
-    private func wisLogboek() {
+    private func clearLog() {
         consoleLogs.removeAll()
-        recenteGebeurtenissen.removeAll()
+        recentEvents.removeAll()
     }
 }
 
 // MARK: - HELPER VIEWS
-struct InstellingenKaart<Content: View>: View {
-    let titel: String
+struct SettingsCard<Content: View>: View {
+    let title: String
     @ViewBuilder let content: Content
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(titel)
+            Text(title)
                 .font(.caption)
                 .bold()
                 .foregroundColor(.gray)
@@ -830,30 +830,30 @@ struct InstellingenKaart<Content: View>: View {
     }
 }
 
-// Generieke MenuRijView met ondersteuning voor op maat gemaakte content aan de rechterkant
-struct MenuRijView<TrailingContent: View>: View {
+// Generic MenuRowView with support for custom trailing content
+struct MenuRowView<TrailingContent: View>: View {
     let icoon: String
-    let kleur: Color
-    let titel: String
+    let color: Color
+    let title: String
     let trailingContent: TrailingContent
     
-    init(icoon: String, kleur: Color, titel: String, @ViewBuilder trailingContent: () -> TrailingContent) {
+    init(icon: String, color: Color, title: String, @ViewBuilder trailingContent: () -> TrailingContent) {
         self.icoon = icoon
-        self.kleur = kleur
-        self.titel = titel
+        self.color = color
+        self.title = title
         self.trailingContent = trailingContent()
     }
     
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: icoon)
+            Image(systemName: icon)
                 .foregroundColor(.white)
                 .frame(width: 32, height: 32)
-                .background(kleur)
+                .background(color)
                 .cornerRadius(8)
             
             VStack(alignment: .leading, spacing: 2) {
-                Text(titel)
+                Text(title)
                     .font(.subheadline.weight(.medium))
                     .foregroundColor(.white)
             }
@@ -869,13 +869,13 @@ struct MenuRijView<TrailingContent: View>: View {
     }
 }
 
-// Extensie voor gemakkelijke weergave met alleen een subtekst
-extension MenuRijView where TrailingContent == Text {
-    init(icoon: String, kleur: Color, titel: String, subtekst: String) {
-        self.icoon = icoon
-        self.kleur = kleur
-        self.titel = titel
-        self.trailingContent = Text(subtekst)
+// Extension for easy display with only a subtitle
+extension MenuRowView where TrailingContent == Text {
+    init(icon: String, color: Color, title: String, subtekst: String) {
+        self.icon = icon
+        self.color = color
+        self.title = title
+        self.trailingContent = Text(subtitle)
             .font(.caption)
             .foregroundColor(.gray)
     }

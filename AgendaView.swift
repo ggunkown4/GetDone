@@ -6,36 +6,36 @@ struct AddPlanSheet: View {
     @Binding var plans: [PlanningItem]
     var selectedDate: Date
     
-    @State private var titel: String = ""
-    @State private var datum: Date = Date()
-    @State private var beginTijd: Date = Date()
-    @State private var eindTijd: Date = Date().addingTimeInterval(3600)
-    @State private var gekozenKleur: Color = .blue
+    @State private var planTitle: String = ""
+    @State private var selectedPlanDate: Date = Date()
+    @State private var startTime: Date = Date()
+    @State private var endTime: Date = Date().addingTimeInterval(3600)
+    @State private var selectedColor: Color = .blue
     
-    let beschikbareKleuren: [Color] = [.blue, .purple, .orange, .green, .red, .pink, .yellow]
+    let availableColors: [Color] = [.blue, .purple, .orange, .green, .red, .pink, .yellow]
     
     var body: some View {
         NavigationStack {
             Form {
                 Section("Plan Details") {
-                    TextField("New plan", text: $titel)
-                    DatePicker("Date", selection: $datum, displayedComponents: .date)
-                    DatePicker("Start time", selection: $beginTijd, displayedComponents: .hourAndMinute)
-                    DatePicker("End time", selection: $eindTijd, displayedComponents: .hourAndMinute)
+                    TextField("New plan", text: $planTitle)
+                    DatePicker("Date", selection: $selectedPlanDate, displayedComponents: .date)
+                    DatePicker("Start time", selection: $startTime, displayedComponents: .hourAndMinute)
+                    DatePicker("End time", selection: $endTime, displayedComponents: .hourAndMinute)
                 }
                 
                 Section("Color Category") {
                     HStack(spacing: 12) {
-                        ForEach(beschikbareKleuren, id: \.self) { kleur in
+                        ForEach(availableColors, id: \.self) { color in
                             Circle()
-                                .fill(kleur)
+                                .fill(color)
                                 .frame(width: 32, height: 32)
                                 .overlay(
                                     Circle()
-                                        .stroke(Color.white, lineWidth: gekozenKleur == kleur ? 3 : 0)
+                                        .stroke(Color.white, lineWidth: selectedColor == color ? 3 : 0)
                                 )
                                 .onTapGesture {
-                                    gekozenKleur = kleur
+                                    selectedColor = color
                                 }
                         }
                     }
@@ -51,11 +51,11 @@ struct AddPlanSheet: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         let nieuwPlan = PlanningItem(
-                            titel: titel.isEmpty ? "New plan" : titel,
-                            datum: datum,
-                            beginTijd: beginTijd,
-                            eindTijd: eindTijd,
-                            kleur: gekozenKleur,
+                            title: planTitle.isEmpty ? "New plan" : planTitle,
+                            date: selectedPlanDate,
+                            startTime: startTime,
+                            endTime: endTime,
+                            color: selectedColor,
                             isMagister: false
                         )
                         plans.append(nieuwPlan)
@@ -66,7 +66,7 @@ struct AddPlanSheet: View {
             }
         }
         .onAppear {
-            datum = selectedDate
+            selectedPlanDate = selectedDate
         }
         .preferredColorScheme(.dark)
     }
@@ -84,7 +84,7 @@ struct WeekSelectorPopover: View {
         VStack(spacing: 16) {
             HStack {
                 Button {
-                    pasWeekAan(met: -1)
+                    adjustWeek(by: -1)
                 } label: {
                     Image(systemName: "chevron.left")
                         .font(.subheadline.bold())
@@ -102,7 +102,7 @@ struct WeekSelectorPopover: View {
                 Spacer()
                 
                 Button {
-                    pasWeekAan(met: 1)
+                    adjustWeek(by: 1)
                 } label: {
                     Image(systemName: "chevron.right")
                         .font(.subheadline.bold())
@@ -172,7 +172,7 @@ struct WeekSelectorPopover: View {
         }
     }
     
-    private func pasWeekAan(met offset: Int) {
+    private func adjustWeek(by offset: Int) {
         var nieuweWeek = gekozenWeek + offset
         if nieuweWeek < 1 { nieuweWeek = 53 }
         else if nieuweWeek > 53 { nieuweWeek = 1 }
@@ -192,8 +192,8 @@ struct WeekSelectorPopover: View {
         components.weekOfYear = week
         components.weekday = calendar.component(.weekday, from: selectedDate)
         
-        if let nieuweDatum = calendar.date(from: components) {
-            selectedDate = nieuweDatum
+        if let newDate = calendar.date(from: components) {
+            selectedDate = newDate
         }
     }
 }
@@ -225,8 +225,8 @@ struct AgendaView: View {
                         .foregroundColor(.gray)
                 }
                 .padding(.vertical, 4)
-            } else if let fout = magisterManager.foutmelding, !fout.isEmpty {
-                Text(fout)
+            } else if let error = magisterManager.errorMessage, !error.isEmpty {
+                Text(error)
                     .font(.caption)
                     .foregroundColor(.orange)
                     .padding(.vertical, 4)
@@ -256,10 +256,10 @@ struct AgendaView: View {
             Spacer()
         }
         .onAppear {
-            magisterManager.loadHomeworkAndSchedule(voor: selectedDate)
+            magisterManager.loadHomeworkAndSchedule(for: selectedDate)
         }
-        .onChange(of: selectedDate) { _, nieuweDatum in
-            magisterManager.loadHomeworkAndSchedule(voor: nieuweDatum)
+        .onChange(of: selectedDate) { _, newDate in
+            magisterManager.loadHomeworkAndSchedule(for: newDate)
         }
     }
     
@@ -275,7 +275,7 @@ struct AgendaView: View {
                     uniekeItems.append(item)
                 }
             } else {
-                let key = "\(item.titel)_\(item.beginTijd.timeIntervalSince1970)"
+                let key = "\(item.title)_\(item.startTime.timeIntervalSince1970)"
                 if !gezieneUniekeKeys.contains(key) {
                     gezieneUniekeKeys.insert(key)
                     uniekeItems.append(item)
@@ -292,7 +292,7 @@ struct AgendaLijstView: View {
     var magisterPlans: [PlanningItem]
     @Binding var showNewPlanSheet: Bool
     
-    var alleGesorteerdePlanningen: [PlanningItem] {
+    var allSortedPlans: [PlanningItem] {
         let gecombineerd = plans + magisterPlans
         var uniekeItems: [PlanningItem] = []
         var gezieneMagisterIDs = Set<Int>()
@@ -307,11 +307,11 @@ struct AgendaLijstView: View {
                 uniekeItems.append(item)
             }
         }
-        return uniekeItems.sorted { $0.beginTijd < $1.beginTijd }
+        return uniekeItems.sorted { $0.startTime < $1.startTime }
     }
     
     var body: some View {
-        if alleGesorteerdePlanningen.isEmpty {
+        if allSortedPlans.isEmpty {
             VStack(spacing: 16) {
                 Spacer()
                 Image(systemName: "calendar.badge.plus")
@@ -341,17 +341,17 @@ struct AgendaLijstView: View {
         } else {
             ScrollView {
                 VStack(spacing: 12) {
-                    ForEach(alleGesorteerdePlanningen) { item in
+                    ForEach(allSortedPlans) { item in
                         let isMagisterItem = item.isMagister || item.magisterID != nil
                         
                         HStack(spacing: 15) {
                             RoundedRectangle(cornerRadius: 4)
-                                .fill(item.kleur)
+                                .fill(item.color)
                                 .frame(width: 5)
                             
                             VStack(alignment: .leading, spacing: 4) {
                                 HStack {
-                                    Text(item.titel)
+                                    Text(item.title)
                                         .font(.headline)
                                         .foregroundColor(.white)
                                     
@@ -362,7 +362,7 @@ struct AgendaLijstView: View {
                                     }
                                 }
                                 
-                                Text("\(item.dagKort) \(item.datum.formatted(.dateTime.day().month())) • \(item.tijdFormat)")
+                                Text("\(item.shortDay) \(item.date.formatted(.dateTime.day().month())) • \(item.timeFormat)")
                                     .font(.subheadline)
                                     .foregroundColor(.gray)
                             }
@@ -395,25 +395,25 @@ struct AgendaDayView: View {
     var selectedDate: Date
     var plans: [PlanningItem]
     
-    let uurHoogte: CGFloat = 60
-    let startUur = 0
-    let eindUur = 23
+    let hourHeight: CGFloat = 60
+    let startHour = 0
+    let endHour = 23
     
-    private var dagPlanningen: [PlanningItem] {
-        plans.filter { Calendar.current.isDate($0.datum, inSameDayAs: selectedDate) }
+    private var dayPlans: [PlanningItem] {
+        plans.filter { Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }
     }
     
-    private var totaleHoogte: CGFloat {
-        CGFloat(eindUur - startUur + 1) * uurHoogte
+    private var totalHeight: CGFloat {
+        CGFloat(endHour - startHour + 1) * hourHeight
     }
     
     var body: some View {
         ScrollView {
             ZStack(alignment: .topLeading) {
                 VStack(alignment: .leading, spacing: 0) {
-                    ForEach(startUur...eindUur, id: \.self) { uur in
+                    ForEach(startHour...endHour, id: \.self) { hour in
                         HStack(alignment: .top) {
-                            Text(String(format: "%02d:00", uur))
+                            Text(String(format: "%02d:00", hour))
                                 .font(.caption)
                                 .foregroundColor(.gray)
                                 .frame(width: 45, alignment: .leading)
@@ -421,59 +421,59 @@ struct AgendaDayView: View {
                             Divider()
                                 .background(Color.gray.opacity(0.3))
                         }
-                        .frame(height: uurHoogte, alignment: .top)
+                        .frame(height: hourHeight, alignment: .top)
                     }
                 }
                 
                 GeometryReader { geo in
-                    ForEach(dagPlanningen) { item in
-                        let yPositie = berekenYPositie(voor: item.beginTijd)
-                        let blokHoogte = berekenHoogte(begin: item.beginTijd, eind: item.eindTijd)
+                    ForEach(dayPlans) { item in
+                        let yPosition = calculateYPosition(for: item.startTime)
+                        let blockHeight = calculateHeight(start: item.startTime, end: item.endTime)
                         
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(item.titel)
+                            Text(item.title)
                                 .font(.caption.bold())
                                 .lineLimit(1)
                             
-                            Text(item.tijdFormat)
+                            Text(item.timeFormat)
                                 .font(.caption2)
                                 .lineLimit(1)
                         }
                         .padding(6)
-                        .frame(width: max(0, geo.size.width - 60), height: blokHoogte, alignment: .topLeading)
-                        .background(item.kleur.opacity(0.25))
-                        .foregroundColor(item.kleur)
+                        .frame(width: max(0, geo.size.width - 60), height: blockHeight, alignment: .topLeading)
+                        .background(item.color.opacity(0.25))
+                        .foregroundColor(item.color)
                         .cornerRadius(6)
                         .overlay(
                             RoundedRectangle(cornerRadius: 6)
-                                .stroke(item.kleur, lineWidth: 1)
+                                .stroke(item.color, lineWidth: 1)
                         )
-                        .offset(x: 50, y: yPositie)
+                        .offset(x: 50, y: yPosition)
                     }
                 }
             }
-            .frame(height: totaleHoogte)
+            .frame(height: totalHeight)
             .padding(.horizontal, 10)
             .padding(.bottom, 30)
         }
     }
     
-    private func berekenYPositie(voor tijd: Date) -> CGFloat {
-        let kalender = Calendar.current
-        let uur = kalender.component(.hour, from: tijd)
-        let minuut = kalender.component(.minute, from: tijd)
+    private func calculateYPosition(for time: Date) -> CGFloat {
+        let calendar = Calendar.current
+        let hour = calendar.component(.hour, from: time)
+        let minute = calendar.component(.minute, from: time)
         
-        let urenVanafStart = CGFloat(uur - startUur)
-        let minutenFractie = CGFloat(minuut) / 60.0
+        let hoursFromStart = CGFloat(hour - startHour)
+        let minutesFraction = CGFloat(minute) / 60.0
         
-        return (urenVanafStart + minutenFractie) * uurHoogte
+        return (hoursFromStart + minutesFraction) * hourHeight
     }
     
-    private func berekenHoogte(begin: Date, eind: Date) -> CGFloat {
-        let duurInSeconden = eind.timeIntervalSince(begin)
-        let duurInUren = CGFloat(duurInSeconden) / 3600.0
+    private func calculateHeight(start: Date, end: Date) -> CGFloat {
+        let durationInSeconds = end.timeIntervalSince(start)
+        let durationInHours = CGFloat(durationInSeconds) / 3600.0
         
-        return max(duurInUren * uurHoogte, 30)
+        return max(durationInHours * hourHeight, 30)
     }
 }
 
@@ -492,41 +492,41 @@ struct AgendaWeekView: View {
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(alignment: .top, spacing: 15) {
-                ForEach(weekDayen, id: \.self) { dagDatum in
-                    let dagPlanningen = plans
-                        .filter { Calendar.current.isDate($0.datum, inSameDayAs: dagDatum) }
-                        .sorted(by: { $0.beginTijd < $1.beginTijd })
+                ForEach(weekDayen, id: \.self) { dayDate in
+                    let dayPlans = plans
+                        .filter { Calendar.current.isDate($0.date, inSameDayAs: dayDate) }
+                        .sorted(by: { $0.startTime < $1.startTime })
                     
                     VStack {
                         VStack(spacing: 2) {
-                            Text(dagDatum.formatted(.dateTime.weekday(.abbreviated)))
+                            Text(dayDate.formatted(.dateTime.weekday(.abbreviated)))
                                 .font(.headline)
                                 .foregroundColor(.white)
-                            Text(dagDatum.formatted(.dateTime.day()))
+                            Text(dayDate.formatted(.dateTime.day()))
                                 .font(.caption.bold())
                                 .foregroundColor(.gray)
                         }
                         .padding(.bottom, 10)
                         
-                        if dagPlanningen.isEmpty {
+                        if dayPlans.isEmpty {
                             Text("No plans")
                                 .font(.caption)
                                 .foregroundColor(.gray.opacity(0.6))
                                 .frame(height: 100)
                         } else {
-                            ForEach(dagPlanningen) { item in
+                            ForEach(dayPlans) { item in
                                 VStack(alignment: .leading) {
-                                    Text(item.titel)
+                                    Text(item.title)
                                         .font(.caption.bold())
                                         .foregroundColor(.white)
                                         .lineLimit(2)
-                                    Text(item.tijdFormat)
+                                    Text(item.timeFormat)
                                         .font(.system(size: 10))
                                         .foregroundColor(.white.opacity(0.8))
                                 }
                                 .padding(8)
                                 .frame(width: 110, alignment: .leading)
-                                .background(item.kleur.opacity(0.5))
+                                .background(item.color.opacity(0.5))
                                 .cornerRadius(8)
                             }
                         }
@@ -550,11 +550,11 @@ struct AgendaWeekView: View {
         selectedView: .constant(0),
         plans: .constant([
             PlanningItem(
-                titel: "Math Homework",
-                datum: Date(),
-                beginTijd: Date(),
-                eindTijd: Date().addingTimeInterval(3600),
-                kleur: .blue
+                title: "Math Homework",
+                date: Date(),
+                startTime: Date(),
+                endTime: Date().addingTimeInterval(3600),
+                color: .blue
             )
         ]),
         magisterPlans: [],

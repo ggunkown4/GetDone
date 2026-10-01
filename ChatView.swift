@@ -50,7 +50,7 @@ final class AIManager: ObservableObject {
     @Published private(set) var debugLog: [String] = []
     
     var debugLogText: String {
-        debugLog.isEmpty ? "Nog geen AI-logboek beschikbaar." : debugLog.joined(separator: "\n")
+        debugLog.isEmpty ? "No AI log available yet." : debugLog.joined(separator: "\n")
     }
     
     func clearDebugLog() {
@@ -58,7 +58,7 @@ final class AIManager: ObservableObject {
     }
     
     func record(_ message: String) {
-        addLog("[\(tijd())] \(message)")
+        addLog("[\(time())] \(message)")
     }
     
     func cancel() {
@@ -66,7 +66,7 @@ final class AIManager: ObservableObject {
         activeTask = nil
         isLoading = false
         statusText = "Stopped by user"
-        addLog("[\(tijd())] Aanvraag gestopt door user")
+        addLog("[\(time())] Request cancelled by user")
     }
     
     private var activeTask: Task<Void, Never>?
@@ -74,7 +74,7 @@ final class AIManager: ObservableObject {
     func sendStreaming(message: String, history: [ChatMessage], onText: @escaping (String) -> Void, onSources: @escaping ([AISource]) -> Void, completion: @escaping (Result<Void, Error>) -> Void) {
         guard let baseURL = normalizedServerURL(), let url = URL(string: baseURL + "/chat/stream") else {
             let error = AIManagerError.serverNotConfigured
-            addLog("[\(tijd())] FOUT: AI-serveradres ontbreekt of is ongeldig.")
+            addLog("[\(time())] ERROR: AI server address missing or invalid.")
             completion(.failure(error))
             return
         }
@@ -96,9 +96,9 @@ final class AIManager: ObservableObject {
         }
         
         statusText = "Connecting to AI..."
-        approachSummary = "Ik maak verbinding met de lokale GetDone-AI."
+        approachSummary = "Connecting to the local GetDone AI..."
         isLoading = true
-        addLog("[\(tijd())] Streaming gestart naar \(baseURL)/chat/stream")
+        addLog("[\(time())] Streaming started to \(baseURL)/chat/stream")
         
         activeTask = Task {
             do {
@@ -107,7 +107,7 @@ final class AIManager: ObservableObject {
                     throw AIManagerError.invalidResponse
                 }
                 
-                statusText = "AI maakt antwoord..."
+                statusText = "AI is responding..."
                 for try await line in bytes.lines {
                     try Task.checkCancellation()
                     guard let data = line.data(using: .utf8),
@@ -132,8 +132,8 @@ final class AIManager: ObservableObject {
                     if let choices = json["choices"] as? [[String: Any]],
                        let delta = choices.first?["delta"] as? [String: Any],
                        let content = delta["content"] as? String {
-                        if statusText != "AI antwoordt..." {
-                            statusText = "AI antwoordt..."
+                        if statusText != "AI is typing..." {
+                            statusText = "AI is typing..."
                         }
                         onText(content)
                     }
@@ -144,7 +144,7 @@ final class AIManager: ObservableObject {
                     self.statusText = "Ready"
                     self.approachSummary = "Answer received."
                     self.activeTask = nil
-                    self.addLog("[\(self.tijd())] Streaming voltooid")
+                    self.addLog("[\(self.time())] Streaming complete")
                     completion(.success(()))
                 }
             } catch is CancellationError {
@@ -160,7 +160,7 @@ final class AIManager: ObservableObject {
                     self.statusText = "Error"
                     self.approachSummary = "Something went wrong while fetching the answer."
                     self.activeTask = nil
-                    self.addLog("[\(self.tijd())] STREAM-FOUT: \(error.localizedDescription)")
+                    self.addLog("[\(self.time())] STREAM ERROR: \(error.localizedDescription)")
                     completion(.failure(error))
                 }
             }
@@ -170,12 +170,12 @@ final class AIManager: ObservableObject {
     func send(message: String, history: [ChatMessage], completion: @escaping (Result<AIChatResponse, Error>) -> Void) {
         let startTime = Date()
         guard let baseURL = normalizedServerURL(), let url = URL(string: baseURL + "/chat") else {
-            addLog("[\(tijd())] FOUT: AI-serveradres ontbreekt of is ongeldig.")
+            addLog("[\(time())] ERROR: AI server address missing or invalid.")
             completion(.failure(AIManagerError.serverNotConfigured))
             return
         }
         
-        addLog("[\(tijd())] Chatbericht gestart naar \(baseURL)/chat")
+        addLog("[\(time())] Chat message sent to \(baseURL)/chat")
         let conversation = history.suffix(12).map { item in
             AIConversationMessage(role: item.isUser ? "user" : "assistant", content: item.text)
         }
@@ -191,39 +191,39 @@ final class AIManager: ObservableObject {
         do {
             request.httpBody = try JSONEncoder().encode(requestBody)
         } catch {
-            addLog("[\(tijd())] FOUT: request kon niet worden opgebouwd: \(error.localizedDescription)")
+            addLog("[\(time())] ERROR: failed to build request: \(error.localizedDescription)")
             completion(.failure(error))
             return
         }
         
-        addLog("[\(tijd())] Verbinding maken...")
+        addLog("[\(time())] Connecting...")
         DispatchQueue.main.async { self.isLoading = true; self.errorMessage = nil }
         URLSession.shared.dataTask(with: request) { data, response, error in
             defer { DispatchQueue.main.async { self.isLoading = false } }
             
             if let error {
-                self.addLog("[\(self.tijd())] NETWERKFOUT na \(self.verstrekenSinds(startTime)): \(error.localizedDescription)")
+                self.addLog("[\(self.time())] NETWORK ERROR after \(self.elapsedSince(startTime)): \(error.localizedDescription)")
                 self.complete(.failure(error), completion: completion)
                 return
             }
             guard let httpResponse = response as? HTTPURLResponse, let data else {
-                self.addLog("[\(self.tijd())] FOUT: geen geldige HTTP-respons ontvangen.")
+                self.addLog("[\(self.time())] ERROR: no valid HTTP response received.")
                 self.complete(.failure(AIManagerError.invalidResponse), completion: completion)
                 return
             }
-            self.addLog("[\(self.tijd())] HTTP \(httpResponse.statusCode) ontvangen na \(self.verstrekenSinds(startTime))")
+            self.addLog("[\(self.time())] HTTP \(httpResponse.statusCode) received after \(self.elapsedSince(startTime))")
             guard (200...299).contains(httpResponse.statusCode) else {
-                self.addLog("[\(self.tijd())] SERVERFOUT: statuscode \(httpResponse.statusCode)")
+                self.addLog("[\(self.time())] SERVER ERROR: status code \(httpResponse.statusCode)")
                 self.complete(.failure(AIManagerError.server(statusCode: httpResponse.statusCode)), completion: completion)
                 return
             }
             
             do {
                 let response = try JSONDecoder().decode(AIChatResponse.self, from: data)
-                self.addLog("[\(self.tijd())] Antwoord ontvangen (\(response.reply.count) tekens)")
+                self.addLog("[\(self.time())] Answer received (\(response.reply.count) characters)")
                 self.complete(.success(response), completion: completion)
             } catch {
-                self.addLog("[\(self.tijd())] FOUT: ongeldige JSON-respons: \(error.localizedDescription)")
+                self.addLog("[\(self.time())] ERROR: invalid JSON response: \(error.localizedDescription)")
                 self.complete(.failure(error), completion: completion)
             }
         }.resume()
@@ -239,11 +239,11 @@ final class AIManager: ObservableObject {
         }
     }
     
-    private func tijd() -> String {
+    private func time() -> String {
         Date().formatted(date: .omitted, time: .standard)
     }
     
-    private func verstrekenSinds(_ startTime: Date) -> String {
+    private func elapsedSince(_ startTime: Date) -> String {
         String(format: "%.1fs", Date().timeIntervalSince(startTime))
     }
     
@@ -270,20 +270,20 @@ enum AIManagerError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .serverNotConfigured:
-            return "De AI-server is nog niet ingesteld in je profiel."
+            return "The AI server has not been configured in your profile."
         case .invalidResponse:
-            return "De AI-server gaf geen geldige reactie."
+            return "The AI server returned an invalid response."
         case .server(let statusCode):
-            return "De AI-server gaf foutcode \(statusCode)."
+            return "The AI server returned error code \(statusCode)."
         case .backend(let message):
             return message
         }
     }
 }
 
-// MARK: - 💬 CHAT COMPONENTEN
+// MARK: - 💬 CHAT COMPONENTS
 struct ChatView: View {
-    var titel: String
+    var title: String
     
     @AppStorage("ai_provider") private var aiProvider: String = "auto"
     @AppStorage("google_user_name") private var googleUserName: String = ""
@@ -291,7 +291,7 @@ struct ChatView: View {
     @AppStorage("magister_achternaam") private var magisterLastName: String = ""
     
     @StateObject private var aiManager = AIManager()
-    @State private var toonLogboek = false
+    @State private var showLog = false
     @State private var messages: [ChatMessage] = []
     @State private var inputText: String = ""
     @State private var streamingReply = ""
@@ -302,24 +302,24 @@ struct ChatView: View {
     @State private var archivedAnswers: [ArchivedAnswer] = []
     @State private var editingMessageID: UUID? = nil
     @State private var originalEditingText: String = ""
-    @State private var toonGearchiveerdeAntwoorden = false
+    @State private var showArchivedAnswers = false
     @State private var webSourcesByMessageID: [UUID: [WebSearchResult]] = [:]
     @State private var selectedWebSources: [WebSearchResult] = []
     @State private var isShowingWebSources = false
     @State private var activeWebSources: [WebSearchResult] = []
     
     private let welcomeTemplates = [
-        "Welkom terug, {name} — we gaan vandaag iets moois bouwen.",
-        "Hey {name}, fijn dat je er bent. Laten we meteen aan de slag.",
-        "Goedemorgen, {name}. Je planning staat klaar voor vandaag.",
-        "Hallo {name}, jouw overzicht is er. Tijd om te starten."
+        "Welcome back, {name} — lets make today count.",
+        "Hey {name}, good to have you. Lets get started.",
+        "Good morning, {name}. Your plan for today is ready.",
+        "Hello {name}, your overview is here. Time to start."
     ]
     
     private var displayUserName: String {
         let magisterName = "\(magisterFirstName) \(magisterLastName)".trimmingCharacters(in: .whitespaces)
         if !magisterName.isEmpty { return magisterName }
         if !googleUserName.isEmpty { return googleUserName }
-        return "Gebruiker"
+        return "User"
     }
     
     private var welcomeGreeting: String {
@@ -346,7 +346,7 @@ struct ChatView: View {
                     .zIndex(1)
             }
             
-            // 1. Berichtenlijst
+            // 1. Messages list
             ScrollViewReader { proxy in
                 ScrollView {
                     VStack(spacing: 24) { 
@@ -393,7 +393,7 @@ struct ChatView: View {
                                 Button {
                                     retryStoppedResponse()
                                 } label: {
-                                    Label("Antwoord opnieuw proberen", systemImage: "arrow.counterclockwise")
+                                    Label("Retry answer", systemImage: "arrow.counterclockwise")
                                         .font(.caption.bold())
                                         .foregroundColor(.white)
                                         .padding(.horizontal, 14)
@@ -443,11 +443,11 @@ struct ChatView: View {
                 }
             }
             
-            // 2. Zwevend Invoerveld
+            // 2. Floating input field
             VStack(spacing: 8) {
                 if editingMessageID != nil {
                     HStack {
-                        Button("Annuleer bewerken") {
+                        Button("Cancel edit") {
                             inputText = ""
                             editingMessageID = nil
                             originalEditingText = ""
@@ -465,7 +465,7 @@ struct ChatView: View {
                 }
                 
                 HStack(alignment: .bottom, spacing: 8) {
-                    TextField("Typ een bericht...", text: $inputText, axis: .vertical)
+                    TextField("Type a message...", text: $inputText, axis: .vertical)
                         .padding(.leading, 20)
                         .padding(.vertical, 14)
                         .lineLimit(1...6)
@@ -479,7 +479,7 @@ struct ChatView: View {
                             aiManager.cancel()
                             responseStopped = true
                         } else {
-                            verstuurBericht()
+                            sendMessage()
                         }
                     } label: {
                         Image(systemName: aiManager.isLoading ? "stop.fill" : "arrow.up")
@@ -518,25 +518,25 @@ struct ChatView: View {
         }
         .background(Color.clear)
         .onAppear {
-            aiManager.record("Chat geopend")
+            aiManager.record("Chat opened")
         }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Menu {
                     Button(action: { aiProvider = "auto" }) {
-                        Label("Automatisch", systemImage: aiProvider == "auto" ? "checkmark" : "")
+                        Label("Auto", systemImage: aiProvider == "auto" ? "checkmark" : "")
                     }
                     Button(action: { aiProvider = "gemini" }) {
                         Label("Gemini API", systemImage: aiProvider == "gemini" ? "checkmark" : "")
                     }
                     Button(action: { aiProvider = "local" }) {
-                        Label("Lokaal Model", systemImage: aiProvider == "local" ? "checkmark" : "")
+                        Label("Local Model", systemImage: aiProvider == "local" ? "checkmark" : "")
                     }
                 } label: {
                     HStack(spacing: 4) {
                         Image(systemName: aiProvider == "gemini" ? "sparkles" : (aiProvider == "local" ? "desktopcomputer" : "wand.and.stars"))
                             .font(.system(size: 14, weight: .semibold))
-                        Text(aiProvider == "gemini" ? "Gemini" : (aiProvider == "local" ? "Lokaal" : "Auto"))
+                        Text(aiProvider == "gemini" ? "Gemini" : (aiProvider == "local" ? "Local" : "Auto"))
                             .font(.subheadline)
                             .fontWeight(.medium)
                     }
@@ -546,35 +546,35 @@ struct ChatView: View {
                     .background(Color.white.opacity(0.12))
                     .clipShape(Capsule())
                 }
-                .accessibilityLabel("AI-provider kiezen")
+                .accessibilityLabel("Choose AI provider")
             }
             
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button {
-                    toonGearchiveerdeAntwoorden = true
+                    showArchivedAnswers = true
                 } label: {
                     Image(systemName: "archivebox")
                         .font(.system(size: 16, weight: .semibold))
                 }
-                .accessibilityLabel("Gearchiveerde antwoorden")
+                .accessibilityLabel("Archived Answers")
                 .foregroundColor(.white)
                 .padding(.horizontal, 2)
                 
                 Button {
-                    toonLogboek = true
+                    showLog = true
                 } label: {
                     Image(systemName: "doc.text.magnifyingglass")
                         .font(.system(size: 16, weight: .semibold))
                 }
-                .accessibilityLabel("AI-logboek")
+                .accessibilityLabel("AI Log")
                 .foregroundColor(.white)
                 .padding(.horizontal, 2)
             }
         }
-        .sheet(isPresented: $toonLogboek) {
-            AILogboekView(aiManager: aiManager)
+        .sheet(isPresented: $showLog) {
+            AILogView(aiManager: aiManager)
         }
-        .sheet(isPresented: $toonGearchiveerdeAntwoorden) {
+        .sheet(isPresented: $showArchivedAnswers) {
             ArchivedResponsesView(archivedAnswers: $archivedAnswers)
         }
         .sheet(isPresented: $isShowingWebSources) {
@@ -582,7 +582,7 @@ struct ChatView: View {
         }
     }
     
-    private func verstuurBericht(forceText: String? = nil) {
+    private func sendMessage(forceText: String? = nil) {
         let text = (forceText ?? inputText).trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return }
         
@@ -652,7 +652,7 @@ struct ChatView: View {
                 if !streamingReply.isEmpty {
                     messages.append(ChatMessage(text: streamingReply, isUser: false))
                 }
-                messages.append(ChatMessage(text: "AI niet beschikbaar: \(error.localizedDescription)", isUser: false))
+                messages.append(ChatMessage(text: "AI not available: \(error.localizedDescription)", isUser: false))
                 streamingReply = ""
                 activeWebSources = []
             }
@@ -804,7 +804,7 @@ struct WelcomeHeroView: View {
             .blur(radius: 10)
             
             VStack(spacing: 18) {
-                Text("Welkom")
+                Text("Welcome")
                     .font(.caption)
                     .foregroundColor(.white.opacity(0.75))
                     .kerning(3)
@@ -884,7 +884,7 @@ struct StoppedResponseDivider: View {
                 .fill(Color.white.opacity(0.18))
                 .frame(height: 1)
             
-            Text("Je hebt deze reactie gestopt")
+            Text("You stopped this response")
                 .font(.caption2)
                 .foregroundColor(.gray)
                 .multilineTextAlignment(.center)
@@ -899,7 +899,7 @@ struct StoppedResponseDivider: View {
     }
 }
 
-struct AILogboekView: View {
+struct AILogView: View {
     @ObservedObject var aiManager: AIManager
     @Environment(\.dismiss) private var dismiss
     
@@ -918,16 +918,16 @@ struct AILogboekView: View {
                 
                 HStack {
                     ShareLink(item: aiManager.debugLogText) {
-                        Label("Deel logboek", systemImage: "square.and.arrow.up")
+                        Label("Share log", systemImage: "square.and.arrow.up")
                     }
                     
                     Button {
                         UIPasteboard.general.string = aiManager.debugLogText
                     } label: {
-                        Label("Kopieer", systemImage: "doc.on.doc")
+                        Label("Copy", systemImage: "doc.on.doc")
                     }
                     
-                    Button("Wis") {
+                    Button("Clear") {
                         aiManager.clearDebugLog()
                     }
                 }
@@ -935,7 +935,7 @@ struct AILogboekView: View {
                 .padding(.bottom)
             }
             .background(Color.black.ignoresSafeArea())
-            .navigationTitle("AI-logboek")
+            .navigationTitle("AI Log")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
@@ -955,14 +955,14 @@ struct ArchivedResponsesView: View {
         NavigationStack {
             List {
                 if archivedAnswers.isEmpty {
-                    Text("Er zijn nog geen gearchiveerde antwoorden.")
+                    Text("No archived answers yet.")
                         .foregroundColor(.gray)
                         .padding(.vertical, 12)
                 } else {
                     ForEach(archivedAnswers) { item in
                         VStack(alignment: .leading, spacing: 10) {
                             HStack {
-                                Text("Vraag")
+                                Text("Question")
                                     .font(.caption2)
                                     .foregroundColor(.gray)
                                     .textCase(.uppercase)
@@ -978,7 +978,7 @@ struct ArchivedResponsesView: View {
                                 .italic()
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             
-                            Text("Antwoord")
+                            Text("Answer")
                                 .font(.caption2)
                                 .foregroundColor(.gray)
                                 .textCase(.uppercase)
@@ -992,7 +992,7 @@ struct ArchivedResponsesView: View {
                                 Button {
                                     UIPasteboard.general.string = item.prompt
                                 } label: {
-                                    Label("Kopieer vraag", systemImage: "doc.on.doc")
+                                    Label("Copy question", systemImage: "doc.on.doc")
                                         .font(.caption2)
                                         .foregroundColor(.white.opacity(0.9))
                                 }
@@ -1000,7 +1000,7 @@ struct ArchivedResponsesView: View {
                                 Button {
                                     UIPasteboard.general.string = item.answer
                                 } label: {
-                                    Label("Kopieer antwoord", systemImage: "doc.on.doc")
+                                    Label("Copy answer", systemImage: "doc.on.doc")
                                         .font(.caption2)
                                         .foregroundColor(.white.opacity(0.9))
                                 }
@@ -1013,7 +1013,7 @@ struct ArchivedResponsesView: View {
             }
             .scrollContentBackground(.hidden)
             .background(Color.black.ignoresSafeArea())
-            .navigationTitle("Gearchiveerde antwoorden")
+            .navigationTitle("Archived Answers")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
@@ -1034,7 +1034,7 @@ struct WebResultsSheet: View {
         NavigationStack {
             List {
                 if results.isEmpty {
-                    Text("None online resultaten beschikbaar.")
+                    Text("No online results available.")
                         .foregroundColor(.gray)
                         .padding(.vertical, 12)
                 } else {
@@ -1079,7 +1079,7 @@ struct WebResultsSheet: View {
             }
             .scrollContentBackground(.hidden)
             .background(Color.black.ignoresSafeArea())
-            .navigationTitle("Zoekresultaten")
+            .navigationTitle("Search Results")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
@@ -1096,7 +1096,7 @@ struct WebResultsSheet: View {
     }
 }
 
-// MARK: - Chat Bubbel Opmaak
+// MARK: - Chat Bubble Styling
 struct ChatBubble: View {
     let message: ChatMessage
     let onCopy: () -> Void

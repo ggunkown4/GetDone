@@ -1,36 +1,36 @@
 import SwiftUI
 
-// MARK: - Resources Weergave
+// MARK: - Resources View
 struct ResourcesView: View {
     @ObservedObject var auth: WebGoogleAuthManager
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    @Binding var selectedFilter: BronFilter
+    @Binding var selectedFilter: SourceFilter
     
-    // Volgorde opgeslagen via AppStorage
+    // Order stored via AppStorage
     @AppStorage("resourcesOrder") private var resourcesOrderRaw: String = "drive,classroom"
     
-    // Weergave Opties
-    @State private var sorteerOptie: SorteerOptie = .datum
-    @State private var sorteerRichting: SorteerRichting = .aflopend
-    @State private var tijdFilter: TijdFilter = .alles
+    // View Options
+    @State private var sortOption: SortOption = .date
+    @State private var sortDirection: SortDirection = .descending
+    @State private var timeFilter: TimeFilter = .all
     
-    // Map Navigatie Status
-    @State private var mapGeschiedenis: [DriveFile] = []
-    @State private var huidigeMap: DriveFile? = nil
+    // Folder Navigation Status
+    @State private var folderHistory: [DriveFile] = []
+    @State private var currentFolder: DriveFile? = nil
     
-    // LOKALE CACHE: Slaat bestanden op per mapId ("root" voor de hoofdmap)
-    @State private var mappenCache: [String: [DriveFile]] = [:]
+    // LOCAL CACHE: stores files per folderId ("root" for the root folder)
+    @State private var folderCache: [String: [DriveFile]] = [:]
     
     let columns = [
         GridItem(.adaptive(minimum: 100, maximum: 120), spacing: 20)
     ]
     
-    private var huidigeMapKey: String {
-        huidigeMap?.id ?? "root"
+    private var currentFolderKey: String {
+        currentFolder?.id ?? "root"
     }
     
     private var currentFiles: [DriveFile] {
-        if let cached = mappenCache[huidigeMapKey], !cached.isEmpty {
+        if let cached = folderCache[currentFolderKey], !cached.isEmpty {
             return cached
         }
         return auth.driveFiles
@@ -38,17 +38,17 @@ struct ResourcesView: View {
     
     private var resourcesOrder: [String] {
         let items = resourcesOrderRaw.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
-        let geldigeItems = items.filter { $0 == "drive" || $0 == "classroom" }
-        return geldigeItems.isEmpty ? ["drive", "classroom"] : geldigeItems
+        let validItems = items.filter { $0 == "drive" || $0 == "classroom" }
+        return validItems.isEmpty ? ["drive", "classroom"] : validItems
     }
     
-    private var filterDatumGrens: Date? {
-        let kalender = Calendar.current
-        switch tijdFilter {
-        case .alles: return nil
-        case .laatsteWeek: return kalender.date(byAdding: .day, value: -7, to: Date())
-        case .laatsteMaand: return kalender.date(byAdding: .month, value: -1, to: Date())
-        case .laatsteJaar: return kalender.date(byAdding: .year, value: -1, to: Date())
+    private var filterDateBoundary: Date? {
+        let calendar = Calendar.current
+        switch timeFilter {
+        case .all: return nil
+        case .lastWeek: return calendar.date(byAdding: .day, value: -7, to: Date())
+        case .lastMonth: return calendar.date(byAdding: .month, value: -1, to: Date())
+        case .lastYear: return calendar.date(byAdding: .year, value: -1, to: Date())
         }
     }
     
@@ -59,17 +59,17 @@ struct ResourcesView: View {
             VStack(spacing: 0) {
                 ScrollView {
                     VStack(spacing: 30) {
-                        ForEach(resourcesOrder, id: \.self) { bronKey in
-                            if bronKey == "drive" && (selectedFilter == .alles || selectedFilter == .drive) {
+                        ForEach(resourcesOrder, id: \.self) { sourceKey in
+                            if sourceKey == "drive" && (selectedFilter == .all || selectedFilter == .drive) {
                                 displayFilesSection
                             }
                             
-                            if bronKey == "classroom" && (selectedFilter == .alles || selectedFilter == .classroom) {
-                                weergaveClassroomSectie
+                            if sourceKey == "classroom" && (selectedFilter == .all || selectedFilter == .classroom) {
+                                classroomSectionView
                             }
                         }
                         
-                        if selectedFilter == .alles && currentFiles.isEmpty && auth.classroomItems.isEmpty {
+                        if selectedFilter == .all && currentFiles.isEmpty && auth.classroomItems.isEmpty {
                             VStack(spacing: 16) {
                                 Image(systemName: "tray")
                                     .font(.system(size: 50))
@@ -86,28 +86,28 @@ struct ResourcesView: View {
         }
         .onChange(of: auth.driveFiles.map(\.id)) { _ in
             if !auth.driveFiles.isEmpty {
-                mappenCache[huidigeMapKey] = auth.driveFiles
+                folderCache[currentFolderKey] = auth.driveFiles
             }
         }
         .onChange(of: selectedFilter) { newValue in
-            if newValue == .alles {
-                resetMapNavigatie()
+            if newValue == .all {
+                resetFolderNavigation()
             }
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                if selectedFilter != .alles {
+                if selectedFilter != .all {
                     Button {
                         withAnimation {
-                            selectedFilter = .alles
-                            resetMapNavigatie()
+                            selectedFilter = .all
+                            resetFolderNavigation()
                         }
                     } label: {
                         HStack(spacing: 4) {
                             Image(systemName: "chevron.left")
                                 .font(.subheadline.bold())
                             if horizontalSizeClass == .regular {
-                                Text("Alles")
+                                Text("All")
                                     .font(.subheadline.bold())
                             }
                         }
@@ -118,19 +118,19 @@ struct ResourcesView: View {
             
             ToolbarItemGroup(placement: .navigationBarTrailing) {
                 Menu {
-                    Section(header: Text("Sorteren op")) {
-                        Picker("Sorteer optie", selection: $sorteerOptie) {
-                            ForEach(SorteerOptie.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+                    Section(header: Text("Sort by")) {
+                        Picker("Sort option", selection: $sortOption) {
+                            ForEach(SortOption.allCases, id: \.self) { Text($0.rawValue).tag($0) }
                         }
                     }
-                    Section(header: Text("Volgorde")) {
-                        Picker("Richting", selection: $sorteerRichting) {
-                            ForEach(SorteerRichting.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+                    Section(header: Text("Order")) {
+                        Picker("Richting", selection: $sortDirection) {
+                            ForEach(SortDirection.allCases, id: \.self) { Text($0.rawValue).tag($0) }
                         }
                     }
-                    Section(header: Text("Tijdfilter")) {
-                        Picker("Filter", selection: $tijdFilter) {
-                            ForEach(TijdFilter.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+                    Section(header: Text("Time Filter")) {
+                        Picker("Filter", selection: $timeFilter) {
+                            ForEach(TimeFilter.allCases, id: \.self) { Text($0.rawValue).tag($0) }
                         }
                     }
                 } label: {
@@ -138,7 +138,7 @@ struct ResourcesView: View {
                         Image(systemName: "line.3.horizontal.decrease.circle.fill")
                             .font(.subheadline.bold())
                         if horizontalSizeClass == .regular {
-                            Text("Weergave")
+                            Text("View")
                                 .font(.subheadline.bold())
                         }
                     }
@@ -146,8 +146,8 @@ struct ResourcesView: View {
                 }
                 
                 Menu {
-                    Picker("Bron", selection: $selectedFilter) {
-                        ForEach(BronFilter.allCases, id: \.self) { filter in
+                    Picker("Source", selection: $selectedFilter) {
+                        ForEach(SourceFilter.allCases, id: \.self) { filter in
                             Text(filter.rawValue).tag(filter)
                         }
                     }
@@ -156,7 +156,7 @@ struct ResourcesView: View {
                         Image(systemName: "book.closed.fill")
                             .font(.subheadline.bold())
                         if horizontalSizeClass == .regular {
-                            Text("Bron")
+                            Text("Source")
                                 .font(.subheadline.bold())
                         }
                     }
@@ -166,42 +166,42 @@ struct ResourcesView: View {
         }
     }
     
-    // MARK: - Map Navigatie Functies
-    private func navigeerNaarMap(_ map: DriveFile) {
+    // MARK: - Folder Navigation Functions
+    private func navigateToFolder(_ folder: DriveFile) {
         withAnimation(.easeInOut(duration: 0.2)) {
             selectedFilter = .drive 
-            if let huidige = huidigeMap {
-                mapGeschiedenis.append(huidige)
+            if let previous = currentFolder {
+                folderHistory.append(previous)
             }
-            huidigeMap = map
+            currentFolder = folder
         }
         
-        if mappenCache[map.id] == nil {
-            auth.loadFilesForFolder(mapId: map.id)
+        if folderCache[folder.id] == nil {
+            auth.loadFilesForFolder(folderId: folder.id)
         }
     }
     
     private func goBackInFolders() {
         withAnimation(.easeInOut(duration: 0.2)) {
-            if !mapGeschiedenis.isEmpty {
-                huidigeMap = mapGeschiedenis.removeLast()
+            if !folderHistory.isEmpty {
+                currentFolder = folderHistory.removeLast()
             } else {
-                huidigeMap = nil
+                currentFolder = nil
             }
         }
         
-        if mappenCache[huidigeMapKey] == nil {
-            auth.loadFilesForFolder(mapId: huidigeMap?.id)
+        if folderCache[currentFolderKey] == nil {
+            auth.loadFilesForFolder(folderId: currentFolder?.id)
         }
     }
     
-    private func resetMapNavigatie() {
+    private func resetFolderNavigation() {
         withAnimation(.easeInOut(duration: 0.2)) {
-            huidigeMap = nil
-            mapGeschiedenis.removeAll()
+            currentFolder = nil
+            folderHistory.removeAll()
         }
-        if mappenCache["root"] == nil {
-            auth.loadFilesForFolder(mapId: nil)
+        if folderCache["root"] == nil {
+            auth.loadFilesForFolder(folderId: nil)
         }
     }
     
@@ -210,22 +210,22 @@ struct ResourcesView: View {
     private var displayFilesSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                if let map = huidigeMap {
+                if let folder = currentFolder {
                     Button(action: goBackInFolders) {
                         HStack(spacing: 6) {
                             Image(systemName: "chevron.left")
                                 .font(.title3.bold())
-                            Text(mapGeschiedenis.isEmpty ? "Google Drive" : (mapGeschiedenis.last?.name ?? "Vorige"))
+                            Text(folderHistory.isEmpty ? "Google Drive" : (folderHistory.last?.name ?? "Previous"))
                                 .font(.title3.bold())
                         }
                         .foregroundColor(.blue)
                     }
                     .buttonStyle(.plain)
                     Text("›").font(.title3.bold()).foregroundColor(.gray)
-                    Text(map.name).font(.title3.bold()).foregroundColor(.white).lineLimit(1)
+                    Text(folder.name).font(.title3.bold()).foregroundColor(.white).lineLimit(1)
                     Spacer()
                 } else {
-                    if selectedFilter == .alles {
+                    if selectedFilter == .all {
                         Button {
                             withAnimation { selectedFilter = .drive }
                         } label: {
@@ -249,14 +249,14 @@ struct ResourcesView: View {
             if filesToShow.isEmpty && !auth.isLoadingData {
                 VStack(spacing: 16) {
                     Image(systemName: "folder").font(.system(size: 50)).foregroundColor(.gray)
-                    Text(huidigeMap != nil ? "Deze map is leeg" : "Je Drive is leeg").foregroundColor(.gray)
+                    Text(currentFolder != nil ? "This folder is empty" : "Your Drive is empty").foregroundColor(.gray)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.top, 40)
             } else {
                 let baseFiles = filesToShow.filter { file in
-                    guard let grens = filterDatumGrens else { return true }
-                    return file.datum >= grens 
+                    guard let boundary = filterDateBoundary else { return true }
+                    return file.date >= boundary 
                 }
                 
                 let sortedFiles = baseFiles.sorted { (file1, file2) -> Bool in
@@ -265,30 +265,30 @@ struct ResourcesView: View {
                     
                     if isFolder1 != isFolder2 { return isFolder1 }
                     
-                    if sorteerOptie == .naam {
-                        return sorteerRichting == .oplopend ? file1.name < file2.name : file1.name > file2.name
+                    if sortOption == .name {
+                        return sortDirection == .ascending ? file1.name < file2.name : file1.name > file2.name
                     } else {
-                        return sorteerRichting == .oplopend ? file1.datum < file2.datum : file1.datum > file2.datum
+                        return sortDirection == .ascending ? file1.date < file2.date : file1.date > file2.date
                     }
                 }
                 
-                let showFiles = (selectedFilter == .alles && huidigeMap == nil)
+                let showFiles = (selectedFilter == .all && currentFolder == nil)
                 ? Array(sortedFiles.prefix(6))
                 : sortedFiles
                 
                 if showFiles.isEmpty {
-                    Text("None bestanden gevonden met deze filters.")
+                    Text("No files found with these filters.")
                         .foregroundColor(.gray)
                         .padding(.horizontal, 20)
                 } else {
                     LazyVGrid(columns: columns, spacing: 30) {
                         ForEach(showFiles) { file in
-                            ResourceIconView(file: file) { geselecteerdeMap in
-                                navigeerNaarMap(geselecteerdeMap)
+                            ResourceIconView(file: file) { selectedFolder in
+                                navigateToFolder(selectedFolder)
                             }
                             .onAppear {
                                 if selectedFilter == .drive, file.id == showFiles.last?.id {
-                                    auth.loadMoreBestandenVoorMap(mapId: huidigeMap?.id)
+                                    auth.loadMoreFilesForFolder(folderId: currentFolder?.id)
                                 }
                             }
                         }
@@ -296,7 +296,7 @@ struct ResourcesView: View {
                     .padding(.horizontal, 20)
                     
                     if auth.isLoadingMoreFiles {
-                        ProgressView("Meer laden...")
+                        ProgressView("Loading more...")
                             .tint(.white)
                             .foregroundColor(.gray)
                             .frame(maxWidth: .infinity)
@@ -309,18 +309,18 @@ struct ResourcesView: View {
     
     // MARK: - Subview: Classroom Items
     @ViewBuilder
-    private var weergaveClassroomSectie: some View {
+    private var classroomSectionView: some View {
         if auth.classroomItems.isEmpty {
             if selectedFilter == .classroom {
                 VStack(spacing: 16) {
                     Image(systemName: "graduationcap").font(.system(size: 50)).foregroundColor(.gray)
-                    Text("None materiaal of opdrachten gevonden").foregroundColor(.gray)
+                    Text("No materials or assignments found").foregroundColor(.gray)
                 }
                 .padding(.top, 40)
             }
         } else {
             VStack(alignment: .leading, spacing: 16) {
-                if selectedFilter == .alles {
+                if selectedFilter == .all {
                     Button {
                         withAnimation { selectedFilter = .classroom }
                     } label: {
@@ -336,39 +336,39 @@ struct ResourcesView: View {
                     Text("Google Classroom").font(.title2.bold()).foregroundColor(.white).padding(.horizontal, 20)
                 }
                 
-                let basisItems = auth.classroomItems.filter { item in
-                    guard let grens = filterDatumGrens else { return true }
-                    return item.datum >= grens
+                let baseItems = auth.classroomItems.filter { item in
+                    guard let boundary = filterDateBoundary else { return true }
+                    return item.date >= boundary
                 }
                 
-                let gesorteerdeItems = basisItems.sorted { item1, item2 in
-                    if sorteerOptie == .naam {
-                        return sorteerRichting == .oplopend ? item1.titel < item2.titel : item1.titel > item2.titel
+                let sortedItems = baseItems.sorted { item1, item2 in
+                    if sortOption == .name {
+                        return sortDirection == .ascending ? item1.title < item2.title : item1.title > item2.title
                     } else {
-                        return sorteerRichting == .oplopend ? item1.datum < item2.datum : item1.datum > item2.datum
+                        return sortDirection == .ascending ? item1.date < item2.date : item1.date > item2.date
                     }
                 }
                 
-                let tonenItems = selectedFilter == .alles 
-                ? Array(gesorteerdeItems.prefix(4)) 
-                : gesorteerdeItems
+                let visibleItems = selectedFilter == .all 
+                ? Array(sortedItems.prefix(4)) 
+                : sortedItems
                 
-                if tonenItems.isEmpty {
-                    Text("None items gevonden met deze filters.").foregroundColor(.gray).padding(.horizontal, 20)
+                if visibleItems.isEmpty {
+                    Text("No items found with these filters.").foregroundColor(.gray).padding(.horizontal, 20)
                 } else {
                     LazyVStack(spacing: 14) {
-                        ForEach(tonenItems) { item in
-                            if item.type == .aankondiging {
+                        ForEach(visibleItems) { item in
+                            if item.type == .announcement {
                                 AnnouncementBarView(item: item)
                                     .onAppear {
-                                        if selectedFilter == .classroom, item.id == tonenItems.last?.id {
+                                        if selectedFilter == .classroom, item.id == visibleItems.last?.id {
                                             auth.loadMoreClassroomItems()
                                         }
                                     }
                             } else {
                                 ClassroomItemCardView(item: item)
                                     .onAppear {
-                                        if selectedFilter == .classroom, item.id == tonenItems.last?.id {
+                                        if selectedFilter == .classroom, item.id == visibleItems.last?.id {
                                             auth.loadMoreClassroomItems()
                                         }
                                     }
@@ -378,7 +378,7 @@ struct ResourcesView: View {
                     .padding(.horizontal, 20)
                     
                     if auth.isLoadingMoreClassroomItems {
-                        ProgressView("Meer Classroom items laden...")
+                        ProgressView("Loading more Classroom items...")
                             .tint(.white)
                             .foregroundColor(.gray)
                             .frame(maxWidth: .infinity)
@@ -393,14 +393,14 @@ struct ResourcesView: View {
 // MARK: - Drive & Classroom Helper Views
 struct ResourceIconView: View {
     let file: DriveFile
-    var actieBijMap: ((DriveFile) -> Void)? = nil
+    var onFolderTap: ((DriveFile) -> Void)? = nil
     @Environment(\.openURL) var openURL
     
     var body: some View {
         Button {
-            let isMap = file.mimeType == "application/vnd.google-apps.folder"
-            if isMap {
-                actieBijMap?(file)
+            let isFolder = file.mimeType == "application/vnd.google-apps.folder"
+            if isFolder {
+                onFolderTap?(file)
             } else if let linkString = file.webViewLink, let url = URL(string: linkString) {
                 openURL(url)
             }
@@ -408,16 +408,16 @@ struct ResourceIconView: View {
             VStack(spacing: 8) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(achtergrondKleurVoorType(file.mimeType))
+                        .fill(backgroundColorForType(file.mimeType))
                         .frame(width: 80, height: 80)
                     
-                    Image(systemName: icoonVoorType(file.mimeType))
+                    Image(systemName: iconForType(file.mimeType))
                         .font(.system(size: 36))
-                        .foregroundColor(icoonKleurVoorType(file.mimeType))
+                        .foregroundColor(iconColorForType(file.mimeType))
                 }
                 .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
                 
-                let isMap = file.mimeType == "application/vnd.google-apps.folder"
+                let isFolder = file.mimeType == "application/vnd.google-apps.folder"
                 
                 VStack(spacing: 2) {
                     Text(file.name)
@@ -425,8 +425,8 @@ struct ResourceIconView: View {
                         .foregroundColor(.white)
                         .lineLimit(1)
                     
-                    if !isMap {
-                        Text(file.datumFormatted)
+                    if !isFolder {
+                        Text(file.dateFormatted)
                             .font(.caption2)
                             .foregroundColor(.gray)
                             .lineLimit(1)
@@ -438,7 +438,7 @@ struct ResourceIconView: View {
         .buttonStyle(.plain)
     }
     
-    private func icoonVoorType(_ type: String?) -> String {
+    private func iconForType(_ type: String?) -> String {
         guard let type = type else { return "doc.fill" }
         if type.contains("folder") { return "folder.fill" }
         if type.contains("document") || type.contains("pdf") { return "doc.text.fill" }
@@ -451,13 +451,13 @@ struct ResourceIconView: View {
         return "doc.fill"
     }
     
-    private func achtergrondKleurVoorType(_ type: String?) -> Color {
+    private func backgroundColorForType(_ type: String?) -> Color {
         guard let type = type else { return Color.white.opacity(0.1) }
         if type.contains("folder") { return Color.blue.opacity(0.2) }
         return Color.white.opacity(0.1)
     }
     
-    private func icoonKleurVoorType(_ type: String?) -> Color {
+    private func iconColorForType(_ type: String?) -> Color {
         guard let type = type else { return .gray }
         if type.contains("folder") { return .blue }
         if type.contains("document") { return .blue }
@@ -476,16 +476,16 @@ struct AnnouncementBarView: View {
         Button { if let url = URL(string: item.url) { openURL(url) } } label: {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    Text(item.vakNaam).font(.caption.bold()).foregroundColor(.white).padding(.horizontal, 10).padding(.vertical, 4).background(item.kleur).clipShape(Capsule())
-                    Text("Announcement").font(.caption2.bold()).foregroundColor(item.kleur)
+                    Text(item.subjectName).font(.caption.bold()).foregroundColor(.white).padding(.horizontal, 10).padding(.vertical, 4).background(item.color).clipShape(Capsule())
+                    Text("Announcement").font(.caption2.bold()).foregroundColor(item.color)
                     Spacer()
-                    Text(item.datumFormatted).font(.caption2).foregroundColor(.gray)
+                    Text(item.dateFormatted).font(.caption2).foregroundColor(.gray)
                 }
-                if let tekst = item.tekst, !tekst.isEmpty {
+                if let tekst = item.text, !text.isEmpty {
                     Text(tekst).font(.subheadline).foregroundColor(.white).multilineTextAlignment(.leading).lineLimit(4)
                 }
             }
-            .padding(14).background(item.kleur.opacity(0.12)).cornerRadius(12).overlay(RoundedRectangle(cornerRadius: 12).stroke(item.kleur.opacity(0.35), lineWidth: 1))
+            .padding(14).background(item.color.opacity(0.12)).cornerRadius(12).overlay(RoundedRectangle(cornerRadius: 12).stroke(item.color.opacity(0.35), lineWidth: 1))
         }.buttonStyle(.plain)
     }
 }
@@ -497,19 +497,19 @@ struct ClassroomItemCardView: View {
         Button { if let url = URL(string: item.url) { openURL(url) } } label: {
             HStack(spacing: 14) {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 10, style: .continuous).fill(item.kleur.opacity(0.2)).frame(width: 46, height: 46)
-                    Image(systemName: item.type == .opdracht ? "doc.text.fill" : "book.fill").font(.title3).foregroundColor(item.kleur)
+                    RoundedRectangle(cornerRadius: 10, style: .continuous).fill(item.color.opacity(0.2)).frame(width: 46, height: 46)
+                    Image(systemName: item.type == .assignment ? "doc.text.fill" : "book.fill").font(.title3).foregroundColor(item.color)
                 }
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
-                        Text(item.vakNaam).font(.system(size: 10, weight: .bold)).foregroundColor(.white).padding(.horizontal, 8).padding(.vertical, 3).background(item.kleur).clipShape(Capsule())
+                        Text(item.subjectName).font(.system(size: 10, weight: .bold)).foregroundColor(.white).padding(.horizontal, 8).padding(.vertical, 3).background(item.color).clipShape(Capsule())
                         Spacer()
-                        Text(item.datumFormatted).font(.caption2).foregroundColor(.gray)
+                        Text(item.dateFormatted).font(.caption2).foregroundColor(.gray)
                     }
-                    Text(item.titel).font(.subheadline.bold()).foregroundColor(.white).lineLimit(2)
+                    Text(item.title).font(.subheadline.bold()).foregroundColor(.white).lineLimit(2)
                 }
             }
-            .padding(12).background(Color.white.opacity(0.06)).cornerRadius(12).overlay(RoundedRectangle(cornerRadius: 12).stroke(item.kleur.opacity(0.25), lineWidth: 1))
+            .padding(12).background(Color.white.opacity(0.06)).cornerRadius(12).overlay(RoundedRectangle(cornerRadius: 12).stroke(item.color.opacity(0.25), lineWidth: 1))
         }.buttonStyle(.plain)
     }
 }

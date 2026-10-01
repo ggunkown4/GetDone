@@ -10,14 +10,14 @@ struct ContentView: View {
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
     
     @State private var isChatOpen: Bool = false
-    @State private var isBestandenOpen: Bool = false
+    @State private var isFilesOpen: Bool = false
     
     var body: some View {
-        let veiligeSelectie = Binding<String?>(
+        let safeSelection = Binding<String?>(
             get: { selectedOption },
             set: { newValue in
-                if let geldigeWaarde = newValue {
-                    selectedOption = geldigeWaarde
+                if let validValue = newValue {
+                    selectedOption = validValue
                 }
             }
         )
@@ -26,29 +26,29 @@ struct ContentView: View {
             if sizeClass == .compact {
                 // iPhone layout
                 TabView(selection: $selectedOption) {
-                    NavigationStack { DetailScreen(titel: "Agenda", auth: auth) }
+                    NavigationStack { DetailScreen(title: "Agenda", auth: auth) }
                         .tabItem { Label("Agenda", systemImage: "calendar") }
                         .tag("Agenda" as String?)
                     
-                    NavigationStack { DetailScreen(titel: "Chat", auth: auth) }
+                    NavigationStack { DetailScreen(title: "Chat", auth: auth) }
                         .tabItem { Label("Chat", systemImage: "message.fill") }
                         .tag("Chat" as String?)
                     
-                    NavigationStack { DetailScreen(titel: "Resources", auth: auth) }
+                    NavigationStack { DetailScreen(title: "Resources", auth: auth) }
                         .tabItem { Label("Resources", systemImage: "books.vertical.fill") }
                         .tag("Resources" as String?)
                     
-                    NavigationStack { DetailScreen(titel: "Profiel", auth: auth) }
-                        .tabItem { Label("Profiel", systemImage: "person.crop.circle.fill") }
-                        .tag("Profiel" as String?)
+                    NavigationStack { DetailScreen(title: "Profile", auth: auth) }
+                        .tabItem { Label("Profile", systemImage: "person.crop.circle.fill") }
+                        .tag("Profile" as String?)
                 }
             } else {
-                // iPad layout: Zijbalk (Sidebar)
+                // iPad layout: Sidebar
                 NavigationSplitView(columnVisibility: $columnVisibility) {
                     ZStack(alignment: .top) {
                         
-                        // 1. SCROLLBARE LIJST
-                        List(selection: veiligeSelectie.animation(.easeInOut(duration: 0.3))) {
+                        // 1. SCROLLABLE LIST
+                        List(selection: safeSelection.animation(.easeInOut(duration: 0.3))) {
                             Section {
                                 NavigationLink(value: "Agenda") {
                                     Label("Agenda", systemImage: "calendar")
@@ -61,9 +61,9 @@ struct ContentView: View {
                                     NavigationLink(value: "Chat") { Label("Chat", systemImage: "message.fill") }
                                 }
                                 
-                                DisclosureGroup(isExpanded: $isBestandenOpen) {
-                                    NavigationLink(value: "Resources - Documenten") { Label("Documenten", systemImage: "doc") }
-                                    NavigationLink(value: "Resources - Afbeeldingen") { Label("Afbeeldingen", systemImage: "photo") }
+                                DisclosureGroup(isExpanded: $isFilesOpen) {
+                                    NavigationLink(value: "Resources - Documents") { Label("Documents", systemImage: "doc") }
+                                    NavigationLink(value: "Resources - Images") { Label("Images", systemImage: "photo") }
                                 } label: {
                                     NavigationLink(value: "Resources") { Label("Resources", systemImage: "books.vertical.fill") }
                                 }
@@ -79,7 +79,7 @@ struct ContentView: View {
                             }
                         )
                         
-                        // 2. CUSTOM HEADER-STACK ZIJBALK
+                        // 2. CUSTOM HEADER STACK SIDEBAR
                         VStack(spacing: 15) {
                             HStack(spacing: 12) {
                                 Button {
@@ -92,9 +92,9 @@ struct ContentView: View {
                             }
                             .padding(.horizontal, 16)
                             
-                            // Dynamic Profielknop
+                            // Dynamic Profile button
                             Button {
-                                withAnimation(.easeInOut(duration: 0.2)) { selectedOption = "Profiel" }
+                                withAnimation(.easeInOut(duration: 0.2)) { selectedOption = "Profile" }
                             } label: {
                                 HStack(spacing: 15) {
                                     if auth.isLoggedIn, let photoUrl = URL(string: auth.userPicture), !auth.userPicture.isEmpty {
@@ -115,10 +115,10 @@ struct ContentView: View {
                                     }
                                     
                                     VStack(alignment: .leading, spacing: 2) {
-                                        Text(auth.isLoggedIn ? (auth.userName.isEmpty ? "Google Gebruiker" : auth.userName) : "Jouw Naam")
+                                        Text(auth.isLoggedIn ? (auth.userName.isEmpty ? "Google User" : auth.userName) : "Your Name")
                                             .font(.headline)
                                             .foregroundColor(.white)
-                                        Text(auth.isLoggedIn ? auth.userEmail : "Accounts, gekoppelde apps...")
+                                        Text(auth.isLoggedIn ? auth.userEmail : "Accounts, linked apps...")
                                             .font(.caption)
                                             .foregroundColor(.gray)
                                             .lineLimit(1)
@@ -128,13 +128,13 @@ struct ContentView: View {
                                 .padding(.vertical, 15)
                                 .padding(.horizontal, 14)
                                 .background {
-                                    let isProfielActief = (selectedOption == "Profiel")
+                                    let isProfileActive = (selectedOption == "Profile")
                                     RoundedRectangle(cornerRadius: 22, style: .continuous)
-                                        .fill(isProfielActief ? AnyShapeStyle(.regularMaterial) : AnyShapeStyle(Color.black))
+                                        .fill(isProfileActive ? AnyShapeStyle(.regularMaterial) : AnyShapeStyle(Color.black))
                                         .environment(\.colorScheme, .dark)
                                         .overlay(
                                             Group {
-                                                if isProfielActief {
+                                                if isProfileActive {
                                                     RoundedRectangle(cornerRadius: 22, style: .continuous)
                                                         .fill(LinearGradient(colors: [.white.opacity(0.15), .clear, .clear, .white.opacity(0.05)], startPoint: .topLeading, endPoint: .bottomTrailing))
                                                 }
@@ -142,9 +142,9 @@ struct ContentView: View {
                                         )
                                         .overlay(
                                             RoundedRectangle(cornerRadius: 22, style: .continuous)
-                                                .stroke(LinearGradient(colors: isProfielActief ? [.white.opacity(0.6), .white.opacity(0.1), .clear, .white.opacity(0.2)] : [.white.opacity(0.2), .white.opacity(0.05)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1.2)
+                                                .stroke(LinearGradient(colors: isProfileActive ? [.white.opacity(0.6), .white.opacity(0.1), .clear, .white.opacity(0.2)] : [.white.opacity(0.2), .white.opacity(0.05)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1.2)
                                         )
-                                        .shadow(color: Color.black.opacity(0.5), radius: isProfielActief ? 15 : 5, x: 0, y: 8)
+                                        .shadow(color: Color.black.opacity(0.5), radius: isProfileActive ? 15 : 5, x: 0, y: 8)
                                 }
                             }
                             .buttonStyle(.plain)
@@ -159,13 +159,13 @@ struct ContentView: View {
                     NavigationStack {
                         Group {
                             if let selectie = selectedOption {
-                                DetailScreen(titel: selectie, auth: auth)
+                                DetailScreen(title: selectie, auth: auth)
                                     .id(selectie)
                                     .transition(.opacity)
                             } else {
                                 ZStack {
                                     Color.black.ignoresSafeArea()
-                                    Text("Hé Gebruiker, laten we beginnen!")
+                                    Text("Hey, let's get started!")
                                         .font(.largeTitle)
                                         .foregroundColor(.white)
                                 }
@@ -178,7 +178,7 @@ struct ContentView: View {
         }
         .onAppear {
             if auth.isLoggedIn && auth.driveFiles.isEmpty && auth.classroomItems.isEmpty {
-                auth.laadGoogleData()
+                auth.loadGoogleData()
             }
         }
         .background(Color.black.ignoresSafeArea())

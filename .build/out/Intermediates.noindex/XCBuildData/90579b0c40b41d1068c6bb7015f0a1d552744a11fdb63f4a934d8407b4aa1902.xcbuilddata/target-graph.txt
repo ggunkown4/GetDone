@@ -1,0 +1,4 @@
+Target dependency graph (2 targets)
+Target 'AllExcludingTests' in project 'Aggregate'
+➜ Explicit dependency on target 'Get Done-product' in project 'Get Done'
+Target 'Get Done-product' in project 'Get Done' (no dependencies)

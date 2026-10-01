@@ -1,7 +1,7 @@
 import SwiftUI
 import Security
 
-// MARK: - Beveiligde Magister Opslag
+// MARK: - Secure Magister Storage
 struct MagisterKeychainHelper {
     private static let service = "GetDone.Magister"
     
@@ -77,78 +77,78 @@ struct MagisterAppStorageHelper {
 }
 
 // MARK: - Resources & Filter Enums
-enum BronFilter: String, CaseIterable {
-    case alles = "Alles"
+enum SourceFilter: String, CaseIterable {
+    case all = "All"
     case drive = "Google Drive"
     case classroom = "Google Classroom"
 }
 
-enum SorteerOptie: String, CaseIterable {
-    case naam = "Naam"
-    case datum = "Datum"
+enum SortOption: String, CaseIterable {
+    case name = "Name"
+    case date = "Date"
 }
 
-enum SorteerRichting: String, CaseIterable {
-    case oplopend = "Oplopend"
-    case aflopend = "Aflopend"
+enum SortDirection: String, CaseIterable {
+    case ascending = "Ascending"
+    case descending = "Descending"
 }
 
-enum TijdFilter: String, CaseIterable {
-    case alles = "Alles"
-    case laatsteWeek = "Afgelopen week"
-    case laatsteMaand = "Afgelopen maand"
-    case laatsteJaar = "Afgelopen jaar"
+enum TimeFilter: String, CaseIterable {
+    case all = "All"
+    case lastWeek = "Last week"
+    case lastMonth = "Last month"
+    case lastYear = "Last year"
 }
 
-// MARK: - Magister Modellen
+// MARK: - Magister Models
 enum MagisterItemType: String {
-    case huiswerk = "Huiswerk"
-    case toets = "Toets"
-    case informatie = "Informatie"
+    case homework = "Homework"
+    case test = "Test"
+    case information = "Information"
 }
 
 struct MagisterItem: Identifiable, Equatable {
     let id: UUID
     var magisterID: Int?
-    var vakNaam: String
-    var titel: String
-    var beschrijving: String
-    var datum: Date
+    var subjectName: String
+    var title: String
+    var description: String
+    var date: Date
     var type: MagisterItemType
-    var toetsType: String?
-    var kleur: Color
+    var testType: String?
+    var color: Color
     
     init(
         id: UUID = UUID(),
         magisterID: Int? = nil,
-        vakNaam: String,
-        titel: String,
-        beschrijving: String,
-        datum: Date,
+        subjectName: String,
+        title: String,
+        description: String,
+        date: Date,
         type: MagisterItemType,
-        toetsType: String? = nil,
-        kleur: Color = .blue
+        testType: String? = nil,
+        color: Color = .blue
     ) {
         self.id = id
         self.magisterID = magisterID
-        self.vakNaam = vakNaam
-        self.titel = titel
-        self.beschrijving = beschrijving
-        self.datum = datum
+        self.subjectName = subjectName
+        self.title = title
+        self.description = description
+        self.date = date
         self.type = type
-        self.toetsType = toetsType
-        self.kleur = kleur
+        self.testType = testType
+        self.color = color
     }
     
-    var datumFormatted: String {
+    var dateFormatted: String {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "nl_NL")
+        formatter.locale = Locale(identifier: "en_US")
         formatter.dateFormat = "d MMM"
-        return formatter.string(from: datum)
+        return formatter.string(from: date)
     }
 }
 
-// MARK: - Chat Component Modellen
+// MARK: - Chat Component Models
 struct ChatMessage: Identifiable {
     let id = UUID()
     let text: String
@@ -159,66 +159,66 @@ struct ChatMessage: Identifiable {
 struct PlanningItem: Identifiable, Equatable {
     let id: UUID
     var magisterID: Int?
-    var titel: String
-    var datum: Date
-    var beginTijd: Date
-    var eindTijd: Date
-    var kleur: Color
+    var title: String
+    var date: Date
+    var startTime: Date
+    var endTime: Date
+    var color: Color
     var isMagister: Bool
     
     init(
         id: UUID = UUID(),
         magisterID: Int? = nil,
-        titel: String,
-        datum: Date,
-        beginTijd: Date,
-        eindTijd: Date,
-        kleur: Color = .blue,
+        title: String,
+        date: Date,
+        startTime: Date,
+        endTime: Date,
+        color: Color = .blue,
         isMagister: Bool = false
     ) {
         self.id = id
         self.magisterID = magisterID
-        self.titel = titel
-        self.datum = datum
-        self.beginTijd = beginTijd
-        self.eindTijd = eindTijd
-        self.kleur = kleur
+        self.title = title
+        self.date = date
+        self.startTime = startTime
+        self.endTime = endTime
+        self.color = color
         self.isMagister = isMagister || (magisterID != nil)
     }
     
-    var tijdFormat: String {
+    var timeFormat: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm"
-        return "\(formatter.string(from: beginTijd)) - \(formatter.string(from: eindTijd))"
+        return "\(formatter.string(from: startTime)) - \(formatter.string(from: endTime))"
     }
     
-    var dagKort: String {
+    var shortDay: String {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "nl_NL")
+        formatter.locale = Locale(identifier: "en_US")
         formatter.dateFormat = "EEE"
-        return formatter.string(from: datum).capitalized
+        return formatter.string(from: date).capitalized
     }
 }
 
-// MARK: - Magister Gebruikersmodel
+// MARK: - Magister User Model
 struct MagisterGebruiker {
-    var voornaam: String = ""
-    var achternaam: String = ""
+    var firstName: String = ""
+    var lastName: String = ""
     var email: String = ""
-    var usersnaam: String = ""
-    var wachtwoord: String = ""
+    var username: String = ""
+    var password: String = ""
     var personId: Int? = nil
-    var schoolDomein: String = ""
+    var schoolDomain: String = ""
     
-    var volledigeNaam: String {
-        if voornaam.isEmpty && achternaam.isEmpty {
-            return "Magister Gebruiker"
+    var fullName: String {
+        if firstName.isEmpty && lastName.isEmpty {
+            return "Magister User"
         }
-        return "\(voornaam) \(achternaam)".trimmingCharacters(in: .whitespaces)
+        return "\(firstName) \(lastName)".trimmingCharacters(in: .whitespaces)
     }
     
-    var geformatteerdDomein: String {
-        var d = schoolDomein.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+    var formattedDomain: String {
+        var d = schoolDomain.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
         if d.isEmpty { return "" }
         if !d.contains(".magister.net") {
             d += ".magister.net"
@@ -227,11 +227,11 @@ struct MagisterGebruiker {
     }
 }
 
-// MARK: - Rooster Lesmodel
-struct Les: Identifiable {
+// MARK: - Schedule Lesson Model
+struct Lesson: Identifiable {
     let id = UUID()
-    let uur: String
-    let vak: String
-    let lokaal: String
-    let tijd: String
+    let period: String
+    let subject: String
+    let room: String
+    let time: String
 }

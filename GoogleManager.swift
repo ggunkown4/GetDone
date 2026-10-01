@@ -2,7 +2,7 @@ import SwiftUI
 import AuthenticationServices
 import CryptoKit
 
-// MARK: - API Modellen
+// MARK: - API Models
 struct DriveFile: Codable, Identifiable {
     let id: String
     let name: String
@@ -10,20 +10,20 @@ struct DriveFile: Codable, Identifiable {
     let webViewLink: String?
     let modifiedTime: String?
     
-    var datum: Date {
+    var date: Date {
         guard let timeStr = modifiedTime else { return Date.distantPast }
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        if let date = formatter.date(from: timeStr) { return date }
+        if let d = formatter.date(from: timeStr) { return d }
         formatter.formatOptions = [.withInternetDateTime]
         return formatter.date(from: timeStr) ?? Date.distantPast
     }
     
-    var datumFormatted: String {
+    var dateFormatted: String {
         guard modifiedTime != nil else { return "" }
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .short
-        return formatter.localizedString(for: datum, relativeTo: Date())
+        return formatter.localizedString(for: date, relativeTo: Date())
     }
 }
 
@@ -38,29 +38,29 @@ struct ClassroomCourse: Codable, Identifiable {
 }
 
 enum ClassroomItemType: String { 
-    case opdracht = "Assignment"
-    case aankondiging = "Announcement"
-    case materiaal = "Material" 
+    case assignment = "Assignment"
+    case announcement = "Announcement"
+    case material = "Material" 
 }
 
 struct ClassroomItem: Identifiable {
     let id: String
-    let titel: String
-    let vakNaam: String
+    let title: String
+    let subjectName: String
     let type: ClassroomItemType
     let url: String
-    let datum: Date
-    let kleur: Color
-    let tekst: String?
+    let date: Date
+    let color: Color
+    let text: String?
     
     var datumFormatted: String {
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .short
-        return formatter.localizedString(for: datum, relativeTo: Date())
+        return formatter.localizedString(for: date, relativeTo: Date())
     }
 }
 
-// MARK: - PKCE Hulpfuncties
+// MARK: - PKCE Helper Functions
 func generateCodeVerifier() -> String {
     var buffer = [UInt8](repeating: 0, count: 32)
     _ = SecRandomCopyBytes(kSecRandomDefault, buffer.count, &buffer)
@@ -105,7 +105,7 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
     @Published var isLoadingMoreClassroomItems: Bool = false
     @Published var classroomHasMoreItems: Bool = false
     
-    // Classroom paginatie tokens per vak
+    // Classroom pagination tokens per course
     private var courseWorkTokens: [String: String] = [:]
     private var materialsTokens: [String: String] = [:]
     private var announcementsTokens: [String: String] = [:]
@@ -260,7 +260,7 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
                         self.fetchAuthenticatedData(url: url, isRetry: true, completion: completion)
                     } else {
                         DispatchQueue.main.async {
-                            self.errorMessage = "Sessie verlopen. Log opnieuw in."
+                            self.errorMessage = "Session expired. Please log in again."
                             self.logout()
                         }
                         completion(nil, error)
@@ -285,7 +285,7 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
         }
     }
     
-    func laadGoogleData() {
+    func loadGoogleData() {
         guard !accessToken.isEmpty else { return }
         DispatchQueue.main.async { 
             self.isLoadingData = true 
@@ -298,26 +298,26 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
             self.announcementsTokens.removeAll()
         }
         
-        fetchDriveFiles(mapId: nil, loadMore: false)
+        fetchDriveFiles(folderId: nil, loadMore: false)
         fetchClassroomCourses()
     }
     
     // MARK: - Drive Ophalen
-    func loadFilesForFolder(mapId: String?) {
+    func loadFilesForFolder(folderId: String?) {
         driveNextPageToken = nil
         isLoadingMoreFiles = false
-        fetchDriveFiles(mapId: mapId, loadMore: false)
+        fetchDriveFiles(folderId: folderId, loadMore: false)
     }
     
-    func loadMoreBestandenVoorMap(mapId: String?) {
+    func loadMoreFilesForFolder(folderId: String?) {
         guard driveNextPageToken != nil, !isLoadingMoreFiles else { return }
         isLoadingMoreFiles = true
-        fetchDriveFiles(mapId: mapId, loadMore: true)
+        fetchDriveFiles(folderId: folderId, loadMore: true)
     }
     
-    private func fetchDriveFiles(mapId: String? = nil, loadMore: Bool = false) {
+    private func fetchDriveFiles(folderId: String? = nil, loadMore: Bool = false) {
         let query: String
-        if let parentId = mapId {
+        if let parentId = folderId {
             query = "'\(parentId)' in parents and trashed = false"
         } else {
             query = "(mimeType != 'application/vnd.google-apps.folder' or 'root' in parents) and trashed = false"
@@ -342,13 +342,13 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
                     let newFiles = response.files ?? []
                     
                     if loadMore {
-                        var bestaande = self.driveFiles
+                        var existing = self.driveFiles
                         for file in newFiles {
-                            if !bestaande.contains(where: { $0.id == file.id }) {
-                                bestaande.append(file)
+                            if !existing.contains(where: { $0.id == file.id }) {
+                                existing.append(file)
                             }
                         }
-                        self.driveFiles = bestaande
+                        self.driveFiles = existing
                     } else {
                         self.driveFiles = newFiles
                     }
@@ -394,7 +394,7 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
         }
         
         let dispatchGroup = DispatchGroup()
-        var opgehaaldeItems: [ClassroomItem] = []
+        var fetchedItems: [ClassroomItem] = []
         let arrayQueue = DispatchQueue(label: "com.classroom.items.queue")
         let tokenQueue = DispatchQueue(label: "com.classroom.tokens.queue")
         
@@ -403,7 +403,7 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
         for course in courses {
             let courseId = course.id
             let courseName = course.name
-            let courseColor = self.kleurVoorVak(id: courseId)
+            let courseColor = self.colorForSubject(id: courseId)
             
             // 1. Assignmenten
             let cwToken = courseWorkTokens[courseId]
@@ -427,11 +427,11 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
                                    let url = work["alternateLink"] as? String {
                                     let timeStr = work["creationTime"] as? String
                                     let item = ClassroomItem(
-                                        id: id, titel: title, vakNaam: courseName,
-                                        type: .opdracht, url: url, datum: self.parseISO8601Date(timeStr),
-                                        kleur: courseColor, tekst: work["description"] as? String
+                                        id: id, title: title, subjectName: courseName,
+                                        type: .assignment, url: url, date: self.parseISO8601Date(timeStr),
+                                        color: courseColor, text: work["description"] as? String
                                     )
-                                    arrayQueue.sync { opgehaaldeItems.append(item) }
+                                    arrayQueue.sync { fetchedItems.append(item) }
                                 }
                             }
                         }
@@ -462,11 +462,11 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
                                    let url = mat["alternateLink"] as? String {
                                     let timeStr = mat["creationTime"] as? String
                                     let item = ClassroomItem(
-                                        id: id, titel: title, vakNaam: courseName,
-                                        type: .materiaal, url: url, datum: self.parseISO8601Date(timeStr),
-                                        kleur: courseColor, tekst: mat["description"] as? String
+                                        id: id, title: title, subjectName: courseName,
+                                        type: .material, url: url, date: self.parseISO8601Date(timeStr),
+                                        color: courseColor, text: mat["description"] as? String
                                     )
-                                    arrayQueue.sync { opgehaaldeItems.append(item) }
+                                    arrayQueue.sync { fetchedItems.append(item) }
                                 }
                             }
                         }
@@ -497,11 +497,11 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
                                    let url = ann["alternateLink"] as? String {
                                     let timeStr = ann["creationTime"] as? String
                                     let item = ClassroomItem(
-                                        id: id, titel: "Announcement", vakNaam: courseName,
-                                        type: .aankondiging, url: url, datum: self.parseISO8601Date(timeStr),
-                                        kleur: courseColor, tekst: text
+                                        id: id, title: "Announcement", subjectName: courseName,
+                                        type: .announcement, url: url, date: self.parseISO8601Date(timeStr),
+                                        color: courseColor, text: text
                                     )
-                                    arrayQueue.sync { opgehaaldeItems.append(item) }
+                                    arrayQueue.sync { fetchedItems.append(item) }
                                 }
                             }
                         }
@@ -514,7 +514,7 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
         dispatchGroup.notify(queue: .main) {
             if loadMore {
                 var bestaande = self.classroomItems
-                for item in opgehaaldeItems {
+                for item in fetchedItems {
                     if !bestaande.contains(where: { $0.id == item.id }) {
                         bestaande.append(item)
                     }
@@ -522,7 +522,7 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
                 self.classroomItems = bestaande
                 self.isLoadingMoreClassroomItems = false
             } else {
-                self.classroomItems = opgehaaldeItems
+                self.classroomItems = fetchedItems
                 self.isLoadingData = false
             }
             
@@ -550,9 +550,9 @@ class WebGoogleAuthManager: NSObject, ObservableObject, ASWebAuthenticationPrese
         return formatter.date(from: dateString) ?? Date.distantPast
     }
     
-    private func kleurVoorVak(id: String) -> Color {
-        let kleurenpalet: [Color] = [.blue, .green, .orange, .purple, .red, .teal, .pink]
-        return kleurenpalet[abs(id.hashValue) % kleurenpalet.count]
+    private func colorForSubject(id: String) -> Color {
+        let colorPalette: [Color] = [.blue, .green, .orange, .purple, .red, .teal, .pink]
+        return colorPalette[abs(id.hashValue) % colorPalette.count]
     }
     
     func logout() {

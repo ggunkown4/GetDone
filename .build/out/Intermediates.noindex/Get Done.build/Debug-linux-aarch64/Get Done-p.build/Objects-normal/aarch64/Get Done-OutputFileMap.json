@@ -1,0 +1,119 @@
+{
+  "" : {
+    "diagnostics" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/Get Done-primary.dia",
+    "emit-module-dependencies" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/Get Done-primary-emit-module.d",
+    "emit-module-diagnostics" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/Get Done-primary-emit-module.dia",
+    "pch" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/Get Done-primary-Bridging-header.pch",
+    "swift-dependencies" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/Get Done-primary.swiftdeps"
+  },
+  "/root/GetDone.swiftpm/AgendaView.swift" : {
+    "const-values" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/AgendaView.swiftconstvalues",
+    "dependencies" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/AgendaView.d",
+    "diagnostics" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/AgendaView.dia",
+    "index-unit-output-path" : "/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/AgendaView.o",
+    "llvm-bc" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/AgendaView.bc",
+    "object" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/AgendaView.o",
+    "swift-dependencies" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/AgendaView.swiftdeps",
+    "swiftmodule" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/AgendaView~partial.swiftmodule"
+  },
+  "/root/GetDone.swiftpm/ChatView.swift" : {
+    "const-values" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ChatView.swiftconstvalues",
+    "dependencies" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ChatView.d",
+    "diagnostics" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ChatView.dia",
+    "index-unit-output-path" : "/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ChatView.o",
+    "llvm-bc" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ChatView.bc",
+    "object" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ChatView.o",
+    "swift-dependencies" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ChatView.swiftdeps",
+    "swiftmodule" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ChatView~partial.swiftmodule"
+  },
+  "/root/GetDone.swiftpm/ContentView.swift" : {
+    "const-values" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ContentView.swiftconstvalues",
+    "dependencies" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ContentView.d",
+    "diagnostics" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ContentView.dia",
+    "index-unit-output-path" : "/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ContentView.o",
+    "llvm-bc" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ContentView.bc",
+    "object" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ContentView.o",
+    "swift-dependencies" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ContentView.swiftdeps",
+    "swiftmodule" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ContentView~partial.swiftmodule"
+  },
+  "/root/GetDone.swiftpm/DetailScreen.swift" : {
+    "const-values" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/DetailScreen.swiftconstvalues",
+    "dependencies" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/DetailScreen.d",
+    "diagnostics" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/DetailScreen.dia",
+    "index-unit-output-path" : "/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/DetailScreen.o",
+    "llvm-bc" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/DetailScreen.bc",
+    "object" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/DetailScreen.o",
+    "swift-dependencies" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/DetailScreen.swiftdeps",
+    "swiftmodule" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/DetailScreen~partial.swiftmodule"
+  },
+  "/root/GetDone.swiftpm/GoogleManager.swift" : {
+    "const-values" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/GoogleManager.swiftconstvalues",
+    "dependencies" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/GoogleManager.d",
+    "diagnostics" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/GoogleManager.dia",
+    "index-unit-output-path" : "/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/GoogleManager.o",
+    "llvm-bc" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/GoogleManager.bc",
+    "object" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/GoogleManager.o",
+    "swift-dependencies" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/GoogleManager.swiftdeps",
+    "swiftmodule" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/GoogleManager~partial.swiftmodule"
+  },
+  "/root/GetDone.swiftpm/MagisterManager.swift" : {
+    "const-values" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/MagisterManager.swiftconstvalues",
+    "dependencies" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/MagisterManager.d",
+    "diagnostics" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/MagisterManager.dia",
+    "index-unit-output-path" : "/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/MagisterManager.o",
+    "llvm-bc" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/MagisterManager.bc",
+    "object" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/MagisterManager.o",
+    "swift-dependencies" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/MagisterManager.swiftdeps",
+    "swiftmodule" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/MagisterManager~partial.swiftmodule"
+  },
+  "/root/GetDone.swiftpm/MagisterSection.swift" : {
+    "const-values" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/MagisterSection.swiftconstvalues",
+    "dependencies" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/MagisterSection.d",
+    "diagnostics" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/MagisterSection.dia",
+    "index-unit-output-path" : "/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/MagisterSection.o",
+    "llvm-bc" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/MagisterSection.bc",
+    "object" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/MagisterSection.o",
+    "swift-dependencies" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/MagisterSection.swiftdeps",
+    "swiftmodule" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/MagisterSection~partial.swiftmodule"
+  },
+  "/root/GetDone.swiftpm/Models.swift" : {
+    "const-values" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/Models.swiftconstvalues",
+    "dependencies" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/Models.d",
+    "diagnostics" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/Models.dia",
+    "index-unit-output-path" : "/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/Models.o",
+    "llvm-bc" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/Models.bc",
+    "object" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/Models.o",
+    "swift-dependencies" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/Models.swiftdeps",
+    "swiftmodule" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/Models~partial.swiftmodule"
+  },
+  "/root/GetDone.swiftpm/MyApp.swift" : {
+    "const-values" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/MyApp.swiftconstvalues",
+    "dependencies" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/MyApp.d",
+    "diagnostics" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/MyApp.dia",
+    "index-unit-output-path" : "/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/MyApp.o",
+    "llvm-bc" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/MyApp.bc",
+    "object" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/MyApp.o",
+    "swift-dependencies" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/MyApp.swiftdeps",
+    "swiftmodule" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/MyApp~partial.swiftmodule"
+  },
+  "/root/GetDone.swiftpm/ProfileView.swift" : {
+    "const-values" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ProfileView.swiftconstvalues",
+    "dependencies" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ProfileView.d",
+    "diagnostics" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ProfileView.dia",
+    "index-unit-output-path" : "/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ProfileView.o",
+    "llvm-bc" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ProfileView.bc",
+    "object" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ProfileView.o",
+    "swift-dependencies" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ProfileView.swiftdeps",
+    "swiftmodule" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ProfileView~partial.swiftmodule"
+  },
+  "/root/GetDone.swiftpm/ResourcesView.swift" : {
+    "const-values" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ResourcesView.swiftconstvalues",
+    "dependencies" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ResourcesView.d",
+    "diagnostics" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ResourcesView.dia",
+    "index-unit-output-path" : "/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ResourcesView.o",
+    "llvm-bc" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ResourcesView.bc",
+    "object" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ResourcesView.o",
+    "swift-dependencies" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ResourcesView.swiftdeps",
+    "swiftmodule" : "/root/GetDone.swiftpm/.build/out/Intermediates.noindex/Get Done.build/Debug-linux-aarch64/Get Done-p.build/Objects-normal/aarch64/ResourcesView~partial.swiftmodule"
+  }
+}

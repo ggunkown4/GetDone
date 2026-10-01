@@ -7,14 +7,14 @@ class MagisterManager: ObservableObject {
     @Published var magisterItems: [MagisterItem] = []
     @Published var magisterPlans: [PlanningItem] = []
     @Published var isLoading: Bool = false
-    @Published var foutmelding: String? = nil
+    @Published var errorMessage: String? = nil
     
-    // Alleen netwerkverzoeken uitschakelen tijdens SwiftUI Canvas static preview rendering
+    // Disable network requests during SwiftUI Canvas static preview rendering
     private var isCanvasPreview: Bool {
         return ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
     }
     
-    func loadHomeworkAndSchedule(voor referentieDatum: Date = Date()) {
+    func loadHomeworkAndSchedule(voor referenceDate: Date = Date()) {
         if isCanvasPreview {
             return
         }
@@ -23,21 +23,21 @@ class MagisterManager: ObservableObject {
         
         if token.isEmpty {
             DispatchQueue.main.async {
-                self.foutmelding = "Niet ingelogd bij Magister"
+                self.errorMessage = "Not logged in to Magister"
                 self.isLoading = false
             }
             return
         }
         
         let domein = MagisterAppStorageHelper.read(key: "magister_domein") ?? "roercollege"
-        let geformatteerdDomein = domein.contains(".magister.net") ? domein : "\(domein).magister.net"
+        let formattedDomain = domein.contains(".magister.net") ? domein : "\(domein).magister.net"
         
         DispatchQueue.main.async {
             self.isLoading = true
-            self.foutmelding = nil
+            self.errorMessage = nil
         }
         
-        guard let accountURL = URL(string: "https://\(geformatteerdDomein)/api/account") else {
+        guard let accountURL = URL(string: "https://\(formattedDomain)/api/account") else {
             DispatchQueue.main.async { self.isLoading = false }
             return
         }
@@ -50,7 +50,7 @@ class MagisterManager: ObservableObject {
             if let error = error {
                 DispatchQueue.main.async {
                     self.isLoading = false
-                    self.foutmelding = "Netwerkfout: \(error.localizedDescription)"
+                    self.errorMessage = "Network error: \(error.localizedDescription)"
                 }
                 return
             }
@@ -58,7 +58,7 @@ class MagisterManager: ObservableObject {
             guard let data = data, let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
                 DispatchQueue.main.async {
                     self.isLoading = false
-                    self.foutmelding = "Could not validate account."
+                    self.errorMessage = "Could not validate account."
                 }
                 return
             }
@@ -78,20 +78,20 @@ class MagisterManager: ObservableObject {
             guard let pId = personId else {
                 DispatchQueue.main.async {
                     self.isLoading = false
-                    self.foutmelding = "Persoon ID niet gevonden."
+                    self.errorMessage = "Person ID not found."
                 }
                 return
             }
             
-            self.haalAfsprakenEnRoosterOp(personId: pId, domein: geformatteerdDomein, token: token, referentieDatum: referentieDatum)
+            self.fetchAppointmentsAndSchedule(personId: pId, domein: formattedDomain, token: token, referenceDate: referenceDate)
         }.resume()
     }
     
-    private func haalAfsprakenEnRoosterOp(personId: Int, domein: String, token: String, referentieDatum: Date) {
+    private func fetchAppointmentsAndSchedule(personId: Int, domein: String, token: String, referenceDate: Date) {
         var calendar = Calendar.current
         calendar.firstWeekday = 2
         
-        let components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: referentieDatum)
+        let components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: referenceDate)
         guard let startOfWeek = calendar.date(from: components),
               let endOfWeek = calendar.date(byAdding: .day, value: 7, to: startOfWeek) else {
             DispatchQueue.main.async { self.isLoading = false }
@@ -101,10 +101,10 @@ class MagisterManager: ObservableObject {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         
-        let vanStr = formatter.string(from: startOfWeek)
-        let totStr = formatter.string(from: endOfWeek)
+        let fromStr = formatter.string(from: startOfWeek)
+        let toStr = formatter.string(from: endOfWeek)
         
-        guard let url = URL(string: "https://\(domein)/api/personen/\(personId)/afspraken?van=\(vanStr)&tot=\(totStr)") else {
+        guard let url = URL(string: "https://\(domein)/api/personen/\(personId)/afspraken?van=\(fromStr)&tot=\(toStr)") else {
             DispatchQueue.main.async { self.isLoading = false }
             return
         }
@@ -120,132 +120,132 @@ class MagisterManager: ObservableObject {
                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                   let items = json["Items"] as? [[String: Any]] else {
                 DispatchQueue.main.async {
-                    self.foutmelding = error != nil ? "Fout bij ophalen rooster" : "None roosterdata ontvangen."
+                    self.errorMessage = error != nil ? "Error fetching schedule" : "No schedule data received."
                 }
                 return
             }
             
-            var geladenMagisterItems: [MagisterItem] = []
-            var geladenPlanningen: [PlanningItem] = []
+            var loadedMagisterItems: [MagisterItem] = []
+            var loadedPlans: [PlanningItem] = []
             
             for item in items {
                 let magisterId = item["Id"] as? Int ?? item["id"] as? Int
-                let omschrijving = item["Omschrijving"] as? String ?? "Les"
-                let inhoudRaw = item["Inhoud"] as? String ?? item["Aantekening"] as? String ?? ""
-                let schoonInhoud = inhoudRaw.strippingHTML
-                let lokatie = item["Lokatie"] as? String ?? ""
+                let description = item["Omschrijving"] as? String ?? "Lesson"
+                let contentRaw = item["Inhoud"] as? String ?? item["Aantekening"] as? String ?? ""
+                let cleanContent = contentRaw.strippingHTML
+                let location = item["Lokatie"] as? String ?? ""
                 let status = item["Status"] as? Int ?? 1
-                let isUitval = status == 4 || status == 5 || omschrijving.lowercased().contains("uitval")
+                let isCancelled = status == 4 || status == 5 || description.lowercased().contains("uitval")
                 
                 let beginStr = item["Begin"] as? String ?? ""
                 let eindStr = item["Einde"] as? String ?? ""
                 
-                guard let beginDatum = self.parseDate(beginStr) else { continue }
-                let eindDatum = self.parseDate(eindStr) ?? beginDatum.addingTimeInterval(2700)
+                guard let startDate = self.parseDate(beginStr) else { continue }
+                let endDate = self.parseDate(eindStr) ?? startDate.addingTimeInterval(2700)
                 
-                var vakNaam = "Algemeen"
-                if let vakken = item["Vakken"] as? [[String: Any]], let eersteVak = vakken.first {
-                    vakNaam = eersteVak["Naam"] as? String ?? eersteVak["Code"] as? String ?? "Vak"
-                } else if !omschrijving.isEmpty {
-                    vakNaam = omschrijving
+                var subjectName = "General"
+                if let subjects = item["Vakken"] as? [[String: Any]], let firstSubject = subjects.first {
+                    subjectName = firstSubject["Naam"] as? String ?? firstSubject["Code"] as? String ?? "Subject"
+                } else if !description.isEmpty {
+                    subjectName = description
                 }
                 
                 let infoType = item["InfoType"] as? Int ?? 0
-                let isHuiswerk = infoType == 1 || !schoonInhoud.isEmpty || omschrijving.lowercased().contains("huiswerk")
-                let isToets = (infoType >= 2 && infoType <= 5) || schoonInhoud.lowercased().contains("toets") || omschrijving.lowercased().contains("toets") || schoonInhoud.lowercased().contains("proefwerk")
+                let isHomework = infoType == 1 || !cleanContent.isEmpty || description.lowercased().contains("homework")
+                let isTest = (infoType >= 2 && infoType <= 5) || cleanContent.lowercased().contains("toets") || omschrijving.lowercased().contains("toets") || cleanContent.lowercased().contains("proefwerk")
                 
-                var itemKleur: Color = .blue
-                var titelPrefix = ""
+                var itemColor: Color = .blue
+                var titlePrefix = ""
                 
-                if isUitval {
-                    itemKleur = .gray
-                    titelPrefix = "[UITVAL] "
-                } else if isToets {
-                    itemKleur = .orange
-                    titelPrefix = "📝 "
-                } else if isHuiswerk {
-                    itemKleur = .purple
-                    titelPrefix = "📚 "
+                if isCancelled {
+                    itemColor = .gray
+                    titlePrefix = "[CANCELLED] "
+                } else if isTest {
+                    itemColor = .orange
+                    titlePrefix = "📝 "
+                } else if isHomework {
+                    itemColor = .purple
+                    titlePrefix = "📚 "
                 } else {
-                    itemKleur = .teal
+                    itemColor = .teal
                 }
                 
-                let volledigeTitel = "\(titelPrefix)\(omschrijving)\(lokatie.isEmpty ? "" : " (\(lokatie))")"
+                let volledigeTitel = "\(titelPrefix)\(omschrijving)\(location.isEmpty ? "" : " (\(location))")"
                 
                 let planning = PlanningItem(
                     magisterID: magisterId,
-                    titel: volledigeTitel,
-                    datum: beginDatum,
-                    beginTijd: beginDatum,
-                    eindTijd: eindDatum,
-                    kleur: itemKleur,
+                    title: fullTitle,
+                    date: startDate,
+                    startTime: startDate,
+                    endTime: endDate,
+                    color: itemColor,
                     isMagister: true
                 )
                 
                 if let mId = magisterId {
-                    if !geladenPlanningen.contains(where: { $0.magisterID == mId }) {
-                        geladenPlanningen.append(planning)
+                    if !loadedPlans.contains(where: { $0.magisterID == mId }) {
+                        loadedPlans.append(planning)
                     }
                 } else {
-                    geladenPlanningen.append(planning)
+                    loadedPlans.append(planning)
                 }
                 
-                if isToets || isHuiswerk || !schoonInhoud.isEmpty {
-                    var toetsSoort: String? = nil
-                    if isToets {
+                if isToets || isHomework || !cleanContent.isEmpty {
+                    var testSort: String? = nil
+                    if isTest {
                         switch infoType {
-                        case 2: toetsSoort = "Proefwerk"
-                        case 3: toetsSoort = "SO"
-                        case 4: toetsSoort = "Mondeling"
-                        case 5: toetsSoort = "Praktijk"
-                        default: toetsSoort = "Toets"
+                        case 2: testSort = "Written Exam"
+                        case 3: testSort = "Quiz"
+                        case 4: testSort = "Oral Exam"
+                        case 5: testSort = "Practical"
+                        default: testSort = "Test"
                         }
                     }
                     
                     let mItem = MagisterItem(
                         magisterID: magisterId,
-                        vakNaam: vakNaam.capitalized,
-                        titel: volledigeTitel,
-                        beschrijving: schoonInhoud.isEmpty ? omschrijving : schoonInhoud,
-                        datum: beginDatum,
-                        type: isToets ? .toets : .huiswerk,
-                        toetsType: toetsSoort,
-                        kleur: itemKleur
+                        subjectName: subjectName.capitalized,
+                        title: fullTitle,
+                        description: cleanContent.isEmpty ? description : cleanContent,
+                        date: startDate,
+                        type: isTest ? .test : .homework,
+                        testType: testSort,
+                        color: itemColor
                     )
                     
                     if let mId = magisterId {
-                        if !geladenMagisterItems.contains(where: { $0.magisterID == mId }) {
-                            geladenMagisterItems.append(mItem)
+                        if !loadedMagisterItems.contains(where: { $0.magisterID == mId }) {
+                            loadedMagisterItems.append(mItem)
                         }
                     } else {
-                        geladenMagisterItems.append(mItem)
+                        loadedMagisterItems.append(mItem)
                     }
                 }
             }
             
             DispatchQueue.main.async {
-                let nieuweMagisterIDs = Set(geladenPlanningen.compactMap { $0.magisterID })
+                let newMagisterIDs = Set(loadedPlans.compactMap { $0.magisterID })
                 
                 self.magisterPlans.removeAll { existing in
-                    if let id = existing.magisterID, nieuweMagisterIDs.contains(id) {
+                    if let id = existing.magisterID, newMagisterIDs.contains(id) {
                         return true
                     }
-                    return existing.datum >= startOfWeek && existing.datum < endOfWeek
+                    return existing.date >= startOfWeek && existing.date < endOfWeek
                 }
                 
                 self.magisterItems.removeAll { existing in
-                    if let id = existing.magisterID, nieuweMagisterIDs.contains(id) {
+                    if let id = existing.magisterID, newMagisterIDs.contains(id) {
                         return true
                     }
-                    return existing.datum >= startOfWeek && existing.datum < endOfWeek
+                    return existing.date >= startOfWeek && existing.date < endOfWeek
                 }
                 
-                self.magisterPlans.append(contentsOf: geladenPlanningen)
-                self.magisterItems.append(contentsOf: geladenMagisterItems)
+                self.magisterPlans.append(contentsOf: loadedPlans)
+                self.magisterItems.append(contentsOf: loadedMagisterItems)
                 
-                self.magisterPlans.sort(by: { $0.beginTijd < $1.beginTijd })
-                self.magisterItems.sort(by: { $0.datum < $1.datum })
-                self.foutmelding = nil
+                self.magisterPlans.sort(by: { $0.startTime < $1.startTime })
+                self.magisterItems.sort(by: { $0.date < $1.date })
+                self.errorMessage = nil
             }
         }.resume()
     }
