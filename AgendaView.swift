@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - Modal Sheet voor Plan Aanmaken
+// MARK: - Modal Sheet for Adding a Plan
 struct AddPlanSheet: View {
     @Environment(\.dismiss) var dismiss
     @Binding var plans: [PlanningItem]
@@ -18,13 +18,13 @@ struct AddPlanSheet: View {
         NavigationStack {
             Form {
                 Section("Plan Details") {
-                    TextField("Nieuw plan", text: $titel)
-                    DatePicker("Datum", selection: $datum, displayedComponents: .date)
-                    DatePicker("Begintijd", selection: $beginTijd, displayedComponents: .hourAndMinute)
-                    DatePicker("Eindtijd", selection: $eindTijd, displayedComponents: .hourAndMinute)
+                    TextField("New plan", text: $titel)
+                    DatePicker("Date", selection: $datum, displayedComponents: .date)
+                    DatePicker("Start time", selection: $beginTijd, displayedComponents: .hourAndMinute)
+                    DatePicker("End time", selection: $eindTijd, displayedComponents: .hourAndMinute)
                 }
                 
-                Section("Kleur Categorie") {
+                Section("Color Category") {
                     HStack(spacing: 12) {
                         ForEach(beschikbareKleuren, id: \.self) { kleur in
                             Circle()
@@ -42,16 +42,16 @@ struct AddPlanSheet: View {
                     .padding(.vertical, 4)
                 }
             }
-            .navigationTitle("Nieuw plan")
+            .navigationTitle("New plan")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Annuleer") { dismiss() }
+                    Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Opslaan") {
+                    Button("Save") {
                         let nieuwPlan = PlanningItem(
-                            titel: titel.isEmpty ? "Nieuw plan" : titel,
+                            titel: titel.isEmpty ? "New plan" : titel,
                             datum: datum,
                             beginTijd: beginTijd,
                             eindTijd: eindTijd,
@@ -95,7 +95,7 @@ struct WeekSelectorPopover: View {
                 
                 Spacer()
                 
-                Text("Selecteer Week")
+                Text("Select Week")
                     .font(.headline)
                     .foregroundColor(.white)
                 
@@ -113,7 +113,7 @@ struct WeekSelectorPopover: View {
             }
             
             HStack {
-                Text("Typ week:")
+                Text("Enter week:")
                     .font(.subheadline)
                     .foregroundColor(.gray)
                 
@@ -151,7 +151,7 @@ struct WeekSelectorPopover: View {
             Button {
                 dismiss()
             } label: {
-                Text("Ready")
+                Text("Done")
                     .font(.subheadline.bold())
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
@@ -198,7 +198,7 @@ struct WeekSelectorPopover: View {
     }
 }
 
-// MARK: - Agenda Weergave Router
+// MARK: - Agenda View Router
 struct AgendaView: View {
     @Binding var selectedDate: Date
     @Binding var selectedView: Int
@@ -220,7 +220,7 @@ struct AgendaView: View {
                 HStack(spacing: 8) {
                     ProgressView()
                         .scaleEffect(0.8)
-                    Text("Magister rooster laden...")
+                    Text("Loading schedule...")
                         .font(.caption)
                         .foregroundColor(.gray)
                 }
@@ -286,7 +286,7 @@ struct AgendaView: View {
     }
 }
 
-// MARK: - 1. Lijst Weergave
+// MARK: - 1. List View
 struct AgendaLijstView: View {
     @Binding var plans: [PlanningItem]
     var magisterPlans: [PlanningItem]
@@ -317,17 +317,17 @@ struct AgendaLijstView: View {
                 Image(systemName: "calendar.badge.plus")
                     .font(.system(size: 50))
                     .foregroundColor(.gray.opacity(0.6))
-                Text("Nog geen plannen aanwezig")
+                Text("No plans yet")
                     .font(.headline)
                     .foregroundColor(.gray)
-                Text("Tik op '+' om een nieuw plan toe te voegen.")
+                Text("Tap + to add a new plan.")
                     .font(.subheadline)
                     .foregroundColor(.gray.opacity(0.8))
                 
                 Button {
                     showNewPlanSheet = true
                 } label: {
-                    Text("Plan toevoegen")
+                    Text("Add Plan")
                         .font(.subheadline.bold())
                         .foregroundColor(.white)
                         .padding(.horizontal, 20)
@@ -390,7 +390,7 @@ struct AgendaLijstView: View {
     }
 }
 
-// MARK: - 2. Dayrooster Weergave
+// MARK: - 2. Day View
 struct AgendaDayView: View {
     var selectedDate: Date
     var plans: [PlanningItem]
@@ -477,7 +477,7 @@ struct AgendaDayView: View {
     }
 }
 
-// MARK: - 3. Weekrooster Weergave
+// MARK: - 3. Week View
 struct AgendaWeekView: View {
     var selectedDate: Date
     var plans: [PlanningItem]
@@ -509,7 +509,7 @@ struct AgendaWeekView: View {
                         .padding(.bottom, 10)
                         
                         if dagPlanningen.isEmpty {
-                            Text("None plannen")
+                            Text("No plans")
                                 .font(.caption)
                                 .foregroundColor(.gray.opacity(0.6))
                                 .frame(height: 100)
@@ -550,7 +550,7 @@ struct AgendaWeekView: View {
         selectedView: .constant(0),
         plans: .constant([
             PlanningItem(
-                titel: "Wiskunde Huiswerk",
+                titel: "Math Homework",
                 datum: Date(),
                 beginTijd: Date(),
                 eindTijd: Date().addingTimeInterval(3600),
