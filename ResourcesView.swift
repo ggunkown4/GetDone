@@ -124,7 +124,7 @@ struct ResourcesView: View {
                         }
                     }
                     Section(header: Text("Order")) {
-                        Picker("Richting", selection: $sortDirection) {
+                        Picker("Direction", selection: $sortDirection) {
                             ForEach(SortDirection.allCases, id: \.self) { Text($0.rawValue).tag($0) }
                         }
                     }
@@ -481,8 +481,8 @@ struct AnnouncementBarView: View {
                     Spacer()
                     Text(item.dateFormatted).font(.caption2).foregroundColor(.gray)
                 }
-                if let tekst = item.text, !text.isEmpty {
-                    Text(tekst).font(.subheadline).foregroundColor(.white).multilineTextAlignment(.leading).lineLimit(4)
+                if let bodyText = item.text, !bodyText.isEmpty {
+                    Text(bodyText).font(.subheadline).foregroundColor(.white).multilineTextAlignment(.leading).lineLimit(4)
                 }
             }
             .padding(14).background(item.color.opacity(0.12)).cornerRadius(12).overlay(RoundedRectangle(cornerRadius: 12).stroke(item.color.opacity(0.35), lineWidth: 1))
@@ -513,4 +513,3 @@ struct ClassroomItemCardView: View {
         }.buttonStyle(.plain)
     }
 }
-

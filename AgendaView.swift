@@ -77,7 +77,7 @@ struct WeekSelectorPopover: View {
     @Binding var selectedDate: Date
     @Environment(\.dismiss) var dismiss
     
-    @State private var gekozenWeek: Int = 1
+    @State private var selectedWeek: Int = 1
     @State private var typInvoer: String = ""
     
     var body: some View {
@@ -128,7 +128,7 @@ struct WeekSelectorPopover: View {
                     .frame(width: 70)
                     .onSubmit {
                         if let number = Int(typInvoer), (1...53).contains(number) {
-                            gekozenWeek = number
+                            selectedWeek = number
                             changeToWeek(number)
                         }
                     }
@@ -136,14 +136,14 @@ struct WeekSelectorPopover: View {
             
             Divider().background(Color.white.opacity(0.2))
             
-            Picker("Week", selection: $gekozenWeek) {
+            Picker("Week", selection: $selectedWeek) {
                 ForEach(1...53, id: \.self) { week in
                     Text("Week \(week)").tag(week)
                 }
             }
             .pickerStyle(.wheel)
             .frame(height: 120)
-            .onChange(of: gekozenWeek) { _, newValue in
+            .onChange(of: selectedWeek) { _, newValue in
                 typInvoer = "\(newValue)"
                 changeToWeek(newValue)
             }
@@ -167,17 +167,17 @@ struct WeekSelectorPopover: View {
             var cal = Calendar.current
             cal.firstWeekday = 2
             let week = cal.component(.weekOfYear, from: selectedDate)
-            gekozenWeek = week
+            selectedWeek = week
             typInvoer = "\(week)"
         }
     }
     
     private func adjustWeek(by offset: Int) {
-        var newWeek = gekozenWeek + offset
+        var newWeek = selectedWeek + offset
         if newWeek < 1 { newWeek = 53 }
         else if newWeek > 53 { newWeek = 1 }
         
-        gekozenWeek = newWeek
+        selectedWeek = newWeek
         typInvoer = "\(newWeek)"
         changeToWeek(newWeek)
     }

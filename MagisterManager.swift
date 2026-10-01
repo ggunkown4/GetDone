@@ -14,7 +14,7 @@ class MagisterManager: ObservableObject {
         return ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
     }
     
-    func loadHomeworkAndSchedule(voor referenceDate: Date = Date()) {
+    func loadHomeworkAndSchedule(for referenceDate: Date = Date()) {
         if isCanvasPreview {
             return
         }
@@ -152,7 +152,7 @@ class MagisterManager: ObservableObject {
                 
                 let infoType = item["InfoType"] as? Int ?? 0
                 let isHomework = infoType == 1 || !cleanContent.isEmpty || description.lowercased().contains("homework")
-                let isTest = (infoType >= 2 && infoType <= 5) || cleanContent.lowercased().contains("toets") || omschrijving.lowercased().contains("toets") || cleanContent.lowercased().contains("proefwerk")
+                let isTest = (infoType >= 2 && infoType <= 5) || cleanContent.lowercased().contains("toets") || description.lowercased().contains("toets") || cleanContent.lowercased().contains("proefwerk")
                 
                 var itemColor: Color = .blue
                 var titlePrefix = ""
@@ -170,7 +170,7 @@ class MagisterManager: ObservableObject {
                     itemColor = .teal
                 }
                 
-                let volledigeTitel = "\(titelPrefix)\(omschrijving)\(location.isEmpty ? "" : " (\(location))")"
+                let fullTitle = "\(titlePrefix)\(description)\(location.isEmpty ? "" : " (\(location))")"
                 
                 let planning = PlanningItem(
                     magisterID: magisterId,
@@ -190,7 +190,7 @@ class MagisterManager: ObservableObject {
                     loadedPlans.append(planning)
                 }
                 
-                if isToets || isHomework || !cleanContent.isEmpty {
+                if isTest || isHomework || !cleanContent.isEmpty {
                     var testSort: String? = nil
                     if isTest {
                         switch infoType {

@@ -93,12 +93,12 @@ struct DetailScreen: View {
         }
         .onAppear {
             if title == "Agenda" {
-                magisterManager.loadHomeworkAndSchedule(voor: selectedDate)
+                magisterManager.loadHomeworkAndSchedule(for: selectedDate)
             }
         }
         .onChange(of: selectedDate) { _, newDate in
             if title == "Agenda" {
-                magisterManager.loadHomeworkAndSchedule(voor: newDate)
+                magisterManager.loadHomeworkAndSchedule(for: newDate)
             }
         }
         .toolbar {
@@ -232,7 +232,7 @@ struct DetailScreen: View {
                                 .progressViewStyle(CircularProgressViewStyle(tint: .orange))
                         } else {
                             Button {
-                                magisterManager.loadHomeworkAndSchedule(voor: selectedDate)
+                                magisterManager.loadHomeworkAndSchedule(for: selectedDate)
                             } label: {
                                 Image(systemName: "arrow.clockwise")
                                     .font(.subheadline.bold())
