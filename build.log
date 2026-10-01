@@ -1,38 +1,1198 @@
-Build failed with 12 error(s)
+Build failed with 10 error(s)
 
 --- AgendaView.swift ---
-<unknown>:0: error: unable to load standard library for target 'arm64-apple-macosx26.0'
+AgendaView.swift:6:26: error: cannot find type 'PlanningItem' in scope
+  4 | struct AddPlanSheet: View {
+  5 |     @Environment(\.dismiss) var dismiss
+  6 |     @Binding var plans: [PlanningItem]
+    |                          `- error: cannot find type 'PlanningItem' in scope
+  7 |     var selectedDate: Date
+  8 |     
+
+AgendaView.swift:205:26: error: cannot find type 'PlanningItem' in scope
+203 |     @Binding var selectedDate: Date
+204 |     @Binding var selectedView: Int
+205 |     @Binding var plans: [PlanningItem]
+    |                          `- error: cannot find type 'PlanningItem' in scope
+206 |     var magisterPlans: [PlanningItem]
+207 |     @Binding var showNewPlanSheet: Bool
+
+AgendaView.swift:209:51: error: cannot find 'MagisterManager' in scope
+207 |     @Binding var showNewPlanSheet: Bool
+208 |     
+209 |     @ObservedObject private var magisterManager = MagisterManager.shared
+    |                                                   `- error: cannot find 'MagisterManager' in scope
+210 |     
+211 |     var allePlanningen: [PlanningItem] {
+
+AgendaView.swift:206:25: error: cannot find type 'PlanningItem' in scope
+204 |     @Binding var selectedView: Int
+205 |     @Binding var plans: [PlanningItem]
+206 |     var magisterPlans: [PlanningItem]
+    |                         `- error: cannot find type 'PlanningItem' in scope
+207 |     @Binding var showNewPlanSheet: Bool
+208 |     
+
+AgendaView.swift:211:26: error: cannot find type 'PlanningItem' in scope
+209 |     @ObservedObject private var magisterManager = MagisterManager.shared
+210 |     
+211 |     var allePlanningen: [PlanningItem] {
+    |                          `- error: cannot find type 'PlanningItem' in scope
+212 |         let combined = plans + magisterManager.magisterPlans + magisterPlans
+213 |         return discoverAndDeduplicate(combined)
+
+AgendaView.swift:266:70: error: cannot find type 'PlanningItem' in scope
+264 |     }
+265 |     
+266 |     private func discoverAndDeduplicate(_ items: [PlanningItem]) -> [PlanningItem] {
+    |                                                                      `- error: cannot find type 'PlanningItem' in scope
+267 |         var uniqueItems: [PlanningItem] = []
+268 |         var seenMagisterIDs = Set<Int>()
+
+AgendaView.swift:266:51: error: cannot find type 'PlanningItem' in scope
+264 |     }
+265 |     
+266 |     private func discoverAndDeduplicate(_ items: [PlanningItem]) -> [PlanningItem] {
+    |                                                   `- error: cannot find type 'PlanningItem' in scope
+267 |         var uniqueItems: [PlanningItem] = []
+268 |         var seenMagisterIDs = Set<Int>()
+
+AgendaView.swift:291:26: error: cannot find type 'PlanningItem' in scope
+289 | // MARK: - 1. List View
+290 | struct AgendaListView: View {
+291 |     @Binding var plans: [PlanningItem]
+    |                          `- error: cannot find type 'PlanningItem' in scope
+292 |     var magisterPlans: [PlanningItem]
+293 |     @Binding var showNewPlanSheet: Bool
+
+AgendaView.swift:292:25: error: cannot find type 'PlanningItem' in scope
+290 | struct AgendaListView: View {
+291 |     @Binding var plans: [PlanningItem]
+292 |     var magisterPlans: [PlanningItem]
+    |                         `- error: cannot find type 'PlanningItem' in scope
+293 |     @Binding var showNewPlanSheet: Bool
+294 |     
+
+AgendaView.swift:295:26: error: cannot find type 'PlanningItem' in scope
+293 |     @Binding var showNewPlanSheet: Bool
+294 |     
+295 |     var allSortedPlans: [PlanningItem] {
+    |                          `- error: cannot find type 'PlanningItem' in scope
+296 |         let combined = plans + magisterPlans
+297 |         var uniqueItems: [PlanningItem] = []
+
+AgendaView.swift:396:17: error: cannot find type 'PlanningItem' in scope
+394 | struct AgendaDayView: View {
+395 |     var selectedDate: Date
+396 |     var plans: [PlanningItem]
+    |                 `- error: cannot find type 'PlanningItem' in scope
+397 |     
+398 |     let hourHeight: CGFloat = 60
+
+AgendaView.swift:402:28: error: cannot find type 'PlanningItem' in scope
+400 |     let endHour = 23
+401 |     
+402 |     private var dayPlans: [PlanningItem] {
+    |                            `- error: cannot find type 'PlanningItem' in scope
+403 |         plans.filter { Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }
+404 |     }
+
+AgendaView.swift:483:17: error: cannot find type 'PlanningItem' in scope
+481 | struct AgendaWeekView: View {
+482 |     var selectedDate: Date
+483 |     var plans: [PlanningItem]
+    |                 `- error: cannot find type 'PlanningItem' in scope
+484 |     
+485 |     private var weekDayen: [Date] {
+
+AgendaView.swift:552:13: error: cannot find 'PlanningItem' in scope
+550 |         selectedView: .constant(0),
+551 |         plans: .constant([
+552 |             PlanningItem(
+    |             `- error: cannot find 'PlanningItem' in scope
+553 |                 title: "Math Homework",
+554 |                 date: Date(),
+
+AgendaView.swift:549:24: error: cannot infer contextual base in reference to member 'constant'
+547 | #Preview {
+548 |     AgendaView(
+549 |         selectedDate: .constant(Date()),
+    |                        `- error: cannot infer contextual base in reference to member 'constant'
+550 |         selectedView: .constant(0),
+551 |         plans: .constant([
+
+AgendaView.swift:550:24: error: cannot infer contextual base in reference to member 'constant'
+548 |     AgendaView(
+549 |         selectedDate: .constant(Date()),
+550 |         selectedView: .constant(0),
+    |                        `- error: cannot infer contextual base in reference to member 'constant'
+551 |         plans: .constant([
+552 |             PlanningItem(
+
+AgendaView.swift:551:17: error: cannot infer contextual base in reference to member 'constant'
+549 |         selectedDate: .constant(Date()),
+550 |         selectedView: .constant(0),
+551 |         plans: .constant([
+    |                 `- error: cannot infer contextual base in reference to member 'constant'
+552 |             PlanningItem(
+553 |                 title: "Math Homework",
+
+AgendaView.swift:561:28: error: cannot infer contextual base in reference to member 'constant'
+559 |         ]),
+560 |         magisterPlans: [],
+561 |         showNewPlanSheet: .constant(false)
+    |                            `- error: cannot infer contextual base in reference to member 'constant'
+562 |     )
+563 | }
+
+AgendaView.swift:557:25: error: cannot infer contextual base in reference to member 'blue'
+555 |                 startTime: Date(),
+556 |                 endTime: Date().addingTimeInterval(3600),
+557 |                 color: .blue
+    |                         `- error: cannot infer contextual base in reference to member 'blue'
+558 |             )
+559 |         ]),
+
+AgendaView.swift:53:41: error: cannot find 'PlanningItem' in scope
+ 51 |                 ToolbarItem(placement: .confirmationAction) {
+ 52 |                     Button("Save") {
+ 53 |                         let nieuwPlan = PlanningItem(
+    |                                         `- error: cannot find 'PlanningItem' in scope
+ 54 |                             title: planTitle.isEmpty ? "New plan" : planTitle,
+ 55 |                             date: selectedPlanDate,
+
+AgendaView.swift:30:29: error: the compiler is unable to type-check this expression in reasonable time; try breaking up the expression into distinct sub-expressions
+ 28 |                     HStack(spacing: 12) {
+ 29 |                         ForEach(availableColors, id: \.self) { color in
+ 30 |                             Circle()
+    |                             `- error: the compiler is unable to type-check this expression in reasonable time; try breaking up the expression into distinct sub-expressions
+ 31 |                                 .fill(color)
+ 32 |                                 .frame(width: 32, height: 32)
+
+AgendaView.swift:267:27: error: cannot find type 'PlanningItem' in scope
+265 |     
+266 |     private func discoverAndDeduplicate(_ items: [PlanningItem]) -> [PlanningItem] {
+267 |         var uniqueItems: [PlanningItem] = []
+    |                           `- error: cannot find type 'PlanningItem' in scope
+268 |         var seenMagisterIDs = Set<Int>()
+269 |         var seenUniqueKeys = Set<String>()
+
+AgendaView.swift:297:27: error: cannot find type 'PlanningItem' in scope
+295 |     var allSortedPlans: [PlanningItem] {
+296 |         let combined = plans + magisterPlans
+297 |         var uniqueItems: [PlanningItem] = []
+    |                           `- error: cannot find type 'PlanningItem' in scope
+298 |         var seenMagisterIDs = Set<Int>()
+299 |         
+
+AgendaView.swift:429:21: error: generic parameter 'C' could not be inferred
+427 |                 
+428 |                 GeometryReader { geo in
+429 |                     ForEach(dayPlans) { item in
+    |                     `- error: generic parameter 'C' could not be inferred
+430 |                         let yPosition = calculateYPosition(for: item.startTime)
+431 |                         let blockHeight = calculateHeight(start: item.startTime, end: item.endTime)
+
+SwiftUI.ForEach.init:2:8: note: in call to initializer
+1 | generic struct ForEach {
+2 | public init<C>(_ data: Binding<C>, @ViewBuilder content: @escaping (Binding<C.Element>) -> Content) where Data == LazyMapSequence<C.Indices, (C.Index, ID)>, ID == C.Element.ID, C : MutableCollection, C : RandomAccessCollection, C.Element : Identifiable, C.Index : Hashable}
+  |        `- note: in call to initializer
+3 | 
+
+AgendaView.swift:430:70: error: cannot convert value of type 'Binding<Subject>' to expected argument type 'Date'
+428 |                 GeometryReader { geo in
+429 |                     ForEach(dayPlans) { item in
+430 |                         let yPosition = calculateYPosition(for: item.startTime)
+    |                                                                      `- error: cannot convert value of type 'Binding<Subject>' to expected argument type 'Date'
+431 |                         let blockHeight = calculateHeight(start: item.startTime, end: item.endTime)
+432 |                         
 
 --- ChatView.swift ---
-<unknown>:0: error: unable to load standard library for target 'arm64-apple-macosx26.0'
+ChatView.swift:74:51: error: cannot find type 'ChatMessage' in scope
+  72 |     private var activeTask: Task<Void, Never>?
+  73 |     
+  74 |     func sendStreaming(message: String, history: [ChatMessage], onText: @escaping (String) -> Void, onSources: @escaping ([AISource]) -> Void, completion: @escaping (Result<Void, Error>) -> Void) {
+     |                                                   `- error: cannot find type 'ChatMessage' in scope
+  75 |         guard let baseURL = normalizedServerURL(), let url = URL(string: baseURL + "/chat/stream") else {
+  76 |             let error = AIManagerError.serverNotConfigured
+
+ChatView.swift:170:42: error: cannot find type 'ChatMessage' in scope
+ 168 |     }
+ 169 |     
+ 170 |     func send(message: String, history: [ChatMessage], completion: @escaping (Result<AIChatResponse, Error>) -> Void) {
+     |                                          `- error: cannot find type 'ChatMessage' in scope
+ 171 |         let startTime = Date()
+ 172 |         guard let baseURL = normalizedServerURL(), let url = URL(string: baseURL + "/chat") else {
+
+ChatView.swift:295:35: error: cannot find type 'ChatMessage' in scope
+ 293 |     @StateObject private var aiManager = AIManager()
+ 294 |     @State private var showLog = false
+ 295 |     @State private var messages: [ChatMessage] = []
+     |                                   `- error: cannot find type 'ChatMessage' in scope
+ 296 |     @State private var inputText: String = ""
+ 297 |     @State private var streamingReply = ""
+
+ChatView.swift:622:60: error: cannot find type 'ChatMessage' in scope
+ 620 |     }
+ 621 |     
+ 622 |     private func startStreaming(message: String, history: [ChatMessage]) {
+     |                                                            `- error: cannot find type 'ChatMessage' in scope
+ 623 |         streamingReply = ""
+ 624 |         activeWebSources = []
+
+ChatView.swift:662:61: error: cannot find type 'ChatMessage' in scope
+ 660 |     }
+ 661 |     
+ 662 |     private func retryAssistantResponse(_ assistantMessage: ChatMessage) {
+     |                                                             `- error: cannot find type 'ChatMessage' in scope
+ 663 |         guard let assistantIndex = messages.firstIndex(where: { $0.id == assistantMessage.id }) else { return }
+ 664 |         guard let promptIndex = previousUserMessageIndex(before: assistantIndex) else { return }
+
+ChatView.swift:687:49: error: cannot find type 'ChatMessage' in scope
+ 685 |     }
+ 686 |     
+ 687 |     private func editUserMessage(_ userMessage: ChatMessage) {
+     |                                                 `- error: cannot find type 'ChatMessage' in scope
+ 688 |         guard let userIndex = messages.firstIndex(where: { $0.id == userMessage.id }) else { return }
+ 689 |         let originalPrompt = userMessage.text
+
+ChatView.swift:768:39: error: cannot find type 'ChatMessage' in scope
+ 766 |     }
+ 767 |     
+ 768 |     private func sources(for message: ChatMessage) -> [WebSearchResult] {
+     |                                       `- error: cannot find type 'ChatMessage' in scope
+ 769 |         guard !message.isUser else { return [] }
+ 770 |         return webSourcesByMessageID[message.id] ?? []
+
+ChatView.swift:1101:18: error: cannot find type 'ChatMessage' in scope
+1099 | // MARK: - Chat Bubble Styling
+1100 | struct ChatBubble: View {
+1101 |     let message: ChatMessage
+     |                  `- error: cannot find type 'ChatMessage' in scope
+1102 |     let onCopy: () -> Void
+1103 |     let onRetry: (() -> Void)?
+
+ChatView.swift:1108:18: error: cannot find type 'ChatMessage' in scope
+1106 |     
+1107 |     init(
+1108 |         message: ChatMessage,
+     |                  `- error: cannot find type 'ChatMessage' in scope
+1109 |         onCopy: @escaping () -> Void,
+1110 |         onRetry: (() -> Void)?,
+
+ChatView.swift:93:11: warning: 'catch' block is unreachable because no errors are thrown in 'do' block
+  91 |         do {
+  92 |             request.httpBody = try JSONEncoder().encode(body)
+  93 |         } catch {
+     |           `- warning: 'catch' block is unreachable because no errors are thrown in 'do' block
+  94 |             completion(.failure(error))
+  95 |             return
+
+ChatView.swift:193:11: warning: 'catch' block is unreachable because no errors are thrown in 'do' block
+ 191 |         do {
+ 192 |             request.httpBody = try JSONEncoder().encode(requestBody)
+ 193 |         } catch {
+     |           `- warning: 'catch' block is unreachable because no errors are thrown in 'do' block
+ 194 |             addLog("[\(time())] ERROR: failed to build request: \(error.localizedDescription)")
+ 195 |             completion(.failure(error))
+
+ChatView.swift:372:42: error: cannot find 'ChatMessage' in scope
+ 370 |                         if !streamingReply.isEmpty {
+ 371 |                             ChatBubble(
+ 372 |                                 message: ChatMessage(text: streamingReply, isUser: false),
+     |                                          `- error: cannot find 'ChatMessage' in scope
+ 373 |                                 onCopy: {
+ 374 |                                     copyMessage(streamingReply)
+
+ChatView.swift:609:27: error: cannot find 'ChatMessage' in scope
+ 607 |         }
+ 608 |         
+ 609 |         let userMessage = ChatMessage(text: text, isUser: true)
+     |                           `- error: cannot find 'ChatMessage' in scope
+ 610 |         autoScrollEnabled = true
+ 611 |         responseStopped = false
+
+ChatView.swift:642:44: error: cannot find 'ChatMessage' in scope
+ 640 |             case .success:
+ 641 |                 if !streamingReply.isEmpty {
+ 642 |                     let assistantMessage = ChatMessage(text: streamingReply, isUser: false)
+     |                                            `- error: cannot find 'ChatMessage' in scope
+ 643 |                     messages.append(assistantMessage)
+ 644 |                     webSourcesByMessageID[assistantMessage.id] = activeWebSources
+
+ChatView.swift:653:37: error: cannot find 'ChatMessage' in scope
+ 651 |                 }
+ 652 |                 if !streamingReply.isEmpty {
+ 653 |                     messages.append(ChatMessage(text: streamingReply, isUser: false))
+     |                                     `- error: cannot find 'ChatMessage' in scope
+ 654 |                 }
+ 655 |                 messages.append(ChatMessage(text: "AI not available: \(error.localizedDescription)", isUser: false))
+
+ChatView.swift:655:33: error: cannot find 'ChatMessage' in scope
+ 653 |                     messages.append(ChatMessage(text: streamingReply, isUser: false))
+ 654 |                 }
+ 655 |                 messages.append(ChatMessage(text: "AI not available: \(error.localizedDescription)", isUser: false))
+     |                                 `- error: cannot find 'ChatMessage' in scope
+ 656 |                 streamingReply = ""
+ 657 |                 activeWebSources = []
+
+ChatView.swift:626:19: error: cannot call value of non-function type 'Binding<Subject>'
+ 624 |         activeWebSources = []
+ 625 |         
+ 626 |         aiManager.sendStreaming(message: message, history: history, onText: { chunk in
+     |                   `- error: cannot call value of non-function type 'Binding<Subject>'
+ 627 |             streamingReply += chunk
+ 628 |         }, onSources: { sources in
+
+ChatView.swift:626:9: error: referencing subscript 'subscript(dynamicMember:)' requires wrapper 'ObservedObject<AIManager>.Wrapper'
+ 624 |         activeWebSources = []
+ 625 |         
+ 626 |         aiManager.sendStreaming(message: message, history: history, onText: { chunk in
+     |         `- error: referencing subscript 'subscript(dynamicMember:)' requires wrapper 'ObservedObject<AIManager>.Wrapper'
+ 627 |             streamingReply += chunk
+ 628 |         }, onSources: { sources in
+
+ChatView.swift:690:68: error: cannot infer contextual base in reference to member 'whitespacesAndNewlines'
+ 688 |         guard let userIndex = messages.firstIndex(where: { $0.id == userMessage.id }) else { return }
+ 689 |         let originalPrompt = userMessage.text
+ 690 |         let trimmedPrompt = originalPrompt.trimmingCharacters(in: .whitespacesAndNewlines)
+     |                                                                    `- error: cannot infer contextual base in reference to member 'whitespacesAndNewlines'
+ 691 |         guard !trimmedPrompt.isEmpty else { return }
+ 692 |         
 
 --- ContentView.swift ---
-<unknown>:0: error: unable to load standard library for target 'arm64-apple-macosx26.0'
+ContentView.swift:5:37: error: cannot find 'WebGoogleAuthManager' in scope
+  3 | // MARK: - Main Content View
+  4 | struct ContentView: View {
+  5 |     @StateObject private var auth = WebGoogleAuthManager()
+    |                                     `- error: cannot find 'WebGoogleAuthManager' in scope
+  6 |     
+  7 |     @Environment(\.horizontalSizeClass) var sizeClass
+
+ContentView.swift:29:39: error: cannot find 'DetailScreen' in scope
+ 27 |                 // iPhone layout
+ 28 |                 TabView(selection: $selectedOption) {
+ 29 |                     NavigationStack { DetailScreen(title: "Agenda", auth: auth) }
+    |                                       `- error: cannot find 'DetailScreen' in scope
+ 30 |                         .tabItem { Label("Agenda", systemImage: "calendar") }
+ 31 |                         .tag("Agenda" as String?)
+
+ContentView.swift:33:39: error: cannot find 'DetailScreen' in scope
+ 31 |                         .tag("Agenda" as String?)
+ 32 |                     
+ 33 |                     NavigationStack { DetailScreen(title: "Chat", auth: auth) }
+    |                                       `- error: cannot find 'DetailScreen' in scope
+ 34 |                         .tabItem { Label("Chat", systemImage: "message.fill") }
+ 35 |                         .tag("Chat" as String?)
+
+ContentView.swift:37:39: error: cannot find 'DetailScreen' in scope
+ 35 |                         .tag("Chat" as String?)
+ 36 |                     
+ 37 |                     NavigationStack { DetailScreen(title: "Resources", auth: auth) }
+    |                                       `- error: cannot find 'DetailScreen' in scope
+ 38 |                         .tabItem { Label("Resources", systemImage: "books.vertical.fill") }
+ 39 |                         .tag("Resources" as String?)
+
+ContentView.swift:41:39: error: cannot find 'DetailScreen' in scope
+ 39 |                         .tag("Resources" as String?)
+ 40 |                     
+ 41 |                     NavigationStack { DetailScreen(title: "Profile", auth: auth) }
+    |                                       `- error: cannot find 'DetailScreen' in scope
+ 42 |                         .tabItem { Label("Profile", systemImage: "person.crop.circle.fill") }
+ 43 |                         .tag("Profile" as String?)
+
+ContentView.swift:162:33: error: cannot find 'DetailScreen' in scope
+160 |                         Group {
+161 |                             if let selectie = selectedOption {
+162 |                                 DetailScreen(title: selectie, auth: auth)
+    |                                 `- error: cannot find 'DetailScreen' in scope
+163 |                                     .id(selectie)
+164 |                                     .transition(.opacity)
 
 --- DetailScreen.swift ---
-<unknown>:0: error: unable to load standard library for target 'arm64-apple-macosx26.0'
+DetailScreen.swift:7:31: error: cannot find type 'WebGoogleAuthManager' in scope
+  5 |     @Environment(\.horizontalSizeClass) var sizeClass
+  6 |     var title: String
+  7 |     @ObservedObject var auth: WebGoogleAuthManager
+    |                               `- error: cannot find type 'WebGoogleAuthManager' in scope
+  8 |     @ObservedObject var magisterManager = MagisterManager.shared
+  9 |     
 
---- GoogleManager.swift ---
-<unknown>:0: error: unable to load standard library for target 'arm64-apple-macosx26.0'
+DetailScreen.swift:8:43: error: cannot find 'MagisterManager' in scope
+  6 |     var title: String
+  7 |     @ObservedObject var auth: WebGoogleAuthManager
+  8 |     @ObservedObject var magisterManager = MagisterManager.shared
+    |                                           `- error: cannot find 'MagisterManager' in scope
+  9 |     
+ 10 |     @State private var selectedDate: Date = Date()
+
+DetailScreen.swift:16:38: error: cannot find type 'SourceFilter' in scope
+ 14 |     
+ 15 |     // Status for source filter
+ 16 |     @State private var sourceFilter: SourceFilter = .all
+    |                                      `- error: cannot find type 'SourceFilter' in scope
+ 17 |     
+ 18 |     // Store custom plans
+
+DetailScreen.swift:19:32: error: cannot find type 'PlanningItem' in scope
+ 17 |     
+ 18 |     // Store custom plans
+ 19 |     @State private var plans: [PlanningItem] = []
+    |                                `- error: cannot find type 'PlanningItem' in scope
+ 20 |     @State private var showNewPlanSheet: Bool = false
+ 21 |     
+
+DetailScreen.swift:53:17: error: cannot find 'AgendaView' in scope
+ 51 |             // ROUTING BASED ON TITLE
+ 52 |             if title == "Agenda" {
+ 53 |                 AgendaView(
+    |                 `- error: cannot find 'AgendaView' in scope
+ 54 |                     selectedDate: $selectedDate,
+ 55 |                     selectedView: $selectedView,
+
+DetailScreen.swift:61:17: error: cannot find 'ChatView' in scope
+ 59 |                 )
+ 60 |             } else if title.hasPrefix("Chat") { 
+ 61 |                 ChatView(title: title)
+    |                 `- error: cannot find 'ChatView' in scope
+ 62 |             } else if title == "Resources" || title.hasPrefix("Source") {
+ 63 |                 ResourcesView(auth: auth, selectedFilter: $sourceFilter)
+
+DetailScreen.swift:63:17: error: cannot find 'ResourcesView' in scope
+ 61 |                 ChatView(title: title)
+ 62 |             } else if title == "Resources" || title.hasPrefix("Source") {
+ 63 |                 ResourcesView(auth: auth, selectedFilter: $sourceFilter)
+    |                 `- error: cannot find 'ResourcesView' in scope
+ 64 |             } else if title == "Profile" {
+ 65 |                 ProfileView(auth: auth)
+
+DetailScreen.swift:65:17: error: cannot find 'ProfileView' in scope
+ 63 |                 ResourcesView(auth: auth, selectedFilter: $sourceFilter)
+ 64 |             } else if title == "Profile" {
+ 65 |                 ProfileView(auth: auth)
+    |                 `- error: cannot find 'ProfileView' in scope
+ 66 |             } else {
+ 67 |                 Text("Currently viewing: \(title)")
+
+DetailScreen.swift:92:13: error: cannot find 'AddPlanSheet' in scope
+ 90 |         .toolbarBackground(.hidden, for: .navigationBar)
+ 91 |         .sheet(isPresented: $showNewPlanSheet) {
+ 92 |             AddPlanSheet(plans: $plans, selectedDate: selectedDate)
+    |             `- error: cannot find 'AddPlanSheet' in scope
+ 93 |         }
+ 94 |         .onAppear {
+
+DetailScreen.swift:219:29: error: cannot find 'WeekSelectorPopover' in scope
+217 |                         .buttonStyle(.plain)
+218 |                         .popover(isPresented: $showWeekPicker) {
+219 |                             WeekSelectorPopover(selectedDate: $selectedDate)
+    |                             `- error: cannot find 'WeekSelectorPopover' in scope
+220 |                                 .presentationCompactAdaptation(.popover)
+221 |                         }
+
+DetailScreen.swift:171:87: error: cannot infer contextual base in reference to member 'all'
+169 |                         .layoutPriority(1)
+170 |                         .padding(.leading, 10)
+171 |                         .padding(.trailing, (title == "Resources" && sourceFilter != .all) ? 0 : 12)
+    |                                                                                       `- error: cannot infer contextual base in reference to member 'all'
+172 |                 }
+173 |             }
 
 --- MagisterManager.swift ---
-<unknown>:0: error: unable to load standard library for target 'arm64-apple-macosx26.0'
+MagisterManager.swift:7:36: error: cannot find type 'MagisterItem' in scope
+  5 |     static let shared = MagisterManager()
+  6 |     
+  7 |     @Published var magisterItems: [MagisterItem] = []
+    |                                    `- error: cannot find type 'MagisterItem' in scope
+  8 |     @Published var magisterPlans: [PlanningItem] = []
+  9 |     @Published var isLoading: Bool = false
+
+MagisterManager.swift:8:36: error: cannot find type 'PlanningItem' in scope
+  6 |     
+  7 |     @Published var magisterItems: [MagisterItem] = []
+  8 |     @Published var magisterPlans: [PlanningItem] = []
+    |                                    `- error: cannot find type 'PlanningItem' in scope
+  9 |     @Published var isLoading: Bool = false
+ 10 |     @Published var errorMessage: String? = nil
+
+MagisterManager.swift:22:21: error: cannot find 'MagisterKeychainHelper' in scope
+ 20 |         }
+ 21 |         
+ 22 |         let token = MagisterKeychainHelper.read(key: "magister_access_token") ?? ""
+    |                     `- error: cannot find 'MagisterKeychainHelper' in scope
+ 23 |         
+ 24 |         if token.isEmpty {
+
+MagisterManager.swift:32:22: error: cannot find 'MagisterAppStorageHelper' in scope
+ 30 |         }
+ 31 |         
+ 32 |         let domain = MagisterAppStorageHelper.read(key: "magister_domein") ?? "roercollege"
+    |                      `- error: cannot find 'MagisterAppStorageHelper' in scope
+ 33 |         let formattedDomain = domain.contains(".magister.net") ? domain : "\(domain).magister.net"
+ 34 |         
+
+MagisterManager.swift:175:32: error: cannot find 'PlanningItem' in scope
+173 |                 let fullTitle = "\(titlePrefix)\(description)\(location.isEmpty ? "" : " (\(location))")"
+174 |                 
+175 |                 let planning = PlanningItem(
+    |                                `- error: cannot find 'PlanningItem' in scope
+176 |                     magisterID: magisterId,
+177 |                     title: fullTitle,
+
+MagisterManager.swift:205:33: error: cannot find 'MagisterItem' in scope
+203 |                     }
+204 |                     
+205 |                     let mItem = MagisterItem(
+    |                                 `- error: cannot find 'MagisterItem' in scope
+206 |                         magisterID: magisterId,
+207 |                         subjectName: subjectName.capitalized,
+
+MagisterManager.swift:128:39: error: cannot find type 'MagisterItem' in scope
+126 |             }
+127 |             
+128 |             var loadedMagisterItems: [MagisterItem] = []
+    |                                       `- error: cannot find type 'MagisterItem' in scope
+129 |             var loadedPlans: [PlanningItem] = []
+130 |             
+
+MagisterManager.swift:129:31: error: cannot find type 'PlanningItem' in scope
+127 |             
+128 |             var loadedMagisterItems: [MagisterItem] = []
+129 |             var loadedPlans: [PlanningItem] = []
+    |                               `- error: cannot find type 'PlanningItem' in scope
+130 |             
+131 |             for item in items {
 
 --- MagisterSection.swift ---
-<unknown>:0: error: unable to load standard library for target 'arm64-apple-macosx26.0'
+MagisterSection.swift:99:21: error: cannot find 'MagisterManager' in scope
+ 97 |                 onLoginSuccess: { 
+ 98 |                     loadLiveSchedule()
+ 99 |                     MagisterManager.shared.loadHomeworkAndSchedule()
+    |                     `- error: cannot find 'MagisterManager' in scope
+100 |                 }
+101 |             )
 
---- Models.swift ---
-<unknown>:0: error: unable to load standard library for target 'arm64-apple-macosx26.0'
+MagisterSection.swift:106:30: error: cannot find 'MagisterAppStorageHelper' in scope
+104 |     
+105 |     private func restoreSession() {
+106 |         if let savedDomein = MagisterAppStorageHelper.read(key: "magister_domein"), !savedDomein.isEmpty { user.schoolDomain = savedDomein }
+    |                              `- error: cannot find 'MagisterAppStorageHelper' in scope
+107 |         if let savedUsername = readSecret(key: "magister_username") { user.username = savedUsername }
+108 |         if let savedPassword = readSecret(key: "magister_password") { user.password = savedPassword }
+
+MagisterSection.swift:109:33: error: cannot find 'MagisterAppStorageHelper' in scope
+107 |         if let savedUsername = readSecret(key: "magister_username") { user.username = savedUsername }
+108 |         if let savedPassword = readSecret(key: "magister_password") { user.password = savedPassword }
+109 |         if let savedFirstName = MagisterAppStorageHelper.read(key: "magister_voornaam") { user.firstName = savedFirstName }
+    |                                 `- error: cannot find 'MagisterAppStorageHelper' in scope
+110 |         if let savedLastName = MagisterAppStorageHelper.read(key: "magister_achternaam") { user.lastName = savedLastName }
+111 |         
+
+MagisterSection.swift:110:32: error: cannot find 'MagisterAppStorageHelper' in scope
+108 |         if let savedPassword = readSecret(key: "magister_password") { user.password = savedPassword }
+109 |         if let savedFirstName = MagisterAppStorageHelper.read(key: "magister_voornaam") { user.firstName = savedFirstName }
+110 |         if let savedLastName = MagisterAppStorageHelper.read(key: "magister_achternaam") { user.lastName = savedLastName }
+    |                                `- error: cannot find 'MagisterAppStorageHelper' in scope
+111 |         
+112 |         if let savedToken = leesGeheim(key: "magister_access_token"), !savedToken.isEmpty {
+
+MagisterSection.swift:112:29: error: cannot find 'leesGeheim' in scope
+110 |         if let savedLastName = MagisterAppStorageHelper.read(key: "magister_achternaam") { user.lastName = savedLastName }
+111 |         
+112 |         if let savedToken = leesGeheim(key: "magister_access_token"), !savedToken.isEmpty {
+    |                             `- error: cannot find 'leesGeheim' in scope
+113 |             self.accessToken = savedToken
+114 |             self.isLoggedIn = true
+
+MagisterSection.swift:116:13: error: cannot find 'MagisterManager' in scope
+114 |             self.isLoggedIn = true
+115 |             self.loadLiveSchedule()
+116 |             MagisterManager.shared.loadHomeworkAndSchedule()
+    |             `- error: cannot find 'MagisterManager' in scope
+117 |         } else {
+118 |             self.isLoggedIn = false
+
+MagisterSection.swift:123:24: error: cannot find 'MagisterKeychainHelper' in scope
+121 |     
+122 |     private func readSecret(key: String) -> String? {
+123 |         if let value = MagisterKeychainHelper.read(key: key) {
+    |                        `- error: cannot find 'MagisterKeychainHelper' in scope
+124 |             return value
+125 |         }
+
+MagisterSection.swift:127:33: error: cannot find 'MagisterAppStorageHelper' in scope
+125 |         }
+126 |         
+127 |         guard let legacyValue = MagisterAppStorageHelper.read(key: key), !legacyValue.isEmpty else {
+    |                                 `- error: cannot find 'MagisterAppStorageHelper' in scope
+128 |             return nil
+129 |         }
+
+MagisterSection.swift:131:9: error: cannot find 'MagisterKeychainHelper' in scope
+129 |         }
+130 |         
+131 |         MagisterKeychainHelper.save(legacyValue, key: key)
+    |         `- error: cannot find 'MagisterKeychainHelper' in scope
+132 |         MagisterAppStorageHelper.delete(key: key)
+133 |         return legacyValue
+
+MagisterSection.swift:132:9: error: cannot find 'MagisterAppStorageHelper' in scope
+130 |         
+131 |         MagisterKeychainHelper.save(legacyValue, key: key)
+132 |         MagisterAppStorageHelper.delete(key: key)
+    |         `- error: cannot find 'MagisterAppStorageHelper' in scope
+133 |         return legacyValue
+134 |     }
+
+MagisterSection.swift:207:17: error: cannot find 'laatstVerverstTekst' in scope
+205 |                 user.email = ""
+206 |                 accessToken = ""
+207 |                 laatstVerverstTekst = ""
+    |                 `- error: cannot find 'laatstVerverstTekst' in scope
+208 |                 
+209 |                 MagisterKeychainHelper.delete(key: "magister_access_token")
+
+MagisterSection.swift:209:17: error: cannot find 'MagisterKeychainHelper' in scope
+207 |                 laatstVerverstTekst = ""
+208 |                 
+209 |                 MagisterKeychainHelper.delete(key: "magister_access_token")
+    |                 `- error: cannot find 'MagisterKeychainHelper' in scope
+210 |                 MagisterAppStorageHelper.save(user.schoolDomain, key: "magister_domein")
+211 |                 MagisterKeychainHelper.save(user.username, key: "magister_username")
+
+MagisterSection.swift:210:17: error: cannot find 'MagisterAppStorageHelper' in scope
+208 |                 
+209 |                 MagisterKeychainHelper.delete(key: "magister_access_token")
+210 |                 MagisterAppStorageHelper.save(user.schoolDomain, key: "magister_domein")
+    |                 `- error: cannot find 'MagisterAppStorageHelper' in scope
+211 |                 MagisterKeychainHelper.save(user.username, key: "magister_username")
+212 |                 MagisterKeychainHelper.save(user.password, key: "magister_password")
+
+MagisterSection.swift:211:17: error: cannot find 'MagisterKeychainHelper' in scope
+209 |                 MagisterKeychainHelper.delete(key: "magister_access_token")
+210 |                 MagisterAppStorageHelper.save(user.schoolDomain, key: "magister_domein")
+211 |                 MagisterKeychainHelper.save(user.username, key: "magister_username")
+    |                 `- error: cannot find 'MagisterKeychainHelper' in scope
+212 |                 MagisterKeychainHelper.save(user.password, key: "magister_password")
+213 |                 MagisterAppStorageHelper.delete(key: "magister_username")
+
+MagisterSection.swift:212:17: error: cannot find 'MagisterKeychainHelper' in scope
+210 |                 MagisterAppStorageHelper.save(user.schoolDomain, key: "magister_domein")
+211 |                 MagisterKeychainHelper.save(user.username, key: "magister_username")
+212 |                 MagisterKeychainHelper.save(user.password, key: "magister_password")
+    |                 `- error: cannot find 'MagisterKeychainHelper' in scope
+213 |                 MagisterAppStorageHelper.delete(key: "magister_username")
+214 |                 MagisterAppStorageHelper.delete(key: "magister_password")
+
+MagisterSection.swift:213:17: error: cannot find 'MagisterAppStorageHelper' in scope
+211 |                 MagisterKeychainHelper.save(user.username, key: "magister_username")
+212 |                 MagisterKeychainHelper.save(user.password, key: "magister_password")
+213 |                 MagisterAppStorageHelper.delete(key: "magister_username")
+    |                 `- error: cannot find 'MagisterAppStorageHelper' in scope
+214 |                 MagisterAppStorageHelper.delete(key: "magister_password")
+215 |                 
+
+MagisterSection.swift:214:17: error: cannot find 'MagisterAppStorageHelper' in scope
+212 |                 MagisterKeychainHelper.save(user.password, key: "magister_password")
+213 |                 MagisterAppStorageHelper.delete(key: "magister_username")
+214 |                 MagisterAppStorageHelper.delete(key: "magister_password")
+    |                 `- error: cannot find 'MagisterAppStorageHelper' in scope
+215 |                 
+216 |                 URLCache.shared.removeAllCachedResponses()
+
+MagisterSection.swift:272:21: error: cannot find 'MagisterKeychainHelper' in scope
+270 |                     self.accessToken = ""
+271 |                     self.user.personId = nil
+272 |                     MagisterKeychainHelper.delete(key: "magister_access_token")
+    |                     `- error: cannot find 'MagisterKeychainHelper' in scope
+273 |                     URLCache.shared.removeAllCachedResponses()
+274 |                     WKWebsiteDataStore.default().removeData(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(), modifiedSince: Date(timeIntervalSince1970: 0)) {
+
+MagisterSection.swift:309:25: error: cannot find 'MagisterManager' in scope
+307 |                     Button(action: { 
+308 |                         loadLiveSchedule()
+309 |                         MagisterManager.shared.loadHomeworkAndSchedule()
+    |                         `- error: cannot find 'MagisterManager' in scope
+310 |                     }) {
+311 |                         Image(systemName: "arrow.clockwise").font(.subheadline).foregroundColor(.orange)
+
+MagisterSection.swift:379:21: error: cannot find 'MagisterKeychainHelper' in scope
+377 |                     isLoggedIn = false
+378 |                     accessToken = ""
+379 |                     MagisterKeychainHelper.delete(key: "magister_access_token")
+    |                     `- error: cannot find 'MagisterKeychainHelper' in scope
+380 |                 }
+381 |                 .font(.subheadline)
+
+MagisterSection.swift:389:21: error: cannot find 'MagisterKeychainHelper' in scope
+387 |                     user = MagisterUserModel()
+388 |                     mySchedule = []
+389 |                     MagisterKeychainHelper.delete(key: "magister_access_token")
+    |                     `- error: cannot find 'MagisterKeychainHelper' in scope
+390 |                     MagisterKeychainHelper.delete(key: "magister_username")
+391 |                     MagisterKeychainHelper.delete(key: "magister_password")
+
+MagisterSection.swift:390:21: error: cannot find 'MagisterKeychainHelper' in scope
+388 |                     mySchedule = []
+389 |                     MagisterKeychainHelper.delete(key: "magister_access_token")
+390 |                     MagisterKeychainHelper.delete(key: "magister_username")
+    |                     `- error: cannot find 'MagisterKeychainHelper' in scope
+391 |                     MagisterKeychainHelper.delete(key: "magister_password")
+392 |                     if let bundleID = Bundle.main.bundleIdentifier { UserDefaults.standard.removePersistentDomain(forName: bundleID) }
+
+MagisterSection.swift:391:21: error: cannot find 'MagisterKeychainHelper' in scope
+389 |                     MagisterKeychainHelper.delete(key: "magister_access_token")
+390 |                     MagisterKeychainHelper.delete(key: "magister_username")
+391 |                     MagisterKeychainHelper.delete(key: "magister_password")
+    |                     `- error: cannot find 'MagisterKeychainHelper' in scope
+392 |                     if let bundleID = Bundle.main.bundleIdentifier { UserDefaults.standard.removePersistentDomain(forName: bundleID) }
+393 |                     WKWebsiteDataStore.default().removeData(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(), modifiedSince: Date(timeIntervalSince1970: 0)) {}
+
+MagisterSection.swift:483:31: error: cannot find 'lesuur' in scope
+481 |                 let room = item["Lokatie"] as? String ?? "Unknown"
+482 |                 let lessonHour = item["LesuurVan"] as? Int
+483 |                 let hourStr = lesuur != nil ? "\(lesuur!)e" : "-"
+    |                               `- error: cannot find 'lesuur' in scope
+484 |                 var tijdStr = ""
+485 |                 if let begin = item["Begin"] as? String { tijdStr = String(begin.prefix(16).suffix(5)) }
+
+MagisterSection.swift:483:50: error: cannot find 'lesuur' in scope
+481 |                 let room = item["Lokatie"] as? String ?? "Unknown"
+482 |                 let lessonHour = item["LesuurVan"] as? Int
+483 |                 let hourStr = lesuur != nil ? "\(lesuur!)e" : "-"
+    |                                                  `- error: cannot find 'lesuur' in scope
+484 |                 var tijdStr = ""
+485 |                 if let begin = item["Begin"] as? String { tijdStr = String(begin.prefix(16).suffix(5)) }
+
+MagisterSection.swift:486:58: error: cannot find 'uurStr' in scope
+484 |                 var tijdStr = ""
+485 |                 if let begin = item["Begin"] as? String { tijdStr = String(begin.prefix(16).suffix(5)) }
+486 |                 newLessons.append(MagisterLesson(period: uurStr, subject: lessonDesc, room: room, timeStr: tijdStr))
+    |                                                          `- error: cannot find 'uurStr' in scope
+487 |             }
+488 |             
+
+MagisterSection.swift:660:21: error: cannot find 'MagisterAppStorageHelper' in scope
+658 |                     let schoolName = host.replacingOccurrences(of: ".magister.net", with: "")
+659 |                     self.parent.user.schoolDomain = schoolName
+660 |                     MagisterAppStorageHelper.save(schoolName, key: "magister_domein")
+    |                     `- error: cannot find 'MagisterAppStorageHelper' in scope
+661 |                 }
+662 |             }
+
+MagisterSection.swift:673:21: error: cannot find 'MagisterKeychainHelper' in scope
+671 |                 DispatchQueue.main.async {
+672 |                     self.parent.accessToken = token
+673 |                     MagisterKeychainHelper.save(token, key: "magister_access_token")
+    |                     `- error: cannot find 'MagisterKeychainHelper' in scope
+674 |                     MagisterAppStorageHelper.saveDate(Date(), key: "magister_last_login_date")
+675 |                 }
+
+MagisterSection.swift:674:21: error: cannot find 'MagisterAppStorageHelper' in scope
+672 |                     self.parent.accessToken = token
+673 |                     MagisterKeychainHelper.save(token, key: "magister_access_token")
+674 |                     MagisterAppStorageHelper.saveDate(Date(), key: "magister_last_login_date")
+    |                     `- error: cannot find 'MagisterAppStorageHelper' in scope
+675 |                 }
+676 |             }
+
+MagisterSection.swift:683:25: error: cannot find 'MagisterAppStorageHelper' in scope
+681 |                     if let firstName = payload["given_name"] as? String {
+682 |                         self.parent.user.firstName = firstName
+683 |                         MagisterAppStorageHelper.save(firstName, key: "magister_voornaam")
+    |                         `- error: cannot find 'MagisterAppStorageHelper' in scope
+684 |                     }
+685 |                     if let lastName = payload["family_name"] as? String {
+
+MagisterSection.swift:687:25: error: cannot find 'MagisterAppStorageHelper' in scope
+685 |                     if let lastName = payload["family_name"] as? String {
+686 |                         self.parent.user.lastName = lastName
+687 |                         MagisterAppStorageHelper.save(lastName, key: "magister_achternaam")
+    |                         `- error: cannot find 'MagisterAppStorageHelper' in scope
+688 |                     }
+689 |                     if let email = payload["email"] as? String {
+
+MagisterSection.swift:694:25: error: cannot find 'MagisterKeychainHelper' in scope
+692 |                     if let username = payload["preferred_username"] as? String {
+693 |                         self.parent.user.username = username
+694 |                         MagisterKeychainHelper.save(username, key: "magister_username")
+    |                         `- error: cannot find 'MagisterKeychainHelper' in scope
+695 |                         MagisterAppStorageHelper.delete(key: "magister_username")
+696 |                     }
+
+MagisterSection.swift:695:25: error: cannot find 'MagisterAppStorageHelper' in scope
+693 |                         self.parent.user.username = username
+694 |                         MagisterKeychainHelper.save(username, key: "magister_username")
+695 |                         MagisterAppStorageHelper.delete(key: "magister_username")
+    |                         `- error: cannot find 'MagisterAppStorageHelper' in scope
+696 |                     }
+697 |                 }
+
+MagisterSection.swift:707:17: error: cannot find 'MagisterKeychainHelper' in scope
+705 |             DispatchQueue.main.async {
+706 |                 self.parent.accessToken = validToken
+707 |                 MagisterKeychainHelper.save(validToken, key: "magister_access_token")
+    |                 `- error: cannot find 'MagisterKeychainHelper' in scope
+708 |                 MagisterAppStorageHelper.save(self.parent.user.schoolDomain, key: "magister_domein")
+709 |                 MagisterKeychainHelper.save(self.parent.user.username, key: "magister_username")
+
+MagisterSection.swift:708:17: error: cannot find 'MagisterAppStorageHelper' in scope
+706 |                 self.parent.accessToken = validToken
+707 |                 MagisterKeychainHelper.save(validToken, key: "magister_access_token")
+708 |                 MagisterAppStorageHelper.save(self.parent.user.schoolDomain, key: "magister_domein")
+    |                 `- error: cannot find 'MagisterAppStorageHelper' in scope
+709 |                 MagisterKeychainHelper.save(self.parent.user.username, key: "magister_username")
+710 |                 MagisterKeychainHelper.save(self.parent.user.password, key: "magister_password")
+
+MagisterSection.swift:709:17: error: cannot find 'MagisterKeychainHelper' in scope
+707 |                 MagisterKeychainHelper.save(validToken, key: "magister_access_token")
+708 |                 MagisterAppStorageHelper.save(self.parent.user.schoolDomain, key: "magister_domein")
+709 |                 MagisterKeychainHelper.save(self.parent.user.username, key: "magister_username")
+    |                 `- error: cannot find 'MagisterKeychainHelper' in scope
+710 |                 MagisterKeychainHelper.save(self.parent.user.password, key: "magister_password")
+711 |                 MagisterAppStorageHelper.delete(key: "magister_username")
+
+MagisterSection.swift:710:17: error: cannot find 'MagisterKeychainHelper' in scope
+708 |                 MagisterAppStorageHelper.save(self.parent.user.schoolDomain, key: "magister_domein")
+709 |                 MagisterKeychainHelper.save(self.parent.user.username, key: "magister_username")
+710 |                 MagisterKeychainHelper.save(self.parent.user.password, key: "magister_password")
+    |                 `- error: cannot find 'MagisterKeychainHelper' in scope
+711 |                 MagisterAppStorageHelper.delete(key: "magister_username")
+712 |                 MagisterAppStorageHelper.delete(key: "magister_password")
+
+MagisterSection.swift:711:17: error: cannot find 'MagisterAppStorageHelper' in scope
+709 |                 MagisterKeychainHelper.save(self.parent.user.username, key: "magister_username")
+710 |                 MagisterKeychainHelper.save(self.parent.user.password, key: "magister_password")
+711 |                 MagisterAppStorageHelper.delete(key: "magister_username")
+    |                 `- error: cannot find 'MagisterAppStorageHelper' in scope
+712 |                 MagisterAppStorageHelper.delete(key: "magister_password")
+713 |                 
+
+MagisterSection.swift:712:17: error: cannot find 'MagisterAppStorageHelper' in scope
+710 |                 MagisterKeychainHelper.save(self.parent.user.password, key: "magister_password")
+711 |                 MagisterAppStorageHelper.delete(key: "magister_username")
+712 |                 MagisterAppStorageHelper.delete(key: "magister_password")
+    |                 `- error: cannot find 'MagisterAppStorageHelper' in scope
+713 |                 
+714 |                 self.parent.isLoggedIn = true
+
+MagisterSection.swift:776:37: error: cannot find 'MagisterKeychainHelper' in scope
+774 |                 DispatchQueue.main.async { self.parent.logText += "
+✅ Page Loaded: \(self.safeURLDescription(url))" }
+775 |                 
+776 |                 let savedUsername = MagisterKeychainHelper.read(key: "magister_username") ?? self.parent.user.username
+    |                                     `- error: cannot find 'MagisterKeychainHelper' in scope
+777 |                 let savedPassword = MagisterKeychainHelper.read(key: "magister_password") ?? self.parent.user.password
+778 |                 
+
+MagisterSection.swift:777:37: error: cannot find 'MagisterKeychainHelper' in scope
+775 |                 
+776 |                 let savedUsername = MagisterKeychainHelper.read(key: "magister_username") ?? self.parent.user.username
+777 |                 let savedPassword = MagisterKeychainHelper.read(key: "magister_password") ?? self.parent.user.password
+    |                                     `- error: cannot find 'MagisterKeychainHelper' in scope
+778 |                 
+779 |                 if url.host == "accounts.magister.net" {
 
 --- MyApp.swift ---
-<unknown>:0: error: unable to load standard library for target 'arm64-apple-macosx26.0'
+MyApp.swift:7:13: error: cannot find 'ContentView' in scope
+ 5 |     var body: some Scene {
+ 6 |         WindowGroup {
+ 7 |             ContentView()
+   |             `- error: cannot find 'ContentView' in scope
+ 8 |         }
+ 9 |     }
 
 --- Package.swift ---
-<unknown>:0: error: unable to load standard library for target 'arm64-apple-macosx26.0'
+Package.swift:7:8: error: no such module 'PackageDescription'
+ 5 | // Do not edit it by hand because the contents will be replaced.
+ 6 | 
+ 7 | import PackageDescription
+   |        `- error: no such module 'PackageDescription'
+ 8 | import AppleProductTypes
+ 9 | 
 
 --- ProfileView.swift ---
-<unknown>:0: error: unable to load standard library for target 'arm64-apple-macosx26.0'
+ProfileView.swift:49:31: error: cannot find type 'WebGoogleAuthManager' in scope
+ 47 | 
+ 48 | struct ProfileView: View {
+ 49 |     @ObservedObject var auth: WebGoogleAuthManager
+    |                               `- error: cannot find type 'WebGoogleAuthManager' in scope
+ 50 |     
+ 51 |     // MARK: - State for Confirmation Popup
+
+ProfileView.swift:531:31: error: cannot find type 'WebGoogleAuthManager' in scope
+529 | 
+530 | struct GoogleAccountDetailView: View {
+531 |     @ObservedObject var auth: WebGoogleAuthManager
+    |                               `- error: cannot find type 'WebGoogleAuthManager' in scope
+532 |     
+533 |     @State private var showLogoutConfirmation: Bool = false
+
+ProfileView.swift:668:31: error: cannot find type 'WebGoogleAuthManager' in scope
+666 | 
+667 | struct DiagnosticsStatusView: View {
+668 |     @ObservedObject var auth: WebGoogleAuthManager
+    |                               `- error: cannot find type 'WebGoogleAuthManager' in scope
+669 |     @AppStorage("isMagisterLoggedIn") private var isMagisterLoggedIn: Bool = false
+670 |     
+
+ProfileView.swift:885:26: error: cannot find 'WebGoogleAuthManager' in scope
+883 | 
+884 | #Preview {
+885 |     let mockGoogleAuth = WebGoogleAuthManager()
+    |                          `- error: cannot find 'WebGoogleAuthManager' in scope
+886 |     return ProfileView(auth: mockGoogleAuth)
+887 | }
+
+ProfileView.swift:886:5: error: cannot use explicit 'return' statement in the body of result builder 'ViewBuilder'
+884 | #Preview {
+885 |     let mockGoogleAuth = WebGoogleAuthManager()
+886 |     return ProfileView(auth: mockGoogleAuth)
+    |     |- error: cannot use explicit 'return' statement in the body of result builder 'ViewBuilder'
+    |     `- note: remove 'return' statements to apply the result builder
+887 | }
+888 | 
+
+ProfileView.swift:18:26: warning: 'onChange(of:perform:)' was deprecated in iOS 17.0: Use `onChange` with a two or zero parameter action closure instead. [#DeprecatedDeclaration]
+ 16 |                             updatePosition(proxy: proxy)
+ 17 |                         }
+ 18 |                         .onChange(of: proxy.frame(in: .global).minY) { _ in
+    |                          `- warning: 'onChange(of:perform:)' was deprecated in iOS 17.0: Use `onChange` with a two or zero parameter action closure instead. [#DeprecatedDeclaration]
+ 19 |                             updatePosition(proxy: proxy)
+ 20 |                         }
+
+ProfileView.swift:30:37: warning: 'screens' was deprecated in iOS 16.0: Use UIApplication.shared.openSessions to find open sessions with scenes from other screens [#DeprecatedDeclaration]
+ 28 |     private func updatePosition(proxy: GeometryProxy) {
+ 29 |         let frame = proxy.frame(in: .global)
+ 30 |         let screenHeight = UIScreen.screens.first?.bounds.height ?? 800
+    |                                     `- warning: 'screens' was deprecated in iOS 16.0: Use UIApplication.shared.openSessions to find open sessions with scenes from other screens [#DeprecatedDeclaration]
+ 31 |         
+ 32 |         if frame.midY > (screenHeight * 0.55) {
+
+ProfileView.swift:70:66: error: cannot infer contextual base in reference to member 'whitespacesAndNewlines'
+ 68 |     private var userPhotoURL: URL? {
+ 69 |         guard auth.isLoggedIn, !auth.userPicture.isEmpty else { return nil }
+ 70 |         var urlString = auth.userPicture.trimmingCharacters(in: .whitespacesAndNewlines)
+    |                                                                  `- error: cannot infer contextual base in reference to member 'whitespacesAndNewlines'
+ 71 |         if urlString.hasPrefix("http://") {
+ 72 |             urlString = urlString.replacingOccurrences(of: "http://", with: "https://")
+
+ProfileView.swift:537:66: error: cannot infer contextual base in reference to member 'whitespacesAndNewlines'
+535 |     private var userPhotoURL: URL? {
+536 |         guard auth.isLoggedIn, !auth.userPicture.isEmpty else { return nil }
+537 |         var urlString = auth.userPicture.trimmingCharacters(in: .whitespacesAndNewlines)
+    |                                                                  `- error: cannot infer contextual base in reference to member 'whitespacesAndNewlines'
+538 |         if urlString.hasPrefix("http://") {
+539 |             urlString = urlString.replacingOccurrences(of: "http://", with: "https://")
+
+ProfileView.swift:656:17: error: cannot find 'MagisterSection' in scope
+654 |         ScrollView {
+655 |             VStack(spacing: 16) {
+656 |                 MagisterSection()
+    |                 `- error: cannot find 'MagisterSection' in scope
+657 |             }
+658 |             .padding()
+
+ProfileView.swift:841:20: error: assigning a property to itself
+839 |     
+840 |     init(icon: String, color: Color, title: String, @ViewBuilder trailingContent: () -> TrailingContent) {
+841 |         self.icoon = icoon
+    |                    `- error: assigning a property to itself
+842 |         self.color = color
+843 |         self.title = title
+
+ProfileView.swift:849:31: error: cannot find 'icon' in scope
+847 |     var body: some View {
+848 |         HStack(spacing: 12) {
+849 |             Image(systemName: icon)
+    |                               `- error: cannot find 'icon' in scope
+850 |                 .foregroundColor(.white)
+851 |                 .frame(width: 32, height: 32)
+
+ProfileView.swift:875:14: error: value of type 'MenuRowView<Text>' has no member 'icon'
+873 | extension MenuRowView where TrailingContent == Text {
+874 |     init(icon: String, color: Color, title: String, subtext: String) {
+875 |         self.icon = icon
+    |              `- error: value of type 'MenuRowView<Text>' has no member 'icon'
+876 |         self.color = color
+877 |         self.title = title
+
+ProfileView.swift:878:37: error: cannot find 'subtitle' in scope
+876 |         self.color = color
+877 |         self.title = title
+878 |         self.trailingContent = Text(subtitle)
+    |                                     `- error: cannot find 'subtitle' in scope
+879 |             .font(.caption)
+880 |             .foregroundColor(.gray)
+
+[#DeprecatedDeclaration]: <https://docs.swift.org/compiler/documentation/diagnostics/deprecated-declaration>
 
 --- ResourcesView.swift ---
-<unknown>:0: error: unable to load standard library for target 'arm64-apple-macosx26.0'
+ResourcesView.swift:5:31: error: cannot find type 'WebGoogleAuthManager' in scope
+  3 | // MARK: - Resources View
+  4 | struct ResourcesView: View {
+  5 |     @ObservedObject var auth: WebGoogleAuthManager
+    |                               `- error: cannot find type 'WebGoogleAuthManager' in scope
+  6 |     @Environment(\.horizontalSizeClass) var horizontalSizeClass
+  7 |     @Binding var selectedFilter: SourceFilter
+
+ResourcesView.swift:7:34: error: cannot find type 'SourceFilter' in scope
+  5 |     @ObservedObject var auth: WebGoogleAuthManager
+  6 |     @Environment(\.horizontalSizeClass) var horizontalSizeClass
+  7 |     @Binding var selectedFilter: SourceFilter
+    |                                  `- error: cannot find type 'SourceFilter' in scope
+  8 |     
+  9 |     // Order stored via AppStorage
+
+ResourcesView.swift:13:36: error: cannot find type 'SortOption' in scope
+ 11 |     
+ 12 |     // View Options
+ 13 |     @State private var sortOption: SortOption = .date
+    |                                    `- error: cannot find type 'SortOption' in scope
+ 14 |     @State private var sortDirection: SortDirection = .descending
+ 15 |     @State private var timeFilter: TimeFilter = .all
+
+ResourcesView.swift:14:39: error: cannot find type 'SortDirection' in scope
+ 12 |     // View Options
+ 13 |     @State private var sortOption: SortOption = .date
+ 14 |     @State private var sortDirection: SortDirection = .descending
+    |                                       `- error: cannot find type 'SortDirection' in scope
+ 15 |     @State private var timeFilter: TimeFilter = .all
+ 16 |     
+
+ResourcesView.swift:15:36: error: cannot find type 'TimeFilter' in scope
+ 13 |     @State private var sortOption: SortOption = .date
+ 14 |     @State private var sortDirection: SortDirection = .descending
+ 15 |     @State private var timeFilter: TimeFilter = .all
+    |                                    `- error: cannot find type 'TimeFilter' in scope
+ 16 |     
+ 17 |     // Folder Navigation Status
+
+ResourcesView.swift:18:40: error: cannot find type 'DriveFile' in scope
+ 16 |     
+ 17 |     // Folder Navigation Status
+ 18 |     @State private var folderHistory: [DriveFile] = []
+    |                                        `- error: cannot find type 'DriveFile' in scope
+ 19 |     @State private var currentFolder: DriveFile? = nil
+ 20 |     
+
+ResourcesView.swift:19:39: error: cannot find type 'DriveFile' in scope
+ 17 |     // Folder Navigation Status
+ 18 |     @State private var folderHistory: [DriveFile] = []
+ 19 |     @State private var currentFolder: DriveFile? = nil
+    |                                       `- error: cannot find type 'DriveFile' in scope
+ 20 |     
+ 21 |     // LOCAL CACHE: stores files per folderId ("root" for the root folder)
+
+ResourcesView.swift:22:47: error: cannot find type 'DriveFile' in scope
+ 20 |     
+ 21 |     // LOCAL CACHE: stores files per folderId ("root" for the root folder)
+ 22 |     @State private var folderCache: [String: [DriveFile]] = [:]
+    |                                               `- error: cannot find type 'DriveFile' in scope
+ 23 |     
+ 24 |     let columns = [
+
+ResourcesView.swift:32:32: error: cannot find type 'DriveFile' in scope
+ 30 |     }
+ 31 |     
+ 32 |     private var currentFiles: [DriveFile] {
+    |                                `- error: cannot find type 'DriveFile' in scope
+ 33 |         if let cached = folderCache[currentFolderKey], !cached.isEmpty {
+ 34 |             return cached
+
+ResourcesView.swift:170:45: error: cannot find type 'DriveFile' in scope
+168 |     
+169 |     // MARK: - Folder Navigation Functions
+170 |     private func navigateToFolder(_ folder: DriveFile) {
+    |                                             `- error: cannot find type 'DriveFile' in scope
+171 |         withAnimation(.easeInOut(duration: 0.2)) {
+172 |             selectedFilter = .drive 
+
+ResourcesView.swift:395:15: error: cannot find type 'DriveFile' in scope
+393 | // MARK: - Drive & Classroom Helper Views
+394 | struct ResourceIconView: View {
+395 |     let file: DriveFile
+    |               `- error: cannot find type 'DriveFile' in scope
+396 |     var onFolderTap: ((DriveFile) -> Void)? = nil
+397 |     @Environment(\.openURL) var openURL
+
+ResourcesView.swift:396:24: error: cannot find type 'DriveFile' in scope
+394 | struct ResourceIconView: View {
+395 |     let file: DriveFile
+396 |     var onFolderTap: ((DriveFile) -> Void)? = nil
+    |                        `- error: cannot find type 'DriveFile' in scope
+397 |     @Environment(\.openURL) var openURL
+398 |     
+
+ResourcesView.swift:473:15: error: cannot find type 'ClassroomItem' in scope
+471 | 
+472 | struct AnnouncementBarView: View {
+473 |     let item: ClassroomItem
+    |               `- error: cannot find type 'ClassroomItem' in scope
+474 |     @Environment(\.openURL) var openURL
+475 |     var body: some View {
+
+ResourcesView.swift:494:15: error: cannot find type 'ClassroomItem' in scope
+492 | 
+493 | struct ClassroomItemCardView: View {
+494 |     let item: ClassroomItem
+    |               `- error: cannot find type 'ClassroomItem' in scope
+495 |     @Environment(\.openURL) var openURL
+496 |     var body: some View {
+
+ResourcesView.swift:123:37: error: cannot find 'SortOption' in scope
+121 |                     Section(header: Text("Sort by")) {
+122 |                         Picker("Sort option", selection: $sortOption) {
+123 |                             ForEach(SortOption.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+    |                                     `- error: cannot find 'SortOption' in scope
+124 |                         }
+125 |                     }
+
+ResourcesView.swift:128:37: error: cannot find 'SortDirection' in scope
+126 |                     Section(header: Text("Order")) {
+127 |                         Picker("Direction", selection: $sortDirection) {
+128 |                             ForEach(SortDirection.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+    |                                     `- error: cannot find 'SortDirection' in scope
+129 |                         }
+130 |                     }
+
+ResourcesView.swift:133:37: error: cannot find 'TimeFilter' in scope
+131 |                     Section(header: Text("Time Filter")) {
+132 |                         Picker("Filter", selection: $timeFilter) {
+133 |                             ForEach(TimeFilter.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+    |                                     `- error: cannot find 'TimeFilter' in scope
+134 |                         }
+135 |                     }
+
+ResourcesView.swift:150:33: error: cannot find 'SourceFilter' in scope
+148 |                 Menu {
+149 |                     Picker("Source", selection: $selectedFilter) {
+150 |                         ForEach(SourceFilter.allCases, id: \.self) { filter in
+    |                                 `- error: cannot find 'SourceFilter' in scope
+151 |                             Text(filter.rawValue).tag(filter)
+152 |                         }
+
+ResourcesView.swift:63:32: error: the compiler is unable to type-check this expression in reasonable time; try breaking up the expression into distinct sub-expressions
+ 61 |                     VStack(spacing: 30) {
+ 62 |                         ForEach(resourcesOrder, id: \.self) { sourceKey in
+ 63 |                             if sourceKey == "drive" && (selectedFilter == .all || selectedFilter == .drive) {
+    |                                `- error: the compiler is unable to type-check this expression in reasonable time; try breaking up the expression into distinct sub-expressions
+ 64 |                                 displayFilesSection
+ 65 |                             }
+
+ResourcesView.swift:172:31: error: cannot infer contextual base in reference to member 'drive'
+170 |     private func navigateToFolder(_ folder: DriveFile) {
+171 |         withAnimation(.easeInOut(duration: 0.2)) {
+172 |             selectedFilter = .drive 
+    |                               `- error: cannot infer contextual base in reference to member 'drive'
+173 |             if let previous = currentFolder {
+174 |                 folderHistory.append(previous)
+
+ResourcesView.swift:204:47: error: 'nil' requires a contextual type
+202 |         }
+203 |         if folderCache["root"] == nil {
+204 |             auth.loadFilesForFolder(folderId: nil)
+    |                                               `- error: 'nil' requires a contextual type
+205 |         }
+206 |     }
 
