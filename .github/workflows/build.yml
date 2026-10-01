@@ -12,16 +12,26 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       
+      - name: Find iOS SDK
+        run: |
+          SDK=$(xcrun --sdk iphoneos --show-sdk-path)
+          echo "iOS SDK: $SDK"
+          TOOLCHAIN=$(xcrun --find swift-frontend)
+          echo "Swift frontend: $TOOLCHAIN"
+      
       - name: Build Swift Playgrounds Package
         run: |
           echo "Validating Swift syntax..."
+          
+          SDK=$(xcrun --sdk iphoneos --show-sdk-path)
+          ARCH="arm64"
           
           ERROR_COUNT=0
           ERROR_OUTPUT=""
           for file in *.swift; do
             if [ -f "$file" ]; then
               echo "Checking $file..."
-              if ! OUTPUT=$(xcrun swift-frontend -typecheck "$file" 2>&1); then
+              if ! OUTPUT=$(xcrun swift-frontend -typecheck -sdk "$SDK" -target "${ARCH}-apple-ios26.0" -parse-as-library "$file" 2>&1); then
                 echo "❌ Syntax error in $file"
                 ERROR_OUTPUT="$ERROR_OUTPUT\n--- $file ---\n$OUTPUT\n"
                 ERROR_COUNT=$((ERROR_COUNT + 1))
