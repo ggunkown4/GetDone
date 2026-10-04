@@ -6,18 +6,19 @@ struct DetailScreen: View {
     var title: String
     @ObservedObject var auth: WebGoogleAuthManager
     @ObservedObject var magisterManager = MagisterManager.shared
-    
-    @State private var selectedDate: Date = Date()
+
+    @StateObject private var agendaModel = AgendaViewModel()
     @State private var showDatePicker: Bool = false
     @State private var showWeekPicker: Bool = false
-    @State private var selectedView: Int = 0 // 0 = List, 1 = Day, 2 = Week
-    
+
     // Status for source filter
     @State private var sourceFilter: SourceFilter = .all
-    
-    // Store custom plans
-    @State private var plans: [PlanningItem] = []
-    @State private var showNewPlanSheet: Bool = false
+    @State private var isPlanEditorPresented: Bool = false
+    @State private var selectedPlanForEditing: PlanningItem?
+    @State private var planEditorStartTime: Date?
+
+    private var selectedDate: Date { agendaModel.selectedDate }
+    private var selectedView: Int { agendaModel.selectedView }
     
     private var currentWeekNumber: Int {
         var calendar = Calendar.current
@@ -51,11 +52,27 @@ struct DetailScreen: View {
             // ROUTING BASED ON TITLE
             if title == "Agenda" {
                 AgendaView(
-                    selectedDate: $selectedDate,
-                    selectedView: $selectedView,
-                    plans: $plans,
+                    selectedDate: $agendaModel.selectedDate,
+                    selectedView: $agendaModel.selectedView,
+                    plans: $agendaModel.customPlans,
                     magisterPlans: magisterManager.magisterPlans,
-                    showNewPlanSheet: $showNewPlanSheet
+                    onSelectPlan: { plan in
+                        guard !plan.isMagister else { return }
+                        selectedPlanForEditing = plan
+                        planEditorStartTime = nil
+                        isPlanEditorPresented = true
+                    },
+                    onAddPlan: {
+                        selectedPlanForEditing = nil
+                        planEditorStartTime = nil
+                        isPlanEditorPresented = true
+                    },
+                    onAddAtTime: { date in
+                        selectedPlanForEditing = nil
+                        planEditorStartTime = date
+                        isPlanEditorPresented = true
+                    },
+                    onRefresh: { magisterManager.loadHomeworkAndSchedule(for: selectedDate) }
                 )
             } else if title.hasPrefix("Chat") { 
                 ChatView(title: title)
@@ -73,7 +90,9 @@ struct DetailScreen: View {
             // floating '+' button BOTTOM RIGHT (Agenda only)
             if title == "Agenda" {
                 Button {
-                    showNewPlanSheet = true
+                    selectedPlanForEditing = nil
+                    planEditorStartTime = nil
+                    isPlanEditorPresented = true
                 } label: {
                     Image(systemName: "plus")
                         .font(.title2.bold())
@@ -88,18 +107,22 @@ struct DetailScreen: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
-        .sheet(isPresented: $showNewPlanSheet) {
-            AddPlanSheet(plans: $plans, selectedDate: selectedDate)
-        }
-        .onAppear {
-            if title == "Agenda" {
-                magisterManager.loadHomeworkAndSchedule(for: selectedDate)
-            }
-        }
-        .onChange(of: selectedDate) { _, newDate in
-            if title == "Agenda" {
-                magisterManager.loadHomeworkAndSchedule(for: newDate)
-            }
+        .sheet(isPresented: $isPlanEditorPresented) {
+            PlanEditorSheet(
+                plan: selectedPlanForEditing,
+                selectedDate: selectedDate,
+                onSave: { plan in
+                    if selectedPlanForEditing == nil {
+                        agendaModel.addPlan(plan)
+                    } else {
+                        agendaModel.updatePlan(plan)
+                    }
+                },
+                onDelete: selectedPlanForEditing.map { planToDelete in
+                    { agendaModel.deletePlan(planToDelete) }
+                },
+                initialStartTime: planEditorStartTime
+            )
         }
         .toolbar {
             // LEFT: Title & Date Picker
@@ -136,7 +159,7 @@ struct DetailScreen: View {
                     }
                     .buttonStyle(.plain)
                     .popover(isPresented: $showDatePicker) {
-                        DatePicker("", selection: $selectedDate, displayedComponents: .date)
+                        DatePicker("", selection: $agendaModel.selectedDate, displayedComponents: .date)
                             .datePickerStyle(.graphical)
                             .labelsHidden()
                             .padding()
@@ -190,7 +213,7 @@ struct DetailScreen: View {
                         }
                         .buttonStyle(.plain)
                         .popover(isPresented: $showWeekPicker) {
-                            WeekSelectorPopover(selectedDate: $selectedDate)
+                            WeekSelectorPopover(selectedDate: $agendaModel.selectedDate)
                                 .presentationCompactAdaptation(.popover)
                         }
                     }
@@ -217,7 +240,7 @@ struct DetailScreen: View {
                         // Today button
                         Button {
                             withAnimation {
-                                selectedDate = Date()
+                                agendaModel.selectedDate = Date()
                             }
                         } label: {
                             HStack(spacing: 6) {
@@ -234,7 +257,7 @@ struct DetailScreen: View {
                         
                         // View menu button
                         Menu {
-                            Picker("View", selection: $selectedView) {
+                            Picker("View", selection: $agendaModel.selectedView) {
                                 Label("List", systemImage: "list.bullet").tag(0)
                                 Label("Day", systemImage: "calendar.day.timeline.left").tag(1)
                                 Label("Week", systemImage: "calendar").tag(2)

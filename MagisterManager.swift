@@ -8,6 +8,7 @@ class MagisterManager: ObservableObject {
     @Published var magisterPlans: [PlanningItem] = []
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
+    private var activeDomain: String?
     
     // Disable network requests during SwiftUI Canvas static preview rendering
     private var isCanvasPreview: Bool {
@@ -19,6 +20,17 @@ class MagisterManager: ObservableObject {
             return
         }
         
+        let domain = MagisterAppStorageHelper.read(key: "magister_domain") ?? "roercollege"
+        let formattedDomain = domain.contains(".magister.net") ? domain : "\(domain).magister.net"
+
+        DispatchQueue.main.async {
+            if self.activeDomain != formattedDomain {
+                self.activeDomain = formattedDomain
+                self.magisterPlans = AgendaStorage.loadMagisterPlans(for: formattedDomain)
+                self.magisterItems = []
+            }
+        }
+
         let token = MagisterKeychainHelper.read(key: "magister_access_token") ?? ""
         
         if token.isEmpty {
@@ -28,9 +40,6 @@ class MagisterManager: ObservableObject {
             }
             return
         }
-        
-        let domain = MagisterAppStorageHelper.read(key: "magister_domain") ?? "roercollege"
-        let formattedDomain = domain.contains(".magister.net") ? domain : "\(domain).magister.net"
         
         DispatchQueue.main.async {
             self.isLoading = true
@@ -245,6 +254,7 @@ class MagisterManager: ObservableObject {
                 
                 self.magisterPlans.sort(by: { $0.startTime < $1.startTime })
                 self.magisterItems.sort(by: { $0.date < $1.date })
+                AgendaStorage.saveMagisterPlans(self.magisterPlans, for: domain)
                 self.errorMessage = nil
             }
         }.resume()
