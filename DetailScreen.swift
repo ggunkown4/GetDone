@@ -40,7 +40,7 @@ struct DetailScreen: View {
         calendar.firstWeekday = 2
         if let newDate = calendar.date(byAdding: .weekOfYear, value: offset, to: selectedDate) {
             withAnimation {
-                selectedDate = newDate
+                agendaModel.selectedDate = newDate
             }
         }
     }
