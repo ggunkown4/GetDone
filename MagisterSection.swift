@@ -103,11 +103,11 @@ struct MagisterSection: View {
     }
     
     private func restoreSession() {
-        if let savedDomein = MagisterAppStorageHelper.read(key: "magister_domein"), !savedDomein.isEmpty { user.schoolDomain = savedDomein }
+        if let savedDomain = MagisterAppStorageHelper.read(key: "magister_domain"), !savedDomain.isEmpty { user.schoolDomain = savedDomain }
         if let savedUsername = readSecret(key: "magister_username") { user.username = savedUsername }
         if let savedPassword = readSecret(key: "magister_password") { user.password = savedPassword }
-        if let savedFirstName = MagisterAppStorageHelper.read(key: "magister_voornaam") { user.firstName = savedFirstName }
-        if let savedLastName = MagisterAppStorageHelper.read(key: "magister_achternaam") { user.lastName = savedLastName }
+        if let savedFirstName = MagisterAppStorageHelper.read(key: "magister_first_name") { user.firstName = savedFirstName }
+        if let savedLastName = MagisterAppStorageHelper.read(key: "magister_last_name") { user.lastName = savedLastName }
         
         if let savedToken = readSecret(key: "magister_access_token"), !savedToken.isEmpty {
             self.accessToken = savedToken
@@ -207,7 +207,7 @@ struct MagisterSection: View {
                 lastRefreshedText = ""
                 
                 MagisterKeychainHelper.delete(key: "magister_access_token")
-                MagisterAppStorageHelper.save(user.schoolDomain, key: "magister_domein")
+                MagisterAppStorageHelper.save(user.schoolDomain, key: "magister_domain")
                 MagisterKeychainHelper.save(user.username, key: "magister_username")
                 MagisterKeychainHelper.save(user.password, key: "magister_password")
                 MagisterAppStorageHelper.delete(key: "magister_username")
@@ -657,7 +657,7 @@ struct MagisterWKWebView: UIViewRepresentable {
                 DispatchQueue.main.async {
                     let schoolName = host.replacingOccurrences(of: ".magister.net", with: "")
                     self.parent.user.schoolDomain = schoolName
-                    MagisterAppStorageHelper.save(schoolName, key: "magister_domein")
+                    MagisterAppStorageHelper.save(schoolName, key: "magister_domain")
                 }
             }
         }
@@ -680,11 +680,11 @@ struct MagisterWKWebView: UIViewRepresentable {
                 DispatchQueue.main.async {
                     if let firstName = payload["given_name"] as? String {
                         self.parent.user.firstName = firstName
-                        MagisterAppStorageHelper.save(firstName, key: "magister_voornaam")
+                        MagisterAppStorageHelper.save(firstName, key: "magister_first_name")
                     }
                     if let lastName = payload["family_name"] as? String {
                         self.parent.user.lastName = lastName
-                        MagisterAppStorageHelper.save(lastName, key: "magister_achternaam")
+                        MagisterAppStorageHelper.save(lastName, key: "magister_last_name")
                     }
                     if let email = payload["email"] as? String {
                         self.parent.user.email = email
@@ -705,7 +705,7 @@ struct MagisterWKWebView: UIViewRepresentable {
             DispatchQueue.main.async {
                 self.parent.accessToken = validToken
                 MagisterKeychainHelper.save(validToken, key: "magister_access_token")
-                MagisterAppStorageHelper.save(self.parent.user.schoolDomain, key: "magister_domein")
+                MagisterAppStorageHelper.save(self.parent.user.schoolDomain, key: "magister_domain")
                 MagisterKeychainHelper.save(self.parent.user.username, key: "magister_username")
                 MagisterKeychainHelper.save(self.parent.user.password, key: "magister_password")
                 MagisterAppStorageHelper.delete(key: "magister_username")

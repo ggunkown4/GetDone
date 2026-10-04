@@ -29,7 +29,7 @@ class MagisterManager: ObservableObject {
             return
         }
         
-        let domain = MagisterAppStorageHelper.read(key: "magister_domein") ?? "roercollege"
+        let domain = MagisterAppStorageHelper.read(key: "magister_domain") ?? "roercollege"
         let formattedDomain = domain.contains(".magister.net") ? domain : "\(domain).magister.net"
         
         DispatchQueue.main.async {

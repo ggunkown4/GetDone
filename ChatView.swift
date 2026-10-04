@@ -287,8 +287,8 @@ struct ChatView: View {
     
     @AppStorage("ai_provider") private var aiProvider: String = "auto"
     @AppStorage("google_user_name") private var googleUserName: String = ""
-    @AppStorage("magister_voornaam") private var magisterFirstName: String = ""
-    @AppStorage("magister_achternaam") private var magisterLastName: String = ""
+    @AppStorage("magister_first_name") private var magisterFirstName: String = ""
+    @AppStorage("magister_last_name") private var magisterLastName: String = ""
     
     @StateObject private var aiManager = AIManager()
     @State private var showLog = false

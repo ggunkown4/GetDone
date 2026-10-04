@@ -54,14 +54,14 @@ struct ProfileView: View {
     // MARK: - Persistent Settings (Are automatically saved)
     @AppStorage("aiShow") private var aiShow: String = "Motivating"
     @AppStorage("productivityType") private var productivityType: String = "MorningMotivation"
-    @AppStorage("bufferTijdMinuten") private var bufferMinutes: Int = 15
+    @AppStorage("buffer_minutes") private var bufferMinutes: Int = 15
     @AppStorage("isMagisterLoggedIn") private var isMagisterLoggedIn: Bool = false
-    @AppStorage("magister_voornaam") private var magisterFirstName: String = ""
-    @AppStorage("magister_achternaam") private var magisterLastName: String = ""
+    @AppStorage("magister_first_name") private var magisterFirstName: String = ""
+    @AppStorage("magister_last_name") private var magisterLastName: String = ""
     
     private var magisterFullName: String {
-        let naam = "\(magisterFirstName) \(magisterLastName)".trimmingCharacters(in: .whitespaces)
-        return naam.isEmpty ? "Magister User" : naam
+        let fullName = "\(magisterFirstName) \(magisterLastName)".trimmingCharacters(in: .whitespaces)
+        return fullName.isEmpty ? "Magister User" : fullName
     }
     
     // MARK: - Helper for Clean & Safe Photo URL
@@ -347,10 +347,10 @@ struct ProfileView: View {
 
 struct AgendaSettingsView: View {
     @AppStorage("productivityType") private var productivityType: String = "MorningMotivation"
-    @AppStorage("dynamischHerplannen") private var dynamicReplanning: Bool = true
-    @AppStorage("maxStudieUur") private var maxStudyHours: Double = 4.0
-    @AppStorage("bufferTijdMinuten") private var bufferMinutes: Int = 15
-    @AppStorage("inclusiefWeekend") private var includeWeekend: Bool = false
+    @AppStorage("dynamic_replanning") private var dynamicReplanning: Bool = true
+    @AppStorage("max_study_hours") private var maxStudyHours: Double = 4.0
+    @AppStorage("buffer_minutes") private var bufferMinutes: Int = 15
+    @AppStorage("include_weekend") private var includeWeekend: Bool = false
     
     var body: some View {
         Form {
@@ -385,8 +385,8 @@ struct AgendaSettingsView: View {
 
 struct ChatSettingsView: View {
     @AppStorage("aiShow") private var aiShow: String = "Motivating"
-    @AppStorage("ochtendBriefing") private var morningBriefing: Bool = true
-    @AppStorage("avondEvaluatie") private var eveningEvaluation: Bool = true
+    @AppStorage("morning_briefing") private var morningBriefing: Bool = true
+    @AppStorage("evening_evaluation") private var eveningEvaluation: Bool = true
     @AppStorage("aiServerURL") private var aiServerURL: String = ""
     @AppStorage("aiServerToken") private var aiServerToken: String = ""
     

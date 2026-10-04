@@ -109,13 +109,6 @@ struct DetailScreen: View {
                         showDatePicker.toggle()
                     } label: {
                         HStack(spacing: 0) {
-                            Text(title)
-                                .font(.title2.bold())
-                                .foregroundColor(.white)
-                                .fixedSize()
-                                .padding(.leading, 10)
-                                .padding(.trailing, 12)
-                            
                             VStack(alignment: .leading, spacing: 0) {
                                 if sizeClass == .regular {
                                     Text(selectedDate.formatted(.dateTime.weekday(.wide)))
@@ -161,14 +154,6 @@ struct DetailScreen: View {
                             .frame(width: 330, height: 350)
                             .presentationCompactAdaptation(.popover)
                     }
-                } else {
-                    Text(title)
-                        .font(.title2.bold())
-                        .foregroundColor(.white)
-                        .fixedSize()
-                        .layoutPriority(1)
-                        .padding(.leading, 10)
-                        .padding(.trailing, (title == "Resources" && sourceFilter != .all) ? 0 : 12)
                 }
             }
             
